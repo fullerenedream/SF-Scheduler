@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/fullerenedream/nodexo/issues"
   },
-  "homepage": "https://github.com/fullerenedream/nodexo#readme"
+  "homepage": "https://github.com/fullerenedream/nodexo#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "pug": "^2.0.0-beta6",
+    "reload": "^1.0.1"
+  }
 }
