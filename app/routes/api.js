@@ -9,9 +9,17 @@ var sampleData = require('../data/sample.json');
 
 // gets data from sample file and returns it as JSON
 router.get('/api', function(req,res){
-  db.connectToScheduleDB();
-  var allTechnicians = technician_schedules.getAllTechnicianSchedules();
-  res.json(allTechnicians);
+  // db.connectToScheduleDB();
+  // var allTechnicians = technician_schedules.getAllTechnicianSchedules();
+  // console.log(allTechnicians);
+  // res.json(allTechnicians);
+  var con = db.connectToScheduleDB();
+  con.query('SELECT * FROM technician_schedules',function(err,rows){
+    if(err) throw err;
+    console.log('\nAll data from technician_schedules table:\n');
+    console.log(rows);
+    res.json(rows);
+  });
 });
 
 // receive a form post and save it to the sample file (later we want this to save to the db)
