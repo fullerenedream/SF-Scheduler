@@ -2,8 +2,9 @@
   "name": "nodexo",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "app/app.js",
   "scripts": {
+    "start": "nodemon -e css,ejs,js,json --watch app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,6 +19,7 @@
   "homepage": "https://github.com/fullerenedream/nodexo#readme",
   "dependencies": {
     "body-parser": "^1.15.2",
+    "ejs": "^2.5.2",
     "express": "^4.14.0",
     "pug": "^2.0.0-beta6",
     "reload": "^1.0.1"

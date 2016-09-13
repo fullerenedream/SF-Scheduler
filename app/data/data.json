@@ -1,0 +1,13 @@
+{
+  "installers":
+  [
+    {"id":"1",
+    "name":"Bob"},
+    {"id":"2",
+    "name":"Pam"},
+    {"id":"3",
+    "name":"Joe"},
+    {"id":"4",
+    "name":"Kat"}
+  ]
+}

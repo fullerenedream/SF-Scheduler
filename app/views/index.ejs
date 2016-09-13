@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <% include parts/template/head.ejs %>
+</head>
+
+<body id="<%= pageID %>">
+  <p>So. It has come to this.</p>
+
+  <ul>
+    <% installers.forEach(function(item) { %>
+      <li><%= item.name %></li>
+    <% }); %>
+  </ul>
+
+  <% include parts/template/jsdefaults.ejs %>
+</body>
+
+</html>
