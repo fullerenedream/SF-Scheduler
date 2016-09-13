@@ -22,6 +22,7 @@
     "ejs": "^2.5.2",
     "express": "^4.14.0",
     "fullcalendar": "^3.0.0",
+    "mysql": "^2.11.1",
     "pug": "^2.0.0-beta6",
     "reload": "^1.0.1"
   }
