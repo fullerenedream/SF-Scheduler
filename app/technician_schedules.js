@@ -1,7 +1,3 @@
-// require models?
-// var myModel = require('../models/mymodel');
-// require collections?
-// var myCollection = require('../collections/mycollection');
 var db = require("./db.js");
 
 module.exports = {
@@ -14,6 +10,7 @@ module.exports = {
       if(err) throw err;
       console.log('\nAll data from technician_schedules table:\n');
       console.log(rows);
+      // *** this wasn't working, probably because it's a return instead of a response
       return JSON.stringify(rows);
     });
   },
@@ -47,3 +44,7 @@ module.exports = {
   }
 
 };
+
+
+// *** so far we're stealing code from here and sticking it in api.js
+// *** we started with getAllTechnicianSchedules

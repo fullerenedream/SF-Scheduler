@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router();
-var db = require("../db.js");
-var technician_schedules = require("../technician_schedules.js");
 var bodyParser = require('body-parser');
 var fs = require('fs');
-
 var sampleData = require('../data/sample.json');
+
+// *** added the db.js and technician_schedules.js files pretty much as-is from NeoNodoSchedule
+var db = require("../db.js");
+var technician_schedules = require("../technician_schedules.js");
 
 // gets data from sample file and returns it as JSON
 router.get('/api', function(req,res){
@@ -13,11 +14,15 @@ router.get('/api', function(req,res){
   // var allTechnicians = technician_schedules.getAllTechnicianSchedules();
   // console.log(allTechnicians);
   // res.json(allTechnicians);
+
+  // *** copied the guts of getAllTechnicianSchedules into this api get request
   var con = db.connectToScheduleDB();
   con.query('SELECT * FROM technician_schedules',function(err,rows){
     if(err) throw err;
     console.log('\nAll data from technician_schedules table:\n');
     console.log(rows);
+    // *** and added this line so that the response to this get request
+    // *** is JSONified result of the db query
     res.json(rows);
   });
 });

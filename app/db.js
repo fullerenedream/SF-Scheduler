@@ -3,7 +3,8 @@ var mysql = require("mysql");
 module.exports = {
 
   // this is incomplete: compare with connectToDatabase()
-  // need to end the connection, but how to organize it?
+  // in NeoNodoSchedule - need to end the connection,
+  // but how to organize it?
   connectToScheduleDB: function() {
     var con = mysql.createConnection({
       host      : 'localhost',
@@ -20,5 +21,7 @@ module.exports = {
     });
     return con;
   }
+
+  // *** add a function here to close the connection
 
 };
