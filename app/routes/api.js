@@ -8,7 +8,7 @@ var sampleData = require('../data/sample.json');
 var db = require("../db.js");
 var technician_schedules = require("../technician_schedules.js");
 
-// gets data from sample file and returns it as JSON
+// GET the whole technician_schedules table
 router.get('/api', function(req,res){
   // db.connectToScheduleDB();
   // var allTechnicians = technician_schedules.getAllTechnicianSchedules();
@@ -22,6 +22,24 @@ router.get('/api', function(req,res){
     console.log('\nAll data from technician_schedules table:\n');
     console.log(rows);
     // *** and added this line so that the response to this get request
+    // *** is JSONified result of the db query
+    res.json(rows);
+  });
+});
+
+router.get('/api/:user_id', function(req,res){
+  var user_id = req.param('user_id');
+  var key = user_id;
+  var queryString = 'SELECT * FROM technician_schedules ' +
+                    'WHERE user_id = ? ' +
+                    'ORDER BY created_at DESC ' +
+                    'LIMIT 1';
+  var con = db.connectToScheduleDB();
+  con.query(queryString, [key], function(err,rows){
+    if(err) throw err;
+    console.log('\nSchedule of Tech with user_id = ' + user_id + ':');
+    console.log(rows);
+    // *** added this line so that the response to this get request
     // *** is JSONified result of the db query
     res.json(rows);
   });
