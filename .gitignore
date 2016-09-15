@@ -10,3 +10,6 @@
 
 # Ignore build notes
 /zzz-mybuildnotes.js
+
+# Ignore database dump
+/dump.sql

@@ -22,40 +22,24 @@
     // http://code.runnable.com/UfNTSnKMU1ZgAACt/how-to-add-calendar-using-jquery-and-fullcalendar
     // some of the code and comments are still in here
     $(document).ready(function() {
-      // Initialize fullCalendar and store into variable,
-      // so we can use it inside another function,
-      // in order to modify its options later
-      var calendar = $('#fullcalendar').fullCalendar(
-      {
-        // header option will define our calendar header.
-        // left defines what will be at left position in calendar
-        // center defines what will be at center position in calendar
-        // right defines what will be at right position in calendar
-        header:
-        {
+
+      // *** switch to this when JSON feed is set up
+      var user_id = 2;
+      var url = '/api/' + String(user_id);
+      console.log('url: ' + url);
+
+      var calendar = $('#fullcalendar').fullCalendar({
+        header: {
           left: 'prev,next today',
           center: 'title',
           right: 'month,agendaWeek,agendaDay'
         },
-        // views built into FullCalendar:
-        // month, basicWeek, basicDay, agendaWeek, agendaDay
-        // defaultView option defines which view to show by default
         defaultView: 'agendaWeek',
-        // selectable:true will enable user to select datetime slot
-        // selectHelper will add helpers for selectable.
         selectable: true,
         selectHelper: true,
-        // when user selects timeslot this option code will execute
-        // It has three arguments: start, end and allDay
-        // Start means starting time of event
-        // End means ending time of event
-        // allDay means if event is for entire day or not
         select: function(start, end, allDay)
         {
-          // after selection user will be promted for enter title for event
           var title = prompt('Event Title:');
-          // if title is entered calendar will add title and event into fullCalendar
-          // this is from a demo & needs much more functionality
           if (title)
           {
             calendar.fullCalendar('renderEvent',
@@ -70,57 +54,109 @@
           }
           calendar.fullCalendar('unselect');
         },
-        // editable: true - allows user to edit events
         editable: true,
-        // events is the main option for calendar.
-        // for demo we have added predefined events in json object.
 
-        // *** switch to this when JSON feed is set up
-        // events: 'urlforJSONfeedgoeshere'
-
-        // events: '/technician_schedules'
-
-        // some demo data
-        events: [
-          {
-            title:'Business Hours',
-            start: '9:00', // start time = 9am
-            end: '18:00', // end time = 6pm
-            dow: [1, 2, 3, 4, 5], // repeat Monday-Friday
-            rendering: 'inverse-background' // anything outside these hours is colored as 'background'
-          },
-          {
-            title: "Pat's Hours",
-            start: '9:00',
-            end: '18:00',
-            dow: [1, 2, 3, 4, 5]
-          },
-          {
-            id: 'kim',
-            title: "Kim's Hours",
-            start: '11:00',
-            end: '18:00',
-            dow: [1, 2, 3, 4],
-            color: '#533A7B'
-          },
-          {
-            id: 'kim',
-            title: "Kim's Hours",
-            start: '9:00',
-            end: '14:00',
-            dow: [5],
-            color: '#533A7B'
-          },
-          {
-            title: "Sam's Hours",
-            start: '9:00',
-            end: '16:00',
-            dow: [1, 2, 3, 4, 5],
-            color: '#E05263'
-          }
-        ]
-
+        events: '/api/2'
       });
+      // *** --------------------------------------
+
+
+      // // Initialize fullCalendar and store into variable,
+      // // so we can use it inside another function,
+      // // in order to modify its options later
+      // var calendar = $('#fullcalendar').fullCalendar(
+      // {
+      //   // header option will define our calendar header.
+      //   // left defines what will be at left position in calendar
+      //   // center defines what will be at center position in calendar
+      //   // right defines what will be at right position in calendar
+      //   header:
+      //   {
+      //     left: 'prev,next today',
+      //     center: 'title',
+      //     right: 'month,agendaWeek,agendaDay'
+      //   },
+      //   // views built into FullCalendar:
+      //   // month, basicWeek, basicDay, agendaWeek, agendaDay
+      //   // defaultView option defines which view to show by default
+      //   defaultView: 'agendaWeek',
+      //   // selectable:true will enable user to select datetime slot
+      //   // selectHelper will add helpers for selectable.
+      //   selectable: true,
+      //   selectHelper: true,
+      //   // when user selects timeslot this option code will execute
+      //   // It has three arguments: start, end and allDay
+      //   // Start means starting time of event
+      //   // End means ending time of event
+      //   // allDay means if event is for entire day or not
+      //   select: function(start, end, allDay)
+      //   {
+      //     // after selection user will be promted for enter title for event
+      //     var title = prompt('Event Title:');
+      //     // if title is entered calendar will add title and event into fullCalendar
+      //     // this is from a demo & needs much more functionality
+      //     if (title)
+      //     {
+      //       calendar.fullCalendar('renderEvent',
+      //         {
+      //           title: title,
+      //           start: start,
+      //           end: end,
+      //           allDay: allDay
+      //         },
+      //         true // make the event "stick"
+      //       );
+      //     }
+      //     calendar.fullCalendar('unselect');
+      //   },
+      //   // editable: true - allows user to edit events
+      //   editable: true,
+      //   // events is the main option for calendar.
+      //   // for demo we have added predefined events in json object.
+
+      //   // events: '/technician_schedules'
+
+      //   // some demo data
+      //   events: [
+      //     {
+      //       title:'Business Hours',
+      //       start: '9:00', // start time = 9am
+      //       end: '18:00', // end time = 6pm
+      //       dow: [1, 2, 3, 4, 5], // repeat Monday-Friday
+      //       rendering: 'inverse-background' // anything outside these hours is colored as 'background'
+      //     },
+      //     {
+      //       title: "Pat's Hours",
+      //       start: '9:00',
+      //       end: '18:00',
+      //       dow: [1, 2, 3, 4, 5]
+      //     },
+      //     {
+      //       id: 'kim',
+      //       title: "Kim's Hours",
+      //       start: '11:00',
+      //       end: '18:00',
+      //       dow: [1, 2, 3, 4],
+      //       color: '#533A7B'
+      //     },
+      //     {
+      //       id: 'kim',
+      //       title: "Kim's Hours",
+      //       start: '9:00',
+      //       end: '14:00',
+      //       dow: [5],
+      //       color: '#533A7B'
+      //     },
+      //     {
+      //       title: "Sam's Hours",
+      //       start: '9:00',
+      //       end: '16:00',
+      //       dow: [1, 2, 3, 4, 5],
+      //       color: '#E05263'
+      //     }
+      //   ]
+
+      // });
 
     });
 
