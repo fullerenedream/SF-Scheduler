@@ -1,3 +1,29 @@
+module.exports = {};
+
+exports.epochToMoment = function(epochTime) {
+  var momentTime = moment.unix(epochTime);
+  return momentTime;
+}
+
+
+// exports.eventify = function(rows) {
+//   // var rows_as_events = rows;
+//   console.log('rows from inside eventify function:');
+//   console.log(rows);
+
+//   // return rows_as_events;
+// }
+
+
+exports.eventify = function() {
+  console.log('inside eventify function');
+  $.getJSON('/api',function(data){
+  console.log(data);
+  });
+}
+
+
+
 // *** Here is the format to put the db data into for fullcalendar:
 
 // {
@@ -20,6 +46,9 @@
 // but actually we can just put names in the user_id
 // I only made them numbers to be lazy
 // *** ----------------------------------------------
+
+
+
 
 
 

@@ -32,18 +32,46 @@ router.get('/api', function(req,res){
   //                       FROM technician_schedules t2
   //                       WHERE t2.user_id = t1.user_id)`;
 
-  var queryString =  `SELECT t1.id, t1.user_id,
-                        SEC_TO_TIME(IFNULL(tuesday_start,1)) AS start,
-                        SEC_TO_TIME(IFNULL(tuesday_end,1)) AS end
+  // var queryString =  `SELECT t1.id, t1.user_id,
+  //                       SEC_TO_TIME(IFNULL(tuesday_start,1)) AS start,
+  //                       SEC_TO_TIME(IFNULL(tuesday_end,1)) AS end
+  //                     FROM technician_schedules t1
+  //                     WHERE t1.created_at = (
+  //                       SELECT MAX(t2.created_at)
+  //                       FROM technician_schedules t2
+  //                       WHERE t2.user_id = t1.user_id)`;
+
+
+    // *** get the data as is from the db
+    var queryString =  `SELECT t1.id, t1.user_id,
+                          sunday_start,
+                          sunday_end,
+                          monday_start,
+                          monday_end,
+                          tuesday_start,
+                          tuesday_end,
+                          wednesday_start,
+                          wednesday_end,
+                          thursday_start,
+                          thursday_end,
+                          friday_start,
+                          friday_end,
+                          saturday_start,
+                          saturday_end
                       FROM technician_schedules t1
                       WHERE t1.created_at = (
                         SELECT MAX(t2.created_at)
                         FROM technician_schedules t2
                         WHERE t2.user_id = t1.user_id)`;
-  con.query(queryString,function(err,rows){
+    con.query(queryString,function(err,rows){
     if(err) throw err;
     console.log('\nAll data from technician_schedules table:\n');
     console.log(rows);
+
+    // *** this is for when eventify(rows) is working
+    // var rows_as_events = process_data.eventify(rows);
+    // res.json(rows_as_events);
+
     // *** and added this line so that the response to this get request
     // *** is JSONified result of the db query
     res.json(rows);
@@ -53,7 +81,7 @@ router.get('/api', function(req,res){
 router.get('/api/:user_id', function(req,res){
   var user_id = req.param('user_id');
   var key = user_id;
-  // var queryString = 'SELECT user_id, ' +
+  // var queryString = 'SELECT user_id
   //                     'sunday_start, ' +
   //                     'sunday_end, ' +
   //                     'monday_start, ' +
@@ -73,6 +101,16 @@ router.get('/api/:user_id', function(req,res){
   //                   'ORDER BY created_at DESC ' +
   //                   'LIMIT 1';
 
+  // var queryString =  `SELECT t1.id, t1.user_id,
+  //                       CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_start,1))) AS start,
+  //                       CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_end,1))) AS end
+  //                     FROM technician_schedules t1
+  //                     WHERE t1.created_at = (
+  //                       SELECT MAX(t2.created_at)
+  //                       FROM technician_schedules t2
+  //                       WHERE t2.user_id = t1.user_id)
+  //                     AND t1.user_id = ?`;
+
   var queryString =  `SELECT t1.id, t1.user_id,
                         CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_start,1))) AS start,
                         CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_end,1))) AS end
@@ -82,6 +120,7 @@ router.get('/api/:user_id', function(req,res){
                         FROM technician_schedules t2
                         WHERE t2.user_id = t1.user_id)
                       AND t1.user_id = ?`;
+
   var con = db.connectToScheduleDB();
   con.query(queryString, [key], function(err,rows){
     if(err) throw err;
