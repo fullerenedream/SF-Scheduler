@@ -111,15 +111,25 @@ router.get('/api/:user_id', function(req,res){
   //                       WHERE t2.user_id = t1.user_id)
   //                     AND t1.user_id = ?`;
 
+  // var queryString =  `SELECT t1.id, t1.user_id,
+  //                       CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_start,1))) AS start,
+  //                       CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_end,1))) AS end
+  //                     FROM technician_schedules t1
+  //                     WHERE t1.created_at = (
+  //                       SELECT MAX(t2.created_at)
+  //                       FROM technician_schedules t2
+  //                       WHERE t2.user_id = t1.user_id)
+  //                     AND t1.user_id = ?`;
+
   var queryString =  `SELECT t1.id, t1.user_id,
-                        CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_start,1))) AS start,
-                        CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_end,1))) AS end
-                      FROM technician_schedules t1
-                      WHERE t1.created_at = (
-                        SELECT MAX(t2.created_at)
-                        FROM technician_schedules t2
-                        WHERE t2.user_id = t1.user_id)
-                      AND t1.user_id = ?`;
+                      (IFNULL(wednesday_start,1)) AS start,
+                      (IFNULL(wednesday_end,1)) AS end
+                    FROM technician_schedules t1
+                    WHERE t1.created_at = (
+                      SELECT MAX(t2.created_at)
+                      FROM technician_schedules t2
+                      WHERE t2.user_id = t1.user_id)
+                    AND t1.user_id = ?`;
 
   var con = db.connectToScheduleDB();
   con.query(queryString, [key], function(err,rows){
