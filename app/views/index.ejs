@@ -10,12 +10,6 @@
 
   <div id="fullcalendar"></div>
 
-  <p><br>So. It has come to this.</p>
-  <ul>
-    <% installers.forEach(function(item) { %>
-      <li><%= item.name %></li>
-    <% }); %>
-  </ul>
 
   <script type="text/javascript">
     // I used this demo to get started:
@@ -31,6 +25,8 @@
       var calendar = $('#fullcalendar').fullCalendar({
         schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
 
+        // You can also dynamically set a calendar's height after initialization - see docs
+        height: 650,
         header: {
           left: 'prev,next today',
           center: 'title',
