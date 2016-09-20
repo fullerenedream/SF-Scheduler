@@ -11,12 +11,12 @@
   <div id="fullcalendar"></div>
 
   <p><br>So. It has come to this.</p>
-
   <ul>
     <% installers.forEach(function(item) { %>
       <li><%= item.name %></li>
     <% }); %>
   </ul>
+
   <script type="text/javascript">
     // I used this demo to get started:
     // http://code.runnable.com/UfNTSnKMU1ZgAACt/how-to-add-calendar-using-jquery-and-fullcalendar
@@ -29,12 +29,14 @@
       console.log('url: ' + url);
 
       var calendar = $('#fullcalendar').fullCalendar({
+        schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+
         header: {
           left: 'prev,next today',
           center: 'title',
           right: 'month,agendaWeek,agendaDay'
         },
-        defaultView: 'agendaWeek',
+        defaultView: 'agendaDay',
         selectable: true,
         selectHelper: true,
         select: function(start, end, allDay)
@@ -56,7 +58,35 @@
         },
         editable: true,
 
-        events: '/api/1'
+        // events: '/api/1'
+
+        // some demo appointments
+        events: [
+          {
+            id: '1',
+            title: 'Full Install',
+            start: '2016-09-19T10:00:00',
+            end: '2016-09-19T12:00:00',
+            resourceId: 'a',
+            color: '#533A7B'
+          },
+          {
+            id: '2',
+            title: 'Service Call',
+            start: '2016-09-19T14:30:00',
+            end: '2016-09-19T15:30:00',
+            resourceId: 'b',
+            color: '#E05263'
+          }
+        ],
+        resources: [
+          { id: 'a', title: 'Room A' },
+          { id: 'b', title: 'Room B' },
+          { id: 'c', title: 'Room C' },
+          { id: 'd', title: 'Room D' }
+        ]
+        // other options go here...
+
       });
 
       // *** --------------------------------------

@@ -1,3 +1,3 @@
 ### nodexo
 
-#### a node/express practice app
+#### A prototype schedule app built for Swift Fox
