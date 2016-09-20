@@ -65,26 +65,61 @@
           {
             id: '1',
             title: 'Full Install',
-            start: '2016-09-19T10:00:00',
-            end: '2016-09-19T12:00:00',
+            start: '2016-09-20T10:00:00',
+            end: '2016-09-20T12:00:00',
             resourceId: 'a',
             color: '#533A7B'
           },
           {
             id: '2',
             title: 'Service Call',
-            start: '2016-09-19T14:30:00',
-            end: '2016-09-19T15:30:00',
+            start: '2016-09-20T14:30:00',
+            end: '2016-09-20T15:30:00',
             resourceId: 'b',
+            color: '#E05263'
+          },
+          {
+            id: '3',
+            title: 'Service Call',
+            start: '2016-09-20T17:00:00',
+            end: '2016-09-20T18:00:00',
+            resourceId: 'c',
             color: '#E05263'
           }
         ],
+        // some demo resources
+        // resources: [
+        //   { id: 'a', title: 'Room A' },
+        //   { id: 'b', title: 'Room B' },
+        //   { id: 'c', title: 'Room C' },
+        //   { id: 'd', title: 'Room D' }
+        // ]
         resources: [
-          { id: 'a', title: 'Room A' },
-          { id: 'b', title: 'Room B' },
-          { id: 'c', title: 'Room C' },
-          { id: 'd', title: 'Room D' }
-        ]
+        {
+          id: 'a',
+          title: 'Sam',
+          businessHours: {
+              start: '07:00',
+              end: '15:00'
+          }
+        },
+        {
+          id: 'b',
+          title: 'Pat',
+          businessHours: {
+              start: '09:00',
+              end: '17:00'
+          }
+        },
+        {
+          id: 'c',
+          title: 'Kim',
+          businessHours: {
+              start: '11:00',
+              end: '19:00'
+          }
+        }
+    ]
         // other options go here...
 
       });
