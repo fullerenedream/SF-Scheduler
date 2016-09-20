@@ -11,7 +11,8 @@
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
-      <li class="active"><a href="#scheduletab" role="tab" data-toggle="tab">Schedule</a></li>
+      <li class="active"><a href="#dailytab" role="tab" data-toggle="tab">Daily</a></li>
+      <li><a href="#monthlytab" role="tab" data-toggle="tab">Monthly</a></li>
       <li><a href="#installerstab" role="tab" data-toggle="tab">Installers</a></li>
       <li><a href="#reportstab" role="tab" data-toggle="tab">Reports</a></li>
       <li><a href="#settingstab" role="tab" data-toggle="tab">Settings</a></li>
@@ -21,15 +22,18 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
-      <div class="tab-pane active" id="scheduletab">
-
-      <!-- Write something for schedule tab -->
+      <div class="tab-pane active" id="dailytab">
 
         <div class="container" id="on-deck-and-calendar">
           <div class="row">
 
             <div class="col-md-3" id="on-deck-column">
               <h2>On Deck</h2>
+              <div class="panel panel-default" id="on-deck-box">
+                <div class="panel-body">
+                <p>On Deck items go here</p>
+                </div>
+              </div>
             </div>
 
             <div class="col-md-9" id="calendar-column">
@@ -52,8 +56,11 @@
 
                     // You can also dynamically set a calendar's height after initialization - see docs
                     height: 600,
+                    // TODO: change buttons so 'today' shows today's date, get rid of title and day/week/month buttons
+                    // I would really like to get the calendar to default-display between 6:30AM & 8:30PM
+                    // instead of an hour later, so you don't have to scroll to see the last little bit
                     header: {
-                      left: 'prev,next today',
+                      left: 'prev,today,next',
                       center: 'title',
                       right: 'agendaDay,agendaWeek,month'
                     },
@@ -112,12 +119,6 @@
                       }
                     ],
                     // some demo resources
-                    // resources: [
-                    //   { id: 'a', title: 'Room A' },
-                    //   { id: 'b', title: 'Room B' },
-                    //   { id: 'c', title: 'Room C' },
-                    //   { id: 'd', title: 'Room D' }
-                    // ]
                     resources: [
                     {
                       id: 'a',
@@ -255,14 +256,15 @@
             </div>
           </div>
         </div>
-
-
-
-
       </div>
-      <div class="tab-pane" id="installerstab">Installers' working hours are viewed and edited here</div>
-      <div class="tab-pane" id="reportstab">Run reports from here</div>
-      <div class="tab-pane" id="settingstab">Edit settings here</div>
+
+      <div class="tab-pane" id="monthlytab">
+        <p>Monthly view goes here</p>
+        <p>I tried to put another fullcalendar here, set to month view, but couldn't get it to show up - I tried giving it a different div id, giving the variable a different name [as in var calendar = $('#fullcalendar').etc] but those didn't work... really it ought to just switch views in the same calendar anyway - try making the 'Daily' and 'Monthly' tabs just secretly click the fullcalendar 'day' and 'month' buttons?</p>
+      </div>
+      <div class="tab-pane" id="installerstab"><p>Installers' working hours are viewed and edited here</p></div>
+      <div class="tab-pane" id="reportstab"><p>Run reports from here</p></div>
+      <div class="tab-pane" id="settingstab"><p>Edit settings here</p></div>
 
     </div>
 

@@ -18,3 +18,32 @@ body {
   margin-top: 0px;
 }
 
+/* copying styles from fullcalendar.css */
+#on-deck-box {
+  border-color: #ddd;
+  background-color: #fff;
+  height: 550px;
+  margin-top: 15px;
+}
+
+#on-deck-box table {
+  width: 100%;
+  box-sizing: border-box;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 1em;
+}
+
+#on-deck-box th {
+  text-align: center;
+}
+
+#on-deck-box th,
+#on-deck-box td {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0;
+  vertical-align: top;
+}
+/* end of copying styles from fullcalendar.css */
