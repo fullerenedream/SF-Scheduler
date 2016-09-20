@@ -1,0 +1,20 @@
+body {
+  margin-top: 5px;
+  text-align: center;
+  font-size: 12px;
+  font-family: "Lucida Grande", Helvetica, Arial, Verdana, sans-serif;
+}
+
+#fullcalendar {
+  /*width: 900px;*/
+  margin: 0 auto;
+}
+
+#on-deck-and-calendar {
+  margin-top: 10px;
+}
+
+#on-deck-column h2 {
+  margin-top: 0px;
+}
+
