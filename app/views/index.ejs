@@ -41,6 +41,10 @@
               <div id="fullcalendar"></div>
 
               <script type="text/javascript">
+
+                todayDate = new Date().toISOString().substring(0,10);
+                console.log(todayDate);
+
                 // I used this demo to get started:
                 // http://code.runnable.com/UfNTSnKMU1ZgAACt/how-to-add-calendar-using-jquery-and-fullcalendar
                 // some of the code and comments are still in here
@@ -65,8 +69,7 @@
                       right: 'agendaDay,agendaWeek,month'
                     },
                     defaultView: 'agendaDay',
-                    allDaySlot: true,
-                    allDayText: 'All Day',
+                    allDaySlot: false,
                     eventOverlap: false,
                     selectable: true,
                     selectHelper: true,
@@ -96,24 +99,24 @@
                       {
                         id: '1',
                         title: 'Full Install',
-                        start: '2016-09-20T10:00:00',
-                        end: '2016-09-20T12:00:00',
+                        start: todayDate + 'T10:00:00',
+                        end: todayDate + 'T12:00:00',
                         resourceId: 'a',
                         color: '#533A7B'
                       },
                       {
                         id: '2',
                         title: 'Service Call',
-                        start: '2016-09-20T14:30:00',
-                        end: '2016-09-20T15:30:00',
+                        start: todayDate + 'T14:30:00',
+                        end: todayDate + 'T15:30:00',
                         resourceId: 'b',
                         color: '#E05263'
                       },
                       {
                         id: '3',
                         title: 'Service Call',
-                        start: '2016-09-20T17:00:00',
-                        end: '2016-09-20T18:00:00',
+                        start: todayDate + 'T17:00:00',
+                        end: todayDate + 'T18:00:00',
                         resourceId: 'c',
                         color: '#E05263'
                       }
