@@ -1,49 +1,51 @@
 body {
   margin-top: 5px;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   font-family: "Lucida Grande", Helvetica, Arial, Verdana, sans-serif;
 }
 
-#fullcalendar {
-  /*width: 900px;*/
+.nav {
+  margin-bottom: 15px;
+}
+
+#wrap {
+  width: 1100px;
   margin: 0 auto;
 }
 
-#on-deck-and-calendar {
-  margin-top: 10px;
+#external-events {
+  float: left;
+  width: 150px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  text-align: left;
 }
 
-#on-deck-column h2 {
-  margin-top: 0px;
+#external-events h4 {
+  font-size: 16px;
+  margin-top: 0;
+  padding-top: 1em;
 }
 
-/* copying styles from fullcalendar.css */
-#on-deck-box {
-  border-color: #ddd;
-  background-color: #fff;
-  height: 550px;
-  margin-top: 15px;
+#external-events .fc-event {
+  margin: 10px 0;
+  cursor: pointer;
 }
 
-#on-deck-box table {
-  width: 100%;
-  box-sizing: border-box;
-  table-layout: fixed;
-  border-collapse: collapse;
-  border-spacing: 0;
-  font-size: 1em;
+#external-events p {
+  margin: 1.5em 0;
+  font-size: 11px;
+  color: #666;
 }
 
-#on-deck-box th {
-  text-align: center;
+#external-events p input {
+  margin: 0;
+  vertical-align: middle;
 }
 
-#on-deck-box th,
-#on-deck-box td {
-  border-style: solid;
-  border-width: 1px;
-  padding: 0;
-  vertical-align: top;
+#fullcalendar {
+  float: right;
+  width: 900px;
 }
-/* end of copying styles from fullcalendar.css */

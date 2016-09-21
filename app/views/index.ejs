@@ -24,105 +24,85 @@
     <div class="tab-content">
       <div class="tab-pane active" id="dailytab">
 
-        <div class="container" id="on-deck-and-calendar">
-          <div class="row">
+        <div id='wrap'>
 
-            <div class="col-md-3" id="on-deck-column">
-              <h2>On Deck</h2>
-              <div class="panel panel-default" id="on-deck-box">
-                <div class="panel-body">
-                <p>On Deck items go here</p>
-                </div>
-              </div>
-            </div>
+          <div id='external-events'>
+            <h2>On Deck</h2>
+            <div class='fc-event'>Appointment 1</div>
+            <div class='fc-event'>Appointment 2</div>
+            <div class='fc-event'>Appointment 3</div>
+            <div class='fc-event'>Appointment 4</div>
+            <div class='fc-event'>Appointment 5</div>
+            <p>
+              <input type='checkbox' id='drop-remove' />
+              <label for='drop-remove'>remove after drop</label>
+            </p>
+          </div>
 
-            <div class="col-md-9" id="calendar-column">
+          <div id='fullcalendar'></div>
 
-              <div id="fullcalendar"></div>
+            <script type="text/javascript">
 
-              <script type="text/javascript">
+              todayDate = new Date().toISOString().substring(0,10);
+              console.log(todayDate);
 
-                todayDate = new Date().toISOString().substring(0,10);
-                console.log(todayDate);
+              $(document).ready(function() {
 
-                // I used this demo to get started:
-                // http://code.runnable.com/UfNTSnKMU1ZgAACt/how-to-add-calendar-using-jquery-and-fullcalendar
-                // some of the code and comments are still in here
-                $(document).ready(function() {
+                // *** switch to this when JSON feed is set up
+                var user_id = 2;
+                var url = '/api/' + String(user_id);
+                console.log('url: ' + url);
 
-                  // *** switch to this when JSON feed is set up
-                  var user_id = 2;
-                  var url = '/api/' + String(user_id);
-                  console.log('url: ' + url);
 
-                  var calendar = $('#fullcalendar').fullCalendar({
-                    schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                /* initialize the external events
+                -----------------------------------------------------------------*/
 
-                    // You can also dynamically set a calendar's height after initialization - see docs
-                    height: 600,
-                    // TODO: change buttons so 'today' shows today's date, get rid of title and day/week/month buttons
-                    // I would really like to get the calendar to default-display between 6:30AM & 8:30PM
-                    // instead of an hour later, so you don't have to scroll to see the last little bit
-                    header: {
-                      left: 'prev,today,next',
-                      center: 'title',
-                      right: 'agendaDay,agendaWeek,month'
-                    },
-                    defaultView: 'agendaDay',
-                    allDaySlot: false,
-                    eventOverlap: false,
-                    selectable: true,
-                    selectHelper: true,
-                    select: function(start, end, allDay)
-                    {
-                      var title = prompt('Event Title:');
-                      if (title)
-                      {
-                        calendar.fullCalendar('renderEvent',
-                          {
-                            title: title,
-                            start: start,
-                            end: end,
-                            allDay: allDay
-                          },
-                          true // make the event "stick"
-                        );
-                      }
-                      calendar.fullCalendar('unselect');
-                    },
-                    editable: true,
+                $('#external-events .fc-event').each(function() {
 
-                    // events: '/api/1'
+                  // store data so the calendar knows to render an event upon drop
+                  $(this).data('event', {
+                    title: $.trim($(this).text()), // use the element's text as the event title
+                    stick: true // maintain when user navigates (see docs on the renderEvent method)
+                  });
 
-                    // some demo appointments
-                    events: [
-                      {
-                        id: '1',
-                        title: 'Full Install',
-                        start: todayDate + 'T10:00:00',
-                        end: todayDate + 'T12:00:00',
-                        resourceId: 'a',
-                        color: '#533A7B'
-                      },
-                      {
-                        id: '2',
-                        title: 'Service Call',
-                        start: todayDate + 'T14:30:00',
-                        end: todayDate + 'T15:30:00',
-                        resourceId: 'b',
-                        color: '#E05263'
-                      },
-                      {
-                        id: '3',
-                        title: 'Service Call',
-                        start: todayDate + 'T17:00:00',
-                        end: todayDate + 'T18:00:00',
-                        resourceId: 'c',
-                        color: '#E05263'
-                      }
-                    ],
-                    // some demo resources
-                    resources: [
+                  // make the event draggable using jQuery UI
+                  $(this).draggable({
+                    zIndex: 999,
+                    revert: true,      // will cause the event to go back to its
+                    revertDuration: 0  //  original position after the drag
+                  });
+
+                });
+
+
+                /* initialize the calendar
+                -----------------------------------------------------------------*/
+
+                var calendar = $('#fullcalendar').fullCalendar({
+                  schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                  // You can also dynamically set a calendar's height after initialization - see docs
+                  height: 600,
+                  now: todayDate,
+                  editable: true, // enable draggable events
+                  droppable: true, // this allows things to be dropped onto the calendar
+                  aspectRatio: 1.8,
+                  scrollTime: '06:30', // undo default 6am scrollTime
+                  eventOverlap: false,
+                  header: {
+                    left: 'prev,today,next',
+                    center: 'title',
+                    right: 'timelineDay,timelineThreeDays,agendaWeek,month'
+                  },
+                  defaultView: 'timelineDay',
+                  views: {
+                    timelineThreeDays: {
+                      type: 'timeline',
+                      duration: { days: 3 }
+                    }
+                  },
+                  resourceLabelText: 'Technicians',
+                  // some demo resources
+                  resources: [
                     {
                       id: 'a',
                       title: 'Sam',
@@ -147,117 +127,148 @@
                           end: '19:00'
                       }
                     }
-                ]
-                    // other options go here...
+                  ],
+                  // some demo appointments
+                  events: [
+                    {
+                      id: '1',
+                      title: 'Full Install',
+                      start: todayDate + 'T10:00:00',
+                      end: todayDate + 'T12:00:00',
+                      resourceId: 'a',
+                      color: '#533A7B'
+                    },
+                    {
+                      id: '2',
+                      title: 'Service Call',
+                      start: todayDate + 'T14:30:00',
+                      end: todayDate + 'T15:30:00',
+                      resourceId: 'b',
+                      color: '#E05263'
+                    },
+                    {
+                      id: '3',
+                      title: 'Service Call',
+                      start: todayDate + 'T17:00:00',
+                      end: todayDate + 'T18:00:00',
+                      resourceId: 'c',
+                      color: '#E05263'
+                    }
+                  ],
+                  drop: function(date, jsEvent, ui, resourceId) {
+                    console.log('drop', date.format(), resourceId);
 
-                  });
+                    // is the "remove after drop" checkbox checked?
+                    if ($('#drop-remove').is(':checked')) {
+                      // if so, remove the element from the "Draggable Events" list
+                      $(this).remove();
+                    }
+                  },
+                  eventReceive: function(event) { // called when a proper external event is dropped
+                    console.log('eventReceive', event);
+                  },
+                  eventDrop: function(event) { // called when an event (already on the calendar) is moved
+                    console.log('eventDrop', event);
+                  }
 
-                  // *** --------------------------------------
 
 
-                  // // Initialize fullCalendar and store into variable,
-                  // // so we can use it inside another function,
-                  // // in order to modify its options later
-                  // var calendar = $('#fullcalendar').fullCalendar(
+                  // header: {
+                  //   left: 'prev,today,next',
+                  //   center: 'title',
+                  //   right: ''
+                  // },
+                  // defaultView: 'agendaDay',
+                  // allDaySlot: false,
+                  // eventOverlap: false,
+                  // selectable: true,
+                  // selectHelper: true,
+                  // select: function(start, end, allDay)
                   // {
-                  //   // header option will define our calendar header.
-                  //   // left defines what will be at left position in calendar
-                  //   // center defines what will be at center position in calendar
-                  //   // right defines what will be at right position in calendar
-                  //   header:
+                  //   var title = prompt('Event Title:');
+                  //   if (title)
                   //   {
-                  //     left: 'prev,next today',
-                  //     center: 'title',
-                  //     right: 'month,agendaWeek,agendaDay'
-                  //   },
-                  //   // views built into FullCalendar:
-                  //   // month, basicWeek, basicDay, agendaWeek, agendaDay
-                  //   // defaultView option defines which view to show by default
-                  //   defaultView: 'agendaWeek',
-                  //   // selectable:true will enable user to select datetime slot
-                  //   // selectHelper will add helpers for selectable.
-                  //   selectable: true,
-                  //   selectHelper: true,
-                  //   // when user selects timeslot this option code will execute
-                  //   // It has three arguments: start, end and allDay
-                  //   // Start means starting time of event
-                  //   // End means ending time of event
-                  //   // allDay means if event is for entire day or not
-                  //   select: function(start, end, allDay)
+                  //     calendar.fullCalendar('renderEvent',
+                  //       {
+                  //         title: title,
+                  //         start: start,
+                  //         end: end,
+                  //         allDay: allDay
+                  //       },
+                  //       true // make the event "stick"
+                  //     );
+                  //   }
+                  //   calendar.fullCalendar('unselect');
+                  // },
+                  // editable: true,
+
+                  // // events: '/api/1'
+
+                  // // some demo appointments
+                  // events: [
                   //   {
-                  //     // after selection user will be promted for enter title for event
-                  //     var title = prompt('Event Title:');
-                  //     // if title is entered calendar will add title and event into fullCalendar
-                  //     // this is from a demo & needs much more functionality
-                  //     if (title)
-                  //     {
-                  //       calendar.fullCalendar('renderEvent',
-                  //         {
-                  //           title: title,
-                  //           start: start,
-                  //           end: end,
-                  //           allDay: allDay
-                  //         },
-                  //         true // make the event "stick"
-                  //       );
-                  //     }
-                  //     calendar.fullCalendar('unselect');
+                  //     id: '1',
+                  //     title: 'Full Install',
+                  //     start: todayDate + 'T10:00:00',
+                  //     end: todayDate + 'T12:00:00',
+                  //     resourceId: 'a',
+                  //     color: '#533A7B'
                   //   },
-                  //   // editable: true - allows user to edit events
-                  //   editable: true,
-                  //   // events is the main option for calendar.
-                  //   // for demo we have added predefined events in json object.
-
-                  //   // events: '/technician_schedules'
-
-                  //   // some demo data
-                  //   events: [
-                  //     {
-                  //       title:'Business Hours',
-                  //       start: '9:00', // start time = 9am
-                  //       end: '18:00', // end time = 6pm
-                  //       dow: [1, 2, 3, 4, 5], // repeat Monday-Friday
-                  //       rendering: 'inverse-background' // anything outside these hours is colored as 'background'
-                  //     },
-                  //     {
-                  //       title: "Pat's Hours",
-                  //       start: '9:00',
-                  //       end: '18:00',
-                  //       dow: [1, 2, 3, 4, 5]
-                  //     },
-                  //     {
-                  //       id: 'kim',
-                  //       title: "Kim's Hours",
-                  //       start: '11:00',
-                  //       end: '18:00',
-                  //       dow: [1, 2, 3, 4],
-                  //       color: '#533A7B'
-                  //     },
-                  //     {
-                  //       id: 'kim',
-                  //       title: "Kim's Hours",
-                  //       start: '9:00',
-                  //       end: '14:00',
-                  //       dow: [5],
-                  //       color: '#533A7B'
-                  //     },
-                  //     {
-                  //       title: "Sam's Hours",
-                  //       start: '9:00',
-                  //       end: '16:00',
-                  //       dow: [1, 2, 3, 4, 5],
-                  //       color: '#E05263'
+                  //   {
+                  //     id: '2',
+                  //     title: 'Service Call',
+                  //     start: todayDate + 'T14:30:00',
+                  //     end: todayDate + 'T15:30:00',
+                  //     resourceId: 'b',
+                  //     color: '#E05263'
+                  //   },
+                  //   {
+                  //     id: '3',
+                  //     title: 'Service Call',
+                  //     start: todayDate + 'T17:00:00',
+                  //     end: todayDate + 'T18:00:00',
+                  //     resourceId: 'c',
+                  //     color: '#E05263'
+                  //   }
+                  // ],
+                  // // some demo resources
+                  // resources: [
+                  //   {
+                  //     id: 'a',
+                  //     title: 'Sam',
+                  //     businessHours: {
+                  //         start: '07:00',
+                  //         end: '15:00'
                   //     }
-                  //   ]
+                  //   },
+                  //   {
+                  //     id: 'b',
+                  //     title: 'Pat',
+                  //     businessHours: {
+                  //         start: '09:00',
+                  //         end: '17:00'
+                  //     }
+                  //   },
+                  //   {
+                  //     id: 'c',
+                  //     title: 'Kim',
+                  //     businessHours: {
+                  //         start: '11:00',
+                  //         end: '19:00'
+                  //     }
+                  //   }
+                  // ]
+                  // // other options go here...
 
-                  // });
+
 
                 });
+              });
 
-              </script>
+            </script>
 
-            </div>
-          </div>
+          <div style='clear:both'></div>
+
         </div>
       </div>
 

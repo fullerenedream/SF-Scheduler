@@ -12,6 +12,7 @@
 /zzz-mybuildnotes.js
 /zzz-nodenotes.js
 /zzz-scratchpad.js
+/fc-external-dragging.html
 
 # Ignore database dump
 /dump.sql
