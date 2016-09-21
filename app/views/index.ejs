@@ -40,6 +40,7 @@
 
               <div id="fullcalendar"></div>
 
+              <!-- TODO: MOVE THIS SCRIPT INTO ITS OWN FILE -->
               <script type="text/javascript">
 
                 todayDate = new Date().toISOString().substring(0,10);
@@ -60,9 +61,7 @@
 
                     // You can also dynamically set a calendar's height after initialization - see docs
                     height: 600,
-                    // TODO: change buttons so 'today' shows today's date, get rid of title and day/week/month buttons
-                    // I would really like to get the calendar to default-display between 6:30AM & 8:30PM
-                    // instead of an hour later, so you don't have to scroll to see the last little bit
+                    // TODO: change buttons so 'today' shows today's date, get rid of title
                     header: {
                       left: 'prev,today,next',
                       center: 'title',
@@ -99,6 +98,8 @@
                       {
                         id: '1',
                         title: 'Full Install',
+                        ticketId: '101',
+                        description: 'Install wifi chez Joe Blow',
                         start: todayDate + 'T10:00:00',
                         end: todayDate + 'T12:00:00',
                         resourceId: 'a',
@@ -107,6 +108,8 @@
                       {
                         id: '2',
                         title: 'Service Call',
+                        ticketId: '95',
+                        description: "Replace broken thing at Mrs. Tiggywinkle's",
                         start: todayDate + 'T14:30:00',
                         end: todayDate + 'T15:30:00',
                         resourceId: 'b',
@@ -115,6 +118,8 @@
                       {
                         id: '3',
                         title: 'Service Call',
+                        ticketId: '109',
+                        description: 'Fix router at the library',
                         start: todayDate + 'T17:00:00',
                         end: todayDate + 'T18:00:00',
                         resourceId: 'c',
@@ -123,134 +128,40 @@
                     ],
                     // some demo resources
                     resources: [
-                    {
-                      id: 'a',
-                      title: 'Sam',
-                      businessHours: {
-                          start: '07:00',
-                          end: '15:00'
+                      {
+                        id: 'a',
+                        title: 'Sam',
+                        businessHours: {
+                            start: '07:00',
+                            end: '15:00'
+                        }
+                      },
+                      {
+                        id: 'b',
+                        title: 'Pat',
+                        businessHours: {
+                            start: '09:00',
+                            end: '17:00'
+                        }
+                      },
+                      {
+                        id: 'c',
+                        title: 'Kim',
+                        businessHours: {
+                            start: '11:00',
+                            end: '19:00'
+                        }
                       }
-                    },
-                    {
-                      id: 'b',
-                      title: 'Pat',
-                      businessHours: {
-                          start: '09:00',
-                          end: '17:00'
-                      }
-                    },
-                    {
-                      id: 'c',
-                      title: 'Kim',
-                      businessHours: {
-                          start: '11:00',
-                          end: '19:00'
-                      }
+                    ],
+                    eventRender: function(event, element) {
+                      if (event.description) {
+                        var descriptionDiv = '<div>' + event.description + '</div>';
+                        $('div.fc-title', element).append(descriptionDiv);
+                      };
                     }
-                ]
                     // other options go here...
 
                   });
-
-                  // *** --------------------------------------
-
-
-                  // // Initialize fullCalendar and store into variable,
-                  // // so we can use it inside another function,
-                  // // in order to modify its options later
-                  // var calendar = $('#fullcalendar').fullCalendar(
-                  // {
-                  //   // header option will define our calendar header.
-                  //   // left defines what will be at left position in calendar
-                  //   // center defines what will be at center position in calendar
-                  //   // right defines what will be at right position in calendar
-                  //   header:
-                  //   {
-                  //     left: 'prev,next today',
-                  //     center: 'title',
-                  //     right: 'month,agendaWeek,agendaDay'
-                  //   },
-                  //   // views built into FullCalendar:
-                  //   // month, basicWeek, basicDay, agendaWeek, agendaDay
-                  //   // defaultView option defines which view to show by default
-                  //   defaultView: 'agendaWeek',
-                  //   // selectable:true will enable user to select datetime slot
-                  //   // selectHelper will add helpers for selectable.
-                  //   selectable: true,
-                  //   selectHelper: true,
-                  //   // when user selects timeslot this option code will execute
-                  //   // It has three arguments: start, end and allDay
-                  //   // Start means starting time of event
-                  //   // End means ending time of event
-                  //   // allDay means if event is for entire day or not
-                  //   select: function(start, end, allDay)
-                  //   {
-                  //     // after selection user will be promted for enter title for event
-                  //     var title = prompt('Event Title:');
-                  //     // if title is entered calendar will add title and event into fullCalendar
-                  //     // this is from a demo & needs much more functionality
-                  //     if (title)
-                  //     {
-                  //       calendar.fullCalendar('renderEvent',
-                  //         {
-                  //           title: title,
-                  //           start: start,
-                  //           end: end,
-                  //           allDay: allDay
-                  //         },
-                  //         true // make the event "stick"
-                  //       );
-                  //     }
-                  //     calendar.fullCalendar('unselect');
-                  //   },
-                  //   // editable: true - allows user to edit events
-                  //   editable: true,
-                  //   // events is the main option for calendar.
-                  //   // for demo we have added predefined events in json object.
-
-                  //   // events: '/technician_schedules'
-
-                  //   // some demo data
-                  //   events: [
-                  //     {
-                  //       title:'Business Hours',
-                  //       start: '9:00', // start time = 9am
-                  //       end: '18:00', // end time = 6pm
-                  //       dow: [1, 2, 3, 4, 5], // repeat Monday-Friday
-                  //       rendering: 'inverse-background' // anything outside these hours is colored as 'background'
-                  //     },
-                  //     {
-                  //       title: "Pat's Hours",
-                  //       start: '9:00',
-                  //       end: '18:00',
-                  //       dow: [1, 2, 3, 4, 5]
-                  //     },
-                  //     {
-                  //       id: 'kim',
-                  //       title: "Kim's Hours",
-                  //       start: '11:00',
-                  //       end: '18:00',
-                  //       dow: [1, 2, 3, 4],
-                  //       color: '#533A7B'
-                  //     },
-                  //     {
-                  //       id: 'kim',
-                  //       title: "Kim's Hours",
-                  //       start: '9:00',
-                  //       end: '14:00',
-                  //       dow: [5],
-                  //       color: '#533A7B'
-                  //     },
-                  //     {
-                  //       title: "Sam's Hours",
-                  //       start: '9:00',
-                  //       end: '16:00',
-                  //       dow: [1, 2, 3, 4, 5],
-                  //       color: '#E05263'
-                  //     }
-                  //   ]
-
-                  // });
 
                 });
 
