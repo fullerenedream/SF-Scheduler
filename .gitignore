@@ -15,3 +15,6 @@
 
 # Ignore database dump
 /dump.sql
+
+
+.nodemon-find-ref
