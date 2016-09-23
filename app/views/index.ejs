@@ -25,6 +25,24 @@
 
         <div id='wrap'>
 
+          <div id='installer-picker'>
+            <form action="#">
+              <fieldset>
+                <select name="installer-selector" id="installer-selector">
+                  <option value="AllInstallers" class="all-installers" selected="selected">All Installers</option>
+                  <option value="Sam">Sam</option>
+                  <option value="Pat">Pat</option>
+                  <option value="Kim">Kim</option>
+                </select>
+              </fieldset>
+            </form>
+          </div> <!-- /#installer-picker -->
+          <script>
+            $(document).ready$(function(){
+              $('select#installer-selector').selectmenu();
+            });
+          </script>
+
           <div id='external-events'>
             <h2>On Deck</h2>
             <div class='fc-event'>Appointment 1</div>

@@ -14,6 +14,10 @@ body {
   margin: 0 auto;
 }
 
+#installer-picker {
+
+}
+
 #external-events {
   float: left;
   width: 150px;
