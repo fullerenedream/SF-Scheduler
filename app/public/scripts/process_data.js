@@ -1,10 +1,5 @@
 module.exports = {};
 
-exports.epochToMoment = function(epochTime) {
-  var momentTime = moment.unix(epochTime);
-  return momentTime;
-}
-
 
 // exports.eventify = function(rows) {
 //   // var rows_as_events = rows;
