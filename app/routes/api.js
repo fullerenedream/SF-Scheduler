@@ -43,7 +43,7 @@ router.get('/api/technician_schedules', function(req,res){
 
 
     // *** get the data as is from the db
-    var queryString =  `SELECT t1.id, t1.user_id, t1.user_name,
+    var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
                           sunday_start,
                           sunday_end,
                           monday_start,
@@ -109,7 +109,7 @@ router.get('/api/technician_schedules', function(req,res){
       console.log('ts_rows ' + i + ' user_id:\n' + ts_rows[i].user_id);
       var resource = new Object();
       resource.businessHours = [];
-      resource.id = ts_rows[i].id;
+      resource.id = ts_rows[i].schedule_id;
       resource.title =ts_rows[i].user_name; // or we could use user_id
       resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end};
       resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end};
