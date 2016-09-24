@@ -124,7 +124,7 @@ router.get('/api/technician_schedules', function(req,res){
 
     // DO THIS LIKE RESOURCES AS ABOVE
     var events = [{
-      id: '1', // id
+      id: 1, // id
       title: 'Full Install', // title
       ticketId: '101', // ticket_id
       appointmentType: 'Install', // appointment_type

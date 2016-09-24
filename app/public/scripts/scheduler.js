@@ -50,6 +50,7 @@ $(document).ready(function() {
   -----------------------------------------------------------------*/
 
   function agendaDayView(allTheThings) {
+    console.log(allTheThings.resources);
     console.log('inside agendaDayView - allTheThings: ')
     console.log(allTheThings);
     var calendar = $('#fullcalendar').fullCalendar({
@@ -94,7 +95,7 @@ $(document).ready(function() {
       },
 
       resourceLabelText: 'Installers',
-      resources: allTheThings.resources,
+      // resources: allTheThings.resources,
       events: allTheThings.events,
       // // some demo resources
       // resources: [
