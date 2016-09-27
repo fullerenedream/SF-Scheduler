@@ -1,3 +1,5 @@
-### nodexo
+## Swift Fox Tech Scheduler
 
-#### A prototype schedule app built for Swift Fox
+#### Prototype of technician scheduling module which manages ISP technician work schedules and service call bookings
+
+#### Written in Node.js, Express, jQuery, HTML/CSS, Bootstrap, MySQL
