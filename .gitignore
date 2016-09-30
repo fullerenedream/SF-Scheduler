@@ -8,10 +8,8 @@
 /*/.DS_Store
 .DS_Store
 
-# Ignore build notes and node notes
-/zzz-mybuildnotes.js
-/zzz-nodenotes.js
-/zzz-scratchpad.js
+# Ignore my notes
+/zzz-*
 
 # Ignore database dump
 /dump-1.sql
