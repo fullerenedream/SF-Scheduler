@@ -99,7 +99,7 @@ $(document).ready(function() {
 
       resourceLabelText: 'Installers',
       resources: allTheThings.resources,
-      events: allTheThings.events,
+      eventSources: allTheThings.eventSources,
       // // some demo resources
       // resources: [
       //   {

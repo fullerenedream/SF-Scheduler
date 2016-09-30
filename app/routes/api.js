@@ -10,38 +10,8 @@ var technician_schedules = require("../technician_schedules.js");
 
 // GET the whole technician_schedules table
 router.get('/api/technician_schedules', function(req,res){
-  // db.connectToScheduleDB();
-  // var allTechnicians = technician_schedules.getAllTechnicianSchedules();
-  // console.log(allTechnicians);
-  // res.json(allTechnicians);
-
   // *** copied the guts of getAllTechnicianSchedules into this api get request
   var con = db.connectToScheduleDB();
-  // *** IFNULL(column, replacement value if column is null)
-  // SEC_TO_TIME converts a number of seconds into 00:00:00 format (hh:mm:ss)
-  // TIME_TO_SEC is also a thing - it's the inverse
-  // CONCAT(DATE(NOW()) hh:mm:ss) - CONCAT(A,' ',B) -> 'A B'
-  // when we call the event source from fullcalendar, there's an option where
-  // you can specify timezone - in case we need to convert timezones.
-  // var queryString =  `SELECT t1.id, t1.user_id,
-  //                      CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(tuesday_start,1))) AS start,
-  //                      CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(tuesday_end,1))) AS end
-  //                     FROM technician_schedules t1
-  //                     WHERE t1.created_at = (
-  //                       SELECT MAX(t2.created_at)
-  //                       FROM technician_schedules t2
-  //                       WHERE t2.user_id = t1.user_id)`;
-
-  // var queryString =  `SELECT t1.id, t1.user_id,
-  //                       SEC_TO_TIME(IFNULL(tuesday_start,1)) AS start,
-  //                       SEC_TO_TIME(IFNULL(tuesday_end,1)) AS end
-  //                     FROM technician_schedules t1
-  //                     WHERE t1.created_at = (
-  //                       SELECT MAX(t2.created_at)
-  //                       FROM technician_schedules t2
-  //                       WHERE t2.user_id = t1.user_id)`;
-
-
     // *** get the data as is from the db
     var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
                           sunday_start,
@@ -67,41 +37,8 @@ router.get('/api/technician_schedules', function(req,res){
     if(err) throw err;
     console.log('\nAll current technician schedules:\n');
     console.log('ts_rows:\n' + ts_rows);
+    // iterate over ts_rows and make it into a valid JSON string
 
-    // iterate over ts_rows into a valid JSON string
-    // that's what fullcalendar wants resources to look like
-
-    // response to this get request is currently the JSONified result of the db query
-
-    // this is the dummy data we're feeding fullcalendar-scheduler right now:
-    // resources: [
-    //   {
-    //     id: 'a',
-    //     title: 'Sam',
-    //     businessHours: {
-    //         start: '07:00',
-    //         end: '15:00'
-    //     }
-    //   },
-    //   {
-    //     id: 'b',
-    //     title: 'Pat',
-    //     businessHours: {
-    //         start: '09:00',
-    //         end: '17:00'
-    //     }
-    //   },
-    //   {
-    //     id: 'c',
-    //     title: 'Kim',
-    //     businessHours: {
-    //         start: '11:00',
-    //         end: '19:00'
-    //     }
-    //   }
-    // ]
-    // right now the response looks like this:
-    // "[{"id":1,"user_id":0,"sunday_start":null,"sunday_end":null,"monday_start":"07:00:00","monday_end":"19:00:00","tuesday_start":"07:00:00","tuesday_end":"19:00:00","wednesday_start":"07:00:00","wednesday_end":"19:00:00","thursday_start":"07:00:00","thursday_end":"19:00:00","friday_start":"07:00:00","friday_end":"19:00:00","saturday_start":null,"saturday_end":null},{"id":2,"user_id":1,"sunday_start":null,"sunday_end":null,"monday_start":"07:00:00","monday_end":"15:00:00","tuesday_start":"07:00:00","tuesday_end":"15:00:00","wednesday_start":"07:00:00","wednesday_end":"15:00:00","thursday_start":"07:00:00","thursday_end":"15:00:00","friday_start":"07:00:00","friday_end":"15:00:00","saturday_start":null,"saturday_end":null},{"id":5,"user_id":3,"sunday_start":null,"sunday_end":null,"monday_start":"09:00:00","monday_end":"16:00:00","tuesday_start":null,"tuesday_end":null,"wednesday_start":"09:00:00","wednesday_end":"16:00:00","thursday_start":null,"thursday_end":null,"friday_start":"09:00:00","friday_end":"16:00:00","saturday_start":null,"saturday_end":null},{"id":9,"user_id":2,"sunday_start":null,"sunday_end":null,"monday_start":null,"monday_end":null,"tuesday_start":"11:00:00","tuesday_end":"19:00:00","wednesday_start":"11:00:00","wednesday_end":"19:00:00","thursday_start":"11:00:00","thursday_end":"19:00:00","friday_start":"11:00:00","friday_end":"19:00:00","saturday_start":null,"saturday_end":null}]"
     var response = new Object();
 
     var resources = [];
@@ -111,7 +48,7 @@ router.get('/api/technician_schedules', function(req,res){
       var resource = new Object();
       resource.businessHours = [];
       resource.id = ts_rows[i].user_id;
-      resource.title =ts_rows[i].user_name;
+      resource.title = ts_rows[i].user_name;
     //   resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end};
     //   resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end};
     //   resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end};
@@ -142,8 +79,11 @@ router.get('/api/technician_schedules', function(req,res){
     }
     response.resources = resources;
 
-    // DO THIS LIKE RESOURCES AS ABOVE
-    var events = [{
+
+    // using eventSources array to combine appointments and time_off events
+    var eventSources = [];
+
+    var appointments = [{
       id: 1, // appointment_id
       title: 'Full Install', // title
       ticketId: '101', // ticket_id
@@ -155,12 +95,6 @@ router.get('/api/technician_schedules', function(req,res){
       resourceId: '1', // tech_id (user_id in technician_schedules)
     }];
 
-    /*  I started writing this in here but then realized it's INSIDE the get request to
-        api/technician_schedules, but this needs to be in a get request to
-        api/appointments... but then how do I combine the results?
-        I will also need to include time_off in events...
-    */
-
     // var appointmentQueryString = `SELECT appointment_id,
     //                                 title,
     //                                 ticket_id,
@@ -171,16 +105,69 @@ router.get('/api/technician_schedules', function(req,res){
     //                                 status,
     //                                 tech_id
     //                               FROM appointments`;
-
-
-    // con.query(appointmentQueryString,function(err,ts_rows){
+    // con.query(appointmentQueryString,function(err,appt_rows){
     // if(err) throw err;
-    // console.log('\nAll current technician schedules:\n');
-    // console.log('ts_rows:\n' + ts_rows);
+    // console.log('\nAll appointments:\n');
+    // console.log('appt_rows:\n' + appt_rows);
+
+    // var appointments = [];
+    // for (var i = 0; i < appt_rows.length; i++) {
+    //   console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
+    //   console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
+    //   var appointment = new Object();
+    //   appointment.id = appt_rows[i].appointment_id;
+    //   appointment.title = appt_rows[i].title;
+    //   appointment.ticketId = appt_rows[i].ticket_id;
+    //   appointment.appointmentType = appt_rows[i].appointment_type;
+    //   appointment.description = appt_rows[i].description;
+    //   appointment.start = appt_rows[i].appt_start_iso_8601;
+    //   appointment.end = appt_rows[i].appt_end_iso_8601;
+    //   appointment.status = appt_rows[i].status;  // (0, 1 or 2)
+    //   appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
+    //   appointments.push(appointment);
+    // }
+    eventSources.push(appointments);
+    // var events = appointments;
 
 
+    var timeOffEvents = [{
+      id: '1', // time_off_id,
+      title: 'Tech 2 Off', // maybe put tech name in here later, e.g. "Ben Off"
+      start: '2016-09-30T15:00:00', // toff_start_iso_8601,
+      end: '2016-09-30T19:00:00', // toff_end_iso_8601,
+      notes: 'going hiking',
+      resourceId: '2', // tech_id (user_id in technician_schedules)
+    }];
 
-    response.events = events;
+    // var timeOffQueryString = `SELECT time_off_id,
+    //                             tech_id,
+    //                             toff_start_iso_8601,
+    //                             toff_end_iso_8601,
+    //                             notes
+    //                           FROM time_off`;
+    // con.query(timeOffQueryString,function(err,toff_rows){
+    // if(err) throw err;
+    // console.log('\nAll timeOffEvents:\n');
+    // console.log('toff_rows:\n' + toff_rows);
+
+    // var timeOffEvents = [];
+    // for (var i = 0; i < toff_rows.length; i++) {
+    //   console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
+    //   console.log('toff_rows ' + i + ' ticket_id:\n' + toff_rows[i].ticket_id);
+    //   var timeOffEvent = new Object();
+    //   timeOffEvent.id = toff_rows[i].time_off_id;
+    //   timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + 'Off';
+    //   timeOffEvent.start = toff_rows[i].appt_start_iso_8601;
+    //   timeOffEvent.end = toff_rows[i].appt_end_iso_8601;
+    //   timeOffEvent.notes = toff_rows[i].notes;
+    //   timeOffEvent.resourceID = toff_rows[i].tech_id;
+    //   timeOffEvents.push(timeOffEvent);
+    // }
+    eventSources.push(timeOffEvents);
+
+    response.eventSources = eventSources;
+
+    // response.events = events;
     res.json(response);
   });
 });
