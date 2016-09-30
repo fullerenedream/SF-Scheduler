@@ -14,7 +14,7 @@
 /zzz-scratchpad.js
 
 # Ignore database dump
-/dump.sql
-
+/dump-1.sql
+/dump-2.sql
 
 .nodemon-find-ref
