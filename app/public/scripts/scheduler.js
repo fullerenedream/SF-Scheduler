@@ -13,12 +13,13 @@ $(document).ready(function() {
   console.log('url: ' + url);
 
   var allTheThings = $.getJSON('/api/technician_schedules', function(data){
+    // once we have the response to the get request, call gotAllTheThings to draw the calendar
     gotAllTheThings(data);
   });
 
   function gotAllTheThings(data){
     console.log('inside gotAllTheThings');
-    // draw the fullcalendar with the data, in Agenda Day view
+    // draw the calendar with the data, in Agenda Day view
     agendaDayView(data);
     // console.log(data);
   }
