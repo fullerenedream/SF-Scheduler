@@ -43,7 +43,7 @@ router.get('/api/technician_schedules', function(req,res){
 
 
     // *** get the data as is from the db
-    var queryString =  `SELECT t1.id, t1.user_id, t1.user_name,
+    var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
                           sunday_start,
                           sunday_end,
                           monday_start,
@@ -103,37 +103,83 @@ router.get('/api/technician_schedules', function(req,res){
     // right now the response looks like this:
     // "[{"id":1,"user_id":0,"sunday_start":null,"sunday_end":null,"monday_start":"07:00:00","monday_end":"19:00:00","tuesday_start":"07:00:00","tuesday_end":"19:00:00","wednesday_start":"07:00:00","wednesday_end":"19:00:00","thursday_start":"07:00:00","thursday_end":"19:00:00","friday_start":"07:00:00","friday_end":"19:00:00","saturday_start":null,"saturday_end":null},{"id":2,"user_id":1,"sunday_start":null,"sunday_end":null,"monday_start":"07:00:00","monday_end":"15:00:00","tuesday_start":"07:00:00","tuesday_end":"15:00:00","wednesday_start":"07:00:00","wednesday_end":"15:00:00","thursday_start":"07:00:00","thursday_end":"15:00:00","friday_start":"07:00:00","friday_end":"15:00:00","saturday_start":null,"saturday_end":null},{"id":5,"user_id":3,"sunday_start":null,"sunday_end":null,"monday_start":"09:00:00","monday_end":"16:00:00","tuesday_start":null,"tuesday_end":null,"wednesday_start":"09:00:00","wednesday_end":"16:00:00","thursday_start":null,"thursday_end":null,"friday_start":"09:00:00","friday_end":"16:00:00","saturday_start":null,"saturday_end":null},{"id":9,"user_id":2,"sunday_start":null,"sunday_end":null,"monday_start":null,"monday_end":null,"tuesday_start":"11:00:00","tuesday_end":"19:00:00","wednesday_start":"11:00:00","wednesday_end":"19:00:00","thursday_start":"11:00:00","thursday_end":"19:00:00","friday_start":"11:00:00","friday_end":"19:00:00","saturday_start":null,"saturday_end":null}]"
     var response = new Object();
+
     var resources = [];
     for (var i = 0; i < ts_rows.length; i++) {
       console.log('ts_rows ' + i + ':\n' + ts_rows[i]);
       console.log('ts_rows ' + i + ' user_id:\n' + ts_rows[i].user_id);
       var resource = new Object();
       resource.businessHours = [];
-      resource.id = ts_rows[i].id;
-      resource.title =ts_rows[i].user_name; // or we could use user_id
-      resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end};
-      resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end};
-      resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end};
-      resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end};
-      resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end};
-      resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end};
-      resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end};
+      resource.id = ts_rows[i].user_id;
+      resource.title =ts_rows[i].user_name;
+    //   resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end};
+    //   resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end};
+    //   resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end};
+    //   resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end};
+    //   resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end};
+    //   resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end};
+    //   resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end};
+
+      /*** DIRTY HACK to get around null resource days showing up as available all day instead of not available all day
+       - this might make people look like they're in on their days off in Month view!!! ***/
+      if (ts_rows[i].sunday_start) {
+        resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end}; }
+      else { resource.businessHours[0] = {dow:[0], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].monday_start) { resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end}; }
+      else { resource.businessHours[1] = {dow:[1], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].tuesday_start) { resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end}; }
+      else { resource.businessHours[2] = {dow:[2], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].wednesday_start) { resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end}; }
+      else { resource.businessHours[3] = {dow:[3], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].thursday_start) { resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end}; }
+      else { resource.businessHours[4] = {dow:[4], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].friday_start) { resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end}; }
+      else { resource.businessHours[5] = {dow:[5], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].saturday_start) { resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end}; }
+      else { resource.businessHours[6] = {dow:[6], start:'00:00:00', end:'00:00:01'}; }
+
       resources.push(resource);
     }
     response.resources = resources;
 
     // DO THIS LIKE RESOURCES AS ABOVE
     var events = [{
-      id: '1', // id
+      id: 1, // appointment_id
       title: 'Full Install', // title
       ticketId: '101', // ticket_id
       appointmentType: 'Install', // appointment_type
       description: 'Install wifi chez Joe Blow', // description
-      start: '2016-09-23T10:00:00', // start_time
-      end: '2016-09-23T12:00:00', // end_time
+      start: '2016-09-30T10:00:00', // appt_start_iso_8601
+      end: '2016-09-30T12:00:00', // appt_end_iso_8601
       status: '0', // status   (0, 1 or 2)
-      resourceId: '1', // tech_id
+      resourceId: '1', // tech_id (user_id in technician_schedules)
     }];
+
+    /*  I started writing this in here but then realized it's INSIDE the get request to
+        api/technician_schedules, but this needs to be in a get request to
+        api/appointments... but then how do I combine the results?
+        I will also need to include time_off in events...
+    */
+
+    // var appointmentQueryString = `SELECT appointment_id,
+    //                                 title,
+    //                                 ticket_id,
+    //                                 appointment_type,
+    //                                 description,
+    //                                 appt_start_iso_8601,
+    //                                 appt_end_iso_8601,
+    //                                 status,
+    //                                 tech_id
+    //                               FROM appointments`;
+
+
+    // con.query(appointmentQueryString,function(err,ts_rows){
+    // if(err) throw err;
+    // console.log('\nAll current technician schedules:\n');
+    // console.log('ts_rows:\n' + ts_rows);
+
+
+
     response.events = events;
     res.json(response);
   });
