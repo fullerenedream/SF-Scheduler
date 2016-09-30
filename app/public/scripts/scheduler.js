@@ -18,6 +18,7 @@ $(document).ready(function() {
 
   function gotAllTheThings(data){
     console.log('inside gotAllTheThings');
+    // draw the fullcalendar with the data, in Agenda Day view
     agendaDayView(data);
     // console.log(data);
   }
@@ -50,6 +51,7 @@ $(document).ready(function() {
   -----------------------------------------------------------------*/
 
   function agendaDayView(allTheThings) {
+    console.log('allTheThings.resources:')
     console.log(allTheThings.resources);
     console.log('inside agendaDayView - allTheThings: ')
     console.log(allTheThings);
@@ -95,7 +97,7 @@ $(document).ready(function() {
       },
 
       resourceLabelText: 'Installers',
-      // resources: allTheThings.resources,
+      resources: allTheThings.resources,
       events: allTheThings.events,
       // // some demo resources
       // resources: [
