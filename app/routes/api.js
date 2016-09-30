@@ -8,32 +8,99 @@ var process_data = require('../public/scripts/process_data.js');
 var db = require("../db.js");
 var technician_schedules = require("../technician_schedules.js");
 
-// GET the whole technician_schedules table
+// GET each tech's most recent working hours from technician_schedules table
+// Trying to re-create this from before... so far it is not working!!!
 router.get('/api/technician_schedules', function(req,res){
+  var con = db.connectToScheduleDB();
+  // *** get the data as is from the db
+  var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
+                        sunday_start,
+                        sunday_end,
+                        monday_start,
+                        monday_end,
+                        tuesday_start,
+                        tuesday_end,
+                        wednesday_start,
+                        wednesday_end,
+                        thursday_start,
+                        thursday_end,
+                        friday_start,
+                        friday_end,
+                        saturday_start,
+                        saturday_end
+                    FROM technician_schedules t1
+                    WHERE t1.created_at = (
+                      SELECT MAX(t2.created_at)
+                      FROM technician_schedules t2
+                      WHERE t2.user_id = t1.user_id)`;
+    con.query(queryString,function(err,ts_rows){
+    if(err) throw err;
+    console.log('\nAll current technician schedules:\n');
+    console.log('ts_rows:\n' + ts_rows);
+
+    // iterate over ts_rows into a valid JSON string
+    var response = new Object();
+
+    var resources = []; // array of working hours of all techs
+    for (var i = 0; i < ts_rows.length; i++) {
+      console.log('ts_rows ' + i + ':\n' + ts_rows[i]);
+      console.log('ts_rows ' + i + ' user_id:\n' + ts_rows[i].user_id);
+      // one resource is one tech's working hours
+      var resource = new Object();
+      resource.businessHours = [];
+      resource.id = ts_rows[i].user_id;
+      resource.title =ts_rows[i].user_name;
+
+      /*** DIRTY HACK to get around null resource days showing up as available all day instead of not available all day
+       - this might make people look like they're in on their days off in Month view!!! ***/
+      if (ts_rows[i].sunday_start) {
+        resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end}; }
+      else { resource.businessHours[0] = {dow:[0], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].monday_start) { resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end}; }
+      else { resource.businessHours[1] = {dow:[1], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].tuesday_start) { resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end}; }
+      else { resource.businessHours[2] = {dow:[2], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].wednesday_start) { resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end}; }
+      else { resource.businessHours[3] = {dow:[3], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].thursday_start) { resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end}; }
+      else { resource.businessHours[4] = {dow:[4], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].friday_start) { resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end}; }
+      else { resource.businessHours[5] = {dow:[5], start:'00:00:00', end:'00:00:01'}; }
+      if (ts_rows[i].saturday_start) { resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end}; }
+      else { resource.businessHours[6] = {dow:[6], start:'00:00:00', end:'00:00:01'}; }
+
+      resources.push(resource);
+    }
+    res.json(resources);
+  });
+});
+
+// GET all the resources and events - technician working hours + appointments + time off events
+router.get('/api/resources_and_events', function(req,res){
   // *** copied the guts of getAllTechnicianSchedules into this api get request
   var con = db.connectToScheduleDB();
-    // *** get the data as is from the db
-    var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
-                          sunday_start,
-                          sunday_end,
-                          monday_start,
-                          monday_end,
-                          tuesday_start,
-                          tuesday_end,
-                          wednesday_start,
-                          wednesday_end,
-                          thursday_start,
-                          thursday_end,
-                          friday_start,
-                          friday_end,
-                          saturday_start,
-                          saturday_end
-                      FROM technician_schedules t1
-                      WHERE t1.created_at = (
-                        SELECT MAX(t2.created_at)
-                        FROM technician_schedules t2
-                        WHERE t2.user_id = t1.user_id)`;
-    con.query(queryString,function(err,ts_rows){ // *** PROBLEM: right now this '{' doesn't close until line 171, just below 'res.json(response);'
+  // *** get the data as is from the db
+  var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
+                        sunday_start,
+                        sunday_end,
+                        monday_start,
+                        monday_end,
+                        tuesday_start,
+                        tuesday_end,
+                        wednesday_start,
+                        wednesday_end,
+                        thursday_start,
+                        thursday_end,
+                        friday_start,
+                        friday_end,
+                        saturday_start,
+                        saturday_end
+                    FROM technician_schedules t1
+                    WHERE t1.created_at = (
+                      SELECT MAX(t2.created_at)
+                      FROM technician_schedules t2
+                      WHERE t2.user_id = t1.user_id)`;
+    con.query(queryString,function(err,ts_rows) { // *** PROBLEM: right now this '{' doesn't close until line 171, just below 'res.json(response);'
     if(err) throw err;
     console.log('\nAll current technician schedules:\n');
     console.log('ts_rows:\n' + ts_rows);
