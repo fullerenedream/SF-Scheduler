@@ -33,7 +33,7 @@ router.get('/api/technician_schedules', function(req,res){
                         SELECT MAX(t2.created_at)
                         FROM technician_schedules t2
                         WHERE t2.user_id = t1.user_id)`;
-    con.query(queryString,function(err,ts_rows){
+    con.query(queryString,function(err,ts_rows){ // *** PROBLEM: right now this '{' doesn't close until line 171, just below 'res.json(response);'
     if(err) throw err;
     console.log('\nAll current technician schedules:\n');
     console.log('ts_rows:\n' + ts_rows);
@@ -59,8 +59,7 @@ router.get('/api/technician_schedules', function(req,res){
 
       /*** DIRTY HACK to get around null resource days showing up as available all day instead of not available all day
        - this might make people look like they're in on their days off in Month view!!! ***/
-      if (ts_rows[i].sunday_start) {
-        resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end}; }
+      if (ts_rows[i].sunday_start) { resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end}; }
       else { resource.businessHours[0] = {dow:[0], start:'00:00:00', end:'00:00:01'}; }
       if (ts_rows[i].monday_start) { resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end}; }
       else { resource.businessHours[1] = {dow:[1], start:'00:00:00', end:'00:00:01'}; }
