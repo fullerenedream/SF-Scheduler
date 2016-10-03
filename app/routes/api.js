@@ -71,9 +71,11 @@ router.get('/api/technician_schedules', function(req,res){
 
       resources.push(resource);
     }
-    res.json(resources);
+    response.resources = resources;
+    res.json(response);
   });
 });
+
 
 // GET all the resources and events - technician working hours + appointments + time off events
 router.get('/api/resources_and_events', function(req,res){
