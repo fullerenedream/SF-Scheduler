@@ -7,9 +7,10 @@ var process_data = require('../public/scripts/process_data.js');
 // *** added the db.js and technician_schedules.js files pretty much as-is from NeoNodoSchedule
 var db = require("../db.js");
 var technician_schedules = require("../technician_schedules.js");
+var eventSources = [];
+var todayDate = new Date().toISOString().substring(0,10);
 
 // GET each tech's most recent working hours from technician_schedules table
-// Trying to re-create this from before... so far it is not working!!!
 router.get('/api/technician_schedules', function(req,res){
   var con = db.connectToScheduleDB();
   // *** get the data as is from the db
@@ -75,6 +76,61 @@ router.get('/api/technician_schedules', function(req,res){
     res.json(response);
   });
 });
+
+
+
+
+// GET all appointments
+router.get('/api/appointments', function(req,res){
+  var con = db.connectToScheduleDB();
+  // *** get the data as is from the db
+    var appointmentQueryString = `SELECT appointment_id,
+                                    title,
+                                    ticket_id,
+                                    appointment_type,
+                                    description,
+                                    appt_start_iso_8601,
+                                    appt_end_iso_8601,
+                                    status,
+                                    tech_id
+                                  FROM appointments`;
+    con.query(appointmentQueryString,function(err,appt_rows){
+    if(err) throw err;
+    console.log('\nAll appointments:\n');
+    console.log('appt_rows:\n' + appt_rows);
+
+    // iterate over ts_rows into a valid JSON string
+    var response = new Object();
+
+    var appointments = [];
+    for (var i = 0; i < appt_rows.length; i++) {
+      console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
+      console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
+      var appointment = new Object();
+      appointment.id = appt_rows[i].appointment_id;
+      appointment.title = appt_rows[i].title;
+      appointment.ticketId = appt_rows[i].ticket_id;
+      appointment.appointmentType = appt_rows[i].appointment_type;
+      appointment.description = appt_rows[i].description;
+      appointment.start = appt_rows[i].appt_start_iso_8601;
+      appointment.end = appt_rows[i].appt_end_iso_8601;
+      appointment.status = appt_rows[i].status;  // (0, 1 or 2)
+      appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
+      appointments.push(appointment);
+      // console.log(appointment);
+    }
+
+    eventSources.push(appointments);
+    response.eventSources = eventSources;
+
+    // for debugging purposes
+    // response = appt_rows;
+
+    res.json(response);
+  });
+});
+
+
 
 
 // GET all the resources and events - technician working hours + appointments + time off events
@@ -157,8 +213,8 @@ router.get('/api/resources_and_events', function(req,res){
       ticketId: '101', // ticket_id
       appointmentType: 'Install', // appointment_type
       description: 'Install wifi chez Joe Blow', // description
-      start: '2016-09-30T10:00:00', // appt_start_iso_8601
-      end: '2016-09-30T12:00:00', // appt_end_iso_8601
+      start: todayDate + 'T10:00:00', // appt_start_iso_8601
+      end: todayDate + 'T12:00:00', // appt_end_iso_8601
       status: '0', // status   (0, 1 or 2)
       resourceId: '1', // tech_id (user_id in technician_schedules)
     }];
@@ -200,11 +256,11 @@ router.get('/api/resources_and_events', function(req,res){
 
     var timeOffEvents = [{
       id: '1', // time_off_id,
-      title: 'Tech 2 Off', // maybe put tech name in here later, e.g. "Ben Off"
-      start: '2016-09-30T15:00:00', // toff_start_iso_8601,
-      end: '2016-09-30T19:00:00', // toff_end_iso_8601,
-      notes: 'going hiking',
-      resourceId: '2', // tech_id (user_id in technician_schedules)
+      title: 'Tech 3 Off', // maybe put tech name in here later, e.g. "Ben Off"
+      start: todayDate + 'T09:30:00', // toff_start_iso_8601,
+      end: todayDate + 'T10:30:00', // toff_end_iso_8601,
+      notes: 'doctor appointment',
+      resourceId: '3', // tech_id (user_id in technician_schedules)
     }];
 
     // var timeOffQueryString = `SELECT time_off_id,
