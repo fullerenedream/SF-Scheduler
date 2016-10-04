@@ -81,6 +81,10 @@ router.get('/api/technician_schedules', function(req,res){
 
 
 // GET all appointments
+// ****** TODO: something weird is happening here.
+// Calendar loads with appointments fine the first time,
+// but when you reload the calendar, a new set of the existing
+// appointments is added - appointments breed on reload :P
 router.get('/api/appointments', function(req,res){
   var con = db.connectToScheduleDB();
   // *** get the data as is from the db
@@ -257,11 +261,11 @@ router.get('/api/resources_and_events', function(req,res){
 
     var timeOffEvents = [{
       id: '1', // time_off_id,
-      title: 'Tech 3 Off', // maybe put tech name in here later, e.g. "Ben Off"
-      start: todayDate + 'T09:30:00', // toff_start_iso_8601,
-      end: todayDate + 'T10:30:00', // toff_end_iso_8601,
+      title: 'Tech 2 Off', // maybe put tech name in here later, e.g. "Ben Off"
+      start: todayDate + 'T12:30:00', // toff_start_iso_8601,
+      end: todayDate + 'T13:30:00', // toff_end_iso_8601,
       notes: 'doctor appointment',
-      resourceId: '3', // tech_id (user_id in technician_schedules)
+      resourceId: '2', // tech_id (user_id in technician_schedules)
     }];
 
     // var timeOffQueryString = `SELECT time_off_id,

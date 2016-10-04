@@ -13,8 +13,10 @@ $(document).ready(function() {
   // var url = '/api/appointments/' + String(user_id);
   // console.log('url: ' + url);
 
+
    // **** when testing new routes, remember to change them here too
-  var allTheThings = $.getJSON('/api/appointments', function(data){
+   // **** e.g. change '/api/technician_schedules' to '/api/appointments'
+  var allTheThings = $.getJSON('/api/resources_and_events', function(data){
     // once we have the response to the get request, call gotAllTheThings to draw the calendar
     gotAllTheThings(data);
   });
@@ -102,9 +104,10 @@ $(document).ready(function() {
       resourceLabelText: 'Installers',
 
       // ************************ comment out for testing events without resources
-      // resources: allTheThings.resources,
-
+      resources: allTheThings.resources,
+      // ************************ comment out for testing resources without events
       eventSources: allTheThings.eventSources,
+
       // // some demo resources
       // resources: [
       //   {
