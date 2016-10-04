@@ -7,21 +7,47 @@ $(document).ready(function() {
   var todayDate = new Date().toISOString().substring(0,10);
   console.log(todayDate);
 
-  // // *** switch to this when JSON feed is set up
-  // var user_id = 1;
-  // // **** when testing new routes, remember to change them here too
-  // var url = '/api/appointments/' + String(user_id);
+  var allUsers = $.getJSON('/api/users', function(data) {
+    initTechDropdown(data);
+  });
+
+  function initTechDropdown(data) {
+    console.log('all users:');
+    console.log(data);
+    var users = '';
+    for (i = 0; i < data.users.length; i++) {
+      var user = '<option value="' + data.users[i].id + '">' + data.users[i].username + '</option>';
+      users += user;
+    }
+    $('select#installer-selector').append(users);
+    $('select#installer-selector').change(function() {
+      var selectedTechId = $('select#installer-selector').val();
+      console.log('selectedTechId: ' + selectedTechId);
+      loadTechCalendar(selectedTechId);
+    });
+  }
+
+  function loadTechCalendar(techId) {
+    if (techId > 0) {
+      $.getJSON('/api/technician_schedules/' + techId, function(data) {
+        agendaDayView(data);
+      });
+    }
+  }
+
+
+  // var url = '/api/appointments/' + String(selectedTechId);
   // console.log('url: ' + url);
 
 
    // **** when testing new routes, remember to change them here too
    // **** e.g. change '/api/technician_schedules' to '/api/appointments'
-  var allTheThings = $.getJSON('/api/time_off/2', function(data){
+  var allTheThings = $.getJSON('/api/technician_schedules/3', function(data) {
     // once we have the response to the get request, call gotAllTheThings to draw the calendar
     gotAllTheThings(data);
   });
 
-  function gotAllTheThings(data){
+  function gotAllTheThings(data) {
     console.log('inside gotAllTheThings');
     // draw the calendar with the data, in Agenda Day view
     agendaDayView(data);
