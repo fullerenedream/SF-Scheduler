@@ -16,7 +16,7 @@ $(document).ready(function() {
 
    // **** when testing new routes, remember to change them here too
    // **** e.g. change '/api/technician_schedules' to '/api/appointments'
-  var allTheThings = $.getJSON('/api/appointments/3', function(data){
+  var allTheThings = $.getJSON('/api/time_off/2', function(data){
     // once we have the response to the get request, call gotAllTheThings to draw the calendar
     gotAllTheThings(data);
   });
