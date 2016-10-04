@@ -39,10 +39,10 @@ router.get('/api/technician_schedules', function(req,res){
     console.log('\nAll current technician schedules:\n');
     console.log('ts_rows:\n' + ts_rows);
 
-    // iterate over ts_rows into a valid JSON string
     var response = new Object();
-
     var resources = []; // array of working hours of all techs
+
+    // iterate over ts_rows into a valid JSON string
     for (var i = 0; i < ts_rows.length; i++) {
       console.log('ts_rows ' + i + ':\n' + ts_rows[i]);
       console.log('ts_rows ' + i + ' user_id:\n' + ts_rows[i].user_id);
@@ -79,13 +79,105 @@ router.get('/api/technician_schedules', function(req,res){
 
 
 
+// GET the most recent working hours of a given tech (identified by user_id) from technician_schedules table
+router.get('/api/technician_schedules/:user_id', function(req,res){
+  var con = db.connectToScheduleDB();
+  var user_id = req.param('user_id');
+  var key = user_id;
+  var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
+                        sunday_start,
+                        sunday_end,
+                        monday_start,
+                        monday_end,
+                        tuesday_start,
+                        tuesday_end,
+                        wednesday_start,
+                        wednesday_end,
+                        thursday_start,
+                        thursday_end,
+                        friday_start,
+                        friday_end,
+                        saturday_start,
+                        saturday_end
+                    FROM technician_schedules t1
+                    WHERE t1.user_id = ?
+                    AND t1.created_at = (
+                      SELECT MAX(t2.created_at)
+                      FROM technician_schedules t2
+                      WHERE t2.user_id = t1.user_id)`;
+  var con = db.connectToScheduleDB();
+  con.query(queryString, [key], function(err,ts_rows){
+    if(err) throw err;
+    console.log('\nSchedule of Tech with user_id = ' + user_id + ':');
+    console.log(ts_rows);
+
+    var response = new Object();
+    var resources = []; // array containing current working hours of this tech
+    var this_tech = ts_rows[0];
+
+    // one resource is one tech's working hours
+    var resource = new Object();
+    resource.businessHours = [];
+    resource.id = this_tech.user_id;
+    resource.title =this_tech.user_name;
+
+    /*** DIRTY HACK to get around null resource days showing up as available all day instead of not available all day
+     - this might make people look like they're in on their days off in Month view!!! ***/
+    if (this_tech.sunday_start) {
+      resource.businessHours[0] = {dow:[0], start:this_tech.sunday_start, end:this_tech.sunday_end}; }
+    else { resource.businessHours[0] = {dow:[0], start:'00:00:00', end:'00:00:01'}; }
+    if (this_tech.monday_start) { resource.businessHours[1] = {dow:[1], start:this_tech.monday_start, end:this_tech.monday_end}; }
+    else { resource.businessHours[1] = {dow:[1], start:'00:00:00', end:'00:00:01'}; }
+    if (this_tech.tuesday_start) { resource.businessHours[2] = {dow:[2], start:this_tech.tuesday_start, end:this_tech.tuesday_end}; }
+    else { resource.businessHours[2] = {dow:[2], start:'00:00:00', end:'00:00:01'}; }
+    if (this_tech.wednesday_start) { resource.businessHours[3] = {dow:[3], start:this_tech.wednesday_start, end:this_tech.wednesday_end}; }
+    else { resource.businessHours[3] = {dow:[3], start:'00:00:00', end:'00:00:01'}; }
+    if (this_tech.thursday_start) { resource.businessHours[4] = {dow:[4], start:this_tech.thursday_start, end:this_tech.thursday_end}; }
+    else { resource.businessHours[4] = {dow:[4], start:'00:00:00', end:'00:00:01'}; }
+    if (this_tech.friday_start) { resource.businessHours[5] = {dow:[5], start:this_tech.friday_start, end:this_tech.friday_end}; }
+    else { resource.businessHours[5] = {dow:[5], start:'00:00:00', end:'00:00:01'}; }
+    if (this_tech.saturday_start) { resource.businessHours[6] = {dow:[6], start:this_tech.saturday_start, end:this_tech.saturday_end}; }
+    else { resource.businessHours[6] = {dow:[6], start:'00:00:00', end:'00:00:01'}; }
+
+    resources.push(resource);
 
 
-// ****** TODO: something weird is happening here.
-// Calendar loads with appointments fine the first time,
-// but when you reload the calendar, a new set of the existing
-// appointments is added - appointments breed on reload :P
-// Same problem with time_off events.
+    // // iterate over ts_rows into a valid JSON string
+    // for (var i = 0; i < ts_rows.length; i++) {
+    //   console.log('ts_rows ' + i + ':\n' + ts_rows[i]);
+    //   console.log('ts_rows ' + i + ' user_id:\n' + ts_rows[i].user_id);
+    //   // one resource is one tech's working hours
+    //   var resource = new Object();
+    //   resource.businessHours = [];
+    //   resource.id = ts_rows[i].user_id;
+    //   resource.title =ts_rows[i].user_name;
+
+    //   /*** DIRTY HACK to get around null resource days showing up as available all day instead of not available all day
+    //    - this might make people look like they're in on their days off in Month view!!! ***/
+    //   if (ts_rows[i].sunday_start) {
+    //     resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end}; }
+    //   else { resource.businessHours[0] = {dow:[0], start:'00:00:00', end:'00:00:01'}; }
+    //   if (ts_rows[i].monday_start) { resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end}; }
+    //   else { resource.businessHours[1] = {dow:[1], start:'00:00:00', end:'00:00:01'}; }
+    //   if (ts_rows[i].tuesday_start) { resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end}; }
+    //   else { resource.businessHours[2] = {dow:[2], start:'00:00:00', end:'00:00:01'}; }
+    //   if (ts_rows[i].wednesday_start) { resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end}; }
+    //   else { resource.businessHours[3] = {dow:[3], start:'00:00:00', end:'00:00:01'}; }
+    //   if (ts_rows[i].thursday_start) { resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end}; }
+    //   else { resource.businessHours[4] = {dow:[4], start:'00:00:00', end:'00:00:01'}; }
+    //   if (ts_rows[i].friday_start) { resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end}; }
+    //   else { resource.businessHours[5] = {dow:[5], start:'00:00:00', end:'00:00:01'}; }
+    //   if (ts_rows[i].saturday_start) { resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end}; }
+    //   else { resource.businessHours[6] = {dow:[6], start:'00:00:00', end:'00:00:01'}; }
+
+    //   resources.push(resource);
+    // }
+    response.resources = resources;
+    res.json(response);
+  });
+});
+
+
 
 // GET all appointments
 router.get('/api/appointments', function(req,res){
@@ -104,9 +196,9 @@ router.get('/api/appointments', function(req,res){
     if(err) throw err;
     console.log('\nAll appointments:\n');
     console.log('appt_rows:\n' + appt_rows);
-
     var response = new Object();
     var appointments = [];
+    eventSources = [];
 
     // iterate over appt_rows into a valid JSON string
     for (var i = 0; i < appt_rows.length; i++) {
@@ -139,13 +231,6 @@ router.get('/api/appointments', function(req,res){
 
 
 
-
-// ****** TODO: something weird is happening here.
-// Calendar loads with time_off events fine the first time,
-// but when you reload the calendar, a new set of the existing
-// time_off events is added - time_off events breed on reload :P
-// Same problem with appointments.
-
 // GET all time_off events
 router.get('/api/time_off', function(req,res){
   var con = db.connectToScheduleDB();
@@ -159,9 +244,9 @@ router.get('/api/time_off', function(req,res){
     if(err) throw err;
     console.log('\nAll timeOffEvents:\n');
     console.log('toff_rows:\n' + toff_rows);
-
     var response = new Object();
     var timeOffEvents = [];
+    eventSources = [];
 
     // iterate over toff_rows into a valid JSON string
     for (var i = 0; i < toff_rows.length; i++) {
@@ -184,38 +269,38 @@ router.get('/api/time_off', function(req,res){
 
 
 
-
+// ******* This is broken - review learnyounode project where you chain output from several streams and then output the response
 // GET all the resources and events - technician working hours + appointments + time off events
 router.get('/api/resources_and_events', function(req,res){
-  // *** copied the guts of getAllTechnicianSchedules into this api get request
-  var con = db.connectToScheduleDB();
-  var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
-                        sunday_start,
-                        sunday_end,
-                        monday_start,
-                        monday_end,
-                        tuesday_start,
-                        tuesday_end,
-                        wednesday_start,
-                        wednesday_end,
-                        thursday_start,
-                        thursday_end,
-                        friday_start,
-                        friday_end,
-                        saturday_start,
-                        saturday_end
-                    FROM technician_schedules t1
-                    WHERE t1.created_at = (
-                      SELECT MAX(t2.created_at)
-                      FROM technician_schedules t2
-                      WHERE t2.user_id = t1.user_id)`;
-    con.query(queryString,function(err,ts_rows) { // *** PROBLEM: right now this '{' doesn't close until line 171, just below 'res.json(response);'
+// *** copied the guts of getAllTechnicianSchedules into this api get request
+var con = db.connectToScheduleDB();
+var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
+                      sunday_start,
+                      sunday_end,
+                      monday_start,
+                      monday_end,
+                      tuesday_start,
+                      tuesday_end,
+                      wednesday_start,
+                      wednesday_end,
+                      thursday_start,
+                      thursday_end,
+                      friday_start,
+                      friday_end,
+                      saturday_start,
+                      saturday_end
+                  FROM technician_schedules t1
+                  WHERE t1.created_at = (
+                    SELECT MAX(t2.created_at)
+                    FROM technician_schedules t2
+                    WHERE t2.user_id = t1.user_id)`;
+  con.query(queryString,function(err,ts_rows) { // *** PROBLEM: right now this '{' doesn't close until line 171, just below 'res.json(response);'
     if(err) throw err;
     console.log('\nAll current technician schedules:\n');
     console.log('ts_rows:\n' + ts_rows);
-
     var response = new Object();
     var resources = [];
+    eventSources = [];
 
     // iterate over ts_rows and make it into a valid JSON string
     for (var i = 0; i < ts_rows.length; i++) {
@@ -347,71 +432,7 @@ router.get('/api/resources_and_events', function(req,res){
   });
 });
 
-router.get('/api/technician_schedules/:user_id', function(req,res){
-  var user_id = req.param('user_id');
-  var key = user_id;
-  // var queryString = 'SELECT user_id
-  //                     'sunday_start, ' +
-  //                     'sunday_end, ' +
-  //                     'monday_start, ' +
-  //                     'monday_end, ' +
-  //                     'tuesday_start, ' +
-  //                     'tuesday_end, ' +
-  //                     'wednesday_start, ' +
-  //                     'wednesday_end, ' +
-  //                     'thursday_start, ' +
-  //                     'thursday_end, ' +
-  //                     'friday_start, ' +
-  //                     'friday_end, ' +
-  //                     'saturday_start, ' +
-  //                     'saturday_end ' +
-  //                   'FROM technician_schedules ' +
-  //                   'WHERE user_id = ? ' +
-  //                   'ORDER BY created_at DESC ' +
-  //                   'LIMIT 1';
 
-  // var queryString =  `SELECT t1.id, t1.user_id,
-  //                       CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_start,1))) AS start,
-  //                       CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_end,1))) AS end
-  //                     FROM technician_schedules t1
-  //                     WHERE t1.created_at = (
-  //                       SELECT MAX(t2.created_at)
-  //                       FROM technician_schedules t2
-  //                       WHERE t2.user_id = t1.user_id)
-  //                     AND t1.user_id = ?`;
-
-  // var queryString =  `SELECT t1.id, t1.user_id,
-  //                       CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_start,1))) AS start,
-  //                       CONCAT(DATE(NOW())," ",SEC_TO_TIME(IFNULL(monday_end,1))) AS end
-  //                     FROM technician_schedules t1
-  //                     WHERE t1.created_at = (
-  //                       SELECT MAX(t2.created_at)
-  //                       FROM technician_schedules t2
-  //                       WHERE t2.user_id = t1.user_id)
-  //                     AND t1.user_id = ?`;
-
-  var queryString =  `SELECT t1.id, t1.user_id,
-                      (IFNULL(wednesday_start,1)) AS start,
-                      (IFNULL(wednesday_end,1)) AS end
-                    FROM technician_schedules t1
-                    WHERE t1.created_at = (
-                      SELECT MAX(t2.created_at)
-                      FROM technician_schedules t2
-                      WHERE t2.user_id = t1.user_id)
-                    AND t1.user_id = ?`;
-
-  var con = db.connectToScheduleDB();
-  con.query(queryString, [key], function(err,rows){
-    if(err) throw err;
-    console.log('\nSchedule of Tech with user_id = ' + user_id + ':');
-    console.log(rows);
-    // rows[0].tuesday_start = process_data.epochToHoursAndMinutes(rows[0].tuesday_start);
-    // rows[0].tuesday_start = 1;
-    // *** added this line so that the response to this get request
-    // *** is JSONified result of the db query
-    res.json(rows);
-  });
-});
 
 // receive a form post and save it to the sample file (later we want this to save to the db)
 router.post('/api',function(req,res){
