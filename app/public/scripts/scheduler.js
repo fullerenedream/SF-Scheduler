@@ -7,12 +7,14 @@ $(document).ready(function() {
   var todayDate = new Date().toISOString().substring(0,10);
   console.log(todayDate);
 
-  // *** switch to this when JSON feed is set up
-  var user_id = 1;
-  var url = '/api/resources_and_events/' + String(user_id);
-  console.log('url: ' + url);
+  // // *** switch to this when JSON feed is set up
+  // var user_id = 1;
+  // // **** when testing new routes, remember to change them here too
+  // var url = '/api/appointments/' + String(user_id);
+  // console.log('url: ' + url);
 
-  var allTheThings = $.getJSON('/api/resources_and_events', function(data){
+   // **** when testing new routes, remember to change them here too
+  var allTheThings = $.getJSON('/api/appointments', function(data){
     // once we have the response to the get request, call gotAllTheThings to draw the calendar
     gotAllTheThings(data);
   });
@@ -98,7 +100,10 @@ $(document).ready(function() {
       },
 
       resourceLabelText: 'Installers',
-      resources: allTheThings.resources,
+
+      // ************************ comment out for testing events without resources
+      // resources: allTheThings.resources,
+
       eventSources: allTheThings.eventSources,
       // // some demo resources
       // resources: [
