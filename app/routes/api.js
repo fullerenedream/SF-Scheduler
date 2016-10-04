@@ -221,26 +221,21 @@ router.get('/api/appointments/:appointment_id', function(req,res){
 
     var response = new Object();
     var appointments = [];
+    var this_appt = appt_rows[0];
     eventSources = [];
 
-    // iterate over appt_rows into a valid JSON string
-    for (var i = 0; i < appt_rows.length; i++) {
-      console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
-      console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
-      var appointment = new Object();
-      appointment.id = appt_rows[i].appointment_id;
-      appointment.title = appt_rows[i].title;
-      appointment.ticketId = appt_rows[i].ticket_id;
-      appointment.appointmentType = appt_rows[i].appointment_type;
-      appointment.description = appt_rows[i].description;
-      appointment.start = appt_rows[i].appt_start_iso_8601;
-      appointment.end = appt_rows[i].appt_end_iso_8601;
-      appointment.status = appt_rows[i].status;  // (0, 1 or 2)
-      // ************************ comment out for testing events without resources
-      // appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
-      appointments.push(appointment);
-      // console.log(appointment);
-    }
+    var appointment = new Object();
+    appointment.id = this_appt.appointment_id;
+    appointment.title = this_appt.title;
+    appointment.ticketId = this_appt.ticket_id;
+    appointment.appointmentType = this_appt.appointment_type;
+    appointment.description = this_appt.description;
+    appointment.start = this_appt.appt_start_iso_8601;
+    appointment.end = this_appt.appt_end_iso_8601;
+    appointment.status = this_appt.status;  // (0, 1 or 2)
+    // ************************ comment out for testing events without resources
+    // appointment.resourceId = this_appt.tech_id;  // (user_id in technician_schedules)
+    appointments.push(appointment);
     eventSources.push(appointments);
     response.eventSources = eventSources;
     res.json(response);
@@ -279,6 +274,45 @@ router.get('/api/time_off', function(req,res){
       // timeOffEvent.resourceID = toff_rows[i].tech_id;
       timeOffEvents.push(timeOffEvent);
     }
+    eventSources.push(timeOffEvents);
+    response.eventSources = eventSources;
+    res.json(response);
+  });
+});
+
+
+
+// GET a time_off event by time_off_id
+router.get('/api/time_off/:time_off_id', function(req,res){
+  var con = db.connectToScheduleDB();
+  var time_off_id = req.param('time_off_id');
+  var key = time_off_id;
+  var timeOffQueryString = `SELECT time_off_id,
+                              tech_id,
+                              toff_start_iso_8601,
+                              toff_end_iso_8601,
+                              notes
+                            FROM time_off
+                            WHERE time_off_id = ?`;
+  con.query(timeOffQueryString, [key], function(err,toff_rows){
+    if(err) throw err;
+    console.log('\ntimeOffEvent with time_off_id = ' + time_off_id + ':\n');
+    console.log('toff_rows:\n' + toff_rows);
+
+    var response = new Object();
+    var timeOffEvents = [];
+    var this_toff = toff_rows[0];
+    eventSources = [];
+
+    var timeOffEvent = new Object();
+    timeOffEvent.id = this_toff.time_off_id;
+    timeOffEvent.title = 'Tech ' + this_toff.tech_id + ' Off';
+    timeOffEvent.start = this_toff.toff_start_iso_8601;
+    timeOffEvent.end = this_toff.toff_end_iso_8601;
+    timeOffEvent.notes = this_toff.notes;
+    // ************************ comment out for testing events without resources
+    // timeOffEvent.resourceID = this_toff.tech_id;
+    timeOffEvents.push(timeOffEvent);
     eventSources.push(timeOffEvents);
     response.eventSources = eventSources;
     res.json(response);
