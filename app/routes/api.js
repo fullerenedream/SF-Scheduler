@@ -115,7 +115,8 @@ router.get('/api/appointments', function(req,res){
       appointment.start = appt_rows[i].appt_start_iso_8601;
       appointment.end = appt_rows[i].appt_end_iso_8601;
       appointment.status = appt_rows[i].status;  // (0, 1 or 2)
-      appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
+       // ************************ comment out for testing events without resources
+      // appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
       appointments.push(appointment);
       // console.log(appointment);
     }
