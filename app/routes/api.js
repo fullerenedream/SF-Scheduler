@@ -80,33 +80,35 @@ router.get('/api/technician_schedules', function(req,res){
 
 
 
-// GET all appointments
+
 // ****** TODO: something weird is happening here.
 // Calendar loads with appointments fine the first time,
 // but when you reload the calendar, a new set of the existing
 // appointments is added - appointments breed on reload :P
+// Same problem with time_off events.
+
+// GET all appointments
 router.get('/api/appointments', function(req,res){
   var con = db.connectToScheduleDB();
-  // *** get the data as is from the db
-    var appointmentQueryString = `SELECT appointment_id,
-                                    title,
-                                    ticket_id,
-                                    appointment_type,
-                                    description,
-                                    appt_start_iso_8601,
-                                    appt_end_iso_8601,
-                                    status,
-                                    tech_id
-                                  FROM appointments`;
-    con.query(appointmentQueryString,function(err,appt_rows){
+  var appointmentQueryString = `SELECT appointment_id,
+                                  title,
+                                  ticket_id,
+                                  appointment_type,
+                                  description,
+                                  appt_start_iso_8601,
+                                  appt_end_iso_8601,
+                                  status,
+                                  tech_id
+                                FROM appointments`;
+  con.query(appointmentQueryString,function(err,appt_rows){
     if(err) throw err;
     console.log('\nAll appointments:\n');
     console.log('appt_rows:\n' + appt_rows);
 
-    // iterate over ts_rows into a valid JSON string
     var response = new Object();
-
     var appointments = [];
+
+    // iterate over appt_rows into a valid JSON string
     for (var i = 0; i < appt_rows.length; i++) {
       console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
       console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
@@ -119,7 +121,7 @@ router.get('/api/appointments', function(req,res){
       appointment.start = appt_rows[i].appt_start_iso_8601;
       appointment.end = appt_rows[i].appt_end_iso_8601;
       appointment.status = appt_rows[i].status;  // (0, 1 or 2)
-       // ************************ comment out for testing events without resources
+      // ************************ comment out for testing events without resources
       // appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
       appointments.push(appointment);
       // console.log(appointment);
@@ -138,11 +140,55 @@ router.get('/api/appointments', function(req,res){
 
 
 
+// ****** TODO: something weird is happening here.
+// Calendar loads with time_off events fine the first time,
+// but when you reload the calendar, a new set of the existing
+// time_off events is added - time_off events breed on reload :P
+// Same problem with appointments.
+
+// GET all time_off events
+router.get('/api/time_off', function(req,res){
+  var con = db.connectToScheduleDB();
+  var timeOffQueryString = `SELECT time_off_id,
+                              tech_id,
+                              toff_start_iso_8601,
+                              toff_end_iso_8601,
+                              notes
+                            FROM time_off`;
+  con.query(timeOffQueryString,function(err,toff_rows){
+    if(err) throw err;
+    console.log('\nAll timeOffEvents:\n');
+    console.log('toff_rows:\n' + toff_rows);
+
+    var response = new Object();
+    var timeOffEvents = [];
+
+    // iterate over toff_rows into a valid JSON string
+    for (var i = 0; i < toff_rows.length; i++) {
+      console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
+      var timeOffEvent = new Object();
+      timeOffEvent.id = toff_rows[i].time_off_id;
+      timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
+      timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
+      timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
+      timeOffEvent.notes = toff_rows[i].notes;
+      // ************************ comment out for testing events without resources
+      // timeOffEvent.resourceID = toff_rows[i].tech_id;
+      timeOffEvents.push(timeOffEvent);
+    }
+    eventSources.push(timeOffEvents);
+    response.eventSources = eventSources;
+    res.json(response);
+  });
+});
+
+
+
+
 // GET all the resources and events - technician working hours + appointments + time off events
 router.get('/api/resources_and_events', function(req,res){
   // *** copied the guts of getAllTechnicianSchedules into this api get request
   var con = db.connectToScheduleDB();
-  // *** get the data as is from the db
   var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
                         sunday_start,
                         sunday_end,
@@ -167,11 +213,11 @@ router.get('/api/resources_and_events', function(req,res){
     if(err) throw err;
     console.log('\nAll current technician schedules:\n');
     console.log('ts_rows:\n' + ts_rows);
-    // iterate over ts_rows and make it into a valid JSON string
 
     var response = new Object();
-
     var resources = [];
+
+    // iterate over ts_rows and make it into a valid JSON string
     for (var i = 0; i < ts_rows.length; i++) {
       console.log('ts_rows ' + i + ':\n' + ts_rows[i]);
       console.log('ts_rows ' + i + ' user_id:\n' + ts_rows[i].user_id);
