@@ -321,6 +321,67 @@ router.get('/api/time_off/:time_off_id', function(req,res){
 
 
 
+// GET all users from users table
+router.get('/api/users', function(req,res){
+  var con = db.connectToScheduleDB();
+  var usersQueryString = `SELECT user_id,
+                              user_type,
+                              username,
+                              email
+                            FROM users`;
+  con.query(usersQueryString,function(err,users_rows){
+    if(err) throw err;
+    var response = new Object();
+    var users = [];
+
+    // iterate over users_rows into a valid JSON string
+    for (var i = 0; i < users_rows.length; i++) {
+      console.log('users_rows ' + i + ':\n' + users_rows[i]);
+      var user = new Object();
+      user.id = users_rows[i].user_id;
+      user.type = users_rows[i].user_type;
+      user.username = users_rows[i].username;
+      user.email = users_rows[i].email;
+      users.push(user);
+    }
+    response.users = users;
+    res.json(response);
+  });
+});
+
+
+
+// GET a user by user_id
+router.get('/api/users/:user_id', function(req,res){
+  var con = db.connectToScheduleDB();
+  var user_id = req.param('user_id');
+  var key = user_id;
+  var usersQueryString = `SELECT user_id,
+                              user_type,
+                              username,
+                              email
+                            FROM users
+                            WHERE user_id = ?`;
+  con.query(usersQueryString, [key], function(err,users_rows){
+    if(err) throw err;
+    var response = new Object();
+    var users = [];
+    var this_user = users_rows[0];
+
+    var user = new Object();
+    user.id = this_user.user_id;
+    user.type = this_user.user_type;
+    user.username = this_user.username;
+    user.email = this_user.email;
+    users.push(user);
+
+    response.users = users;
+    res.json(response);
+  });
+});
+
+
+
 // ******* This is broken - review learnyounode project where you chain output from several streams and then output the response
 // GET all the resources and events - technician working hours + appointments + time off events
 router.get('/api/resources_and_events', function(req,res){
