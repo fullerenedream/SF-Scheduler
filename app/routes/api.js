@@ -14,20 +14,20 @@ var todayDate = new Date().toISOString().substring(0,10);
 router.get('/api/technician_schedules', function(req,res){
   var con = db.connectToScheduleDB();
   var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
-                        sunday_start,
-                        sunday_end,
-                        monday_start,
-                        monday_end,
-                        tuesday_start,
-                        tuesday_end,
-                        wednesday_start,
-                        wednesday_end,
-                        thursday_start,
-                        thursday_end,
-                        friday_start,
-                        friday_end,
-                        saturday_start,
-                        saturday_end
+                        IFNULL(sunday_start,"00:00:00") sunday_start,
+                        IFNULL(sunday_end,"00:00:01") sunday_end,
+                        IFNULL(monday_start,"00:00:00") monday_start,
+                        IFNULL(monday_end,"00:00:01") monday_end,
+                        IFNULL(tuesday_start,"00:00:00") tuesday_start,
+                        IFNULL(tuesday_end,"00:00:01") tuesday_end,
+                        IFNULL(wednesday_start,"00:00:00") wednesday_start,
+                        IFNULL(wednesday_end,"00:00:01") wednesday_end,
+                        IFNULL(thursday_start,"00:00:00") thursday_start,
+                        IFNULL(thursday_end,"00:00:01") thursday_end,
+                        IFNULL(friday_start,"00:00:00") friday_start,
+                        IFNULL(friday_end,"00:00:01") friday_end,
+                        IFNULL(saturday_start,"00:00:00") saturday_start,
+                        IFNULL(saturday_end,"00:00:01") saturday_end
                     FROM technician_schedules t1
                     WHERE t1.created_at = (
                       SELECT MAX(t2.created_at)
@@ -49,25 +49,14 @@ router.get('/api/technician_schedules', function(req,res){
       var resource = new Object();
       resource.businessHours = [];
       resource.id = ts_rows[i].user_id;
-      resource.title =ts_rows[i].user_name;
-
-      /*** DIRTY HACK to get around null resource days showing up as available all day instead of not available all day
-       - this might make people look like they're in on their days off in Month view!!! ***/
-      if (ts_rows[i].sunday_start) {
-        resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end}; }
-      else { resource.businessHours[0] = {dow:[0], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].monday_start) { resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end}; }
-      else { resource.businessHours[1] = {dow:[1], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].tuesday_start) { resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end}; }
-      else { resource.businessHours[2] = {dow:[2], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].wednesday_start) { resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end}; }
-      else { resource.businessHours[3] = {dow:[3], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].thursday_start) { resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end}; }
-      else { resource.businessHours[4] = {dow:[4], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].friday_start) { resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end}; }
-      else { resource.businessHours[5] = {dow:[5], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].saturday_start) { resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end}; }
-      else { resource.businessHours[6] = {dow:[6], start:'00:00:00', end:'00:00:01'}; }
+      resource.title = ts_rows[i].user_name;
+      resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end};
+      resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end};
+      resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end};
+      resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end};
+      resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end};
+      resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end};
+      resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end};
 
       resources.push(resource);
     }
@@ -84,20 +73,20 @@ router.get('/api/technician_schedules/:user_id', function(req,res){
   var user_id = req.param('user_id');
   var key = user_id;
   var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
-                        sunday_start,
-                        sunday_end,
-                        monday_start,
-                        monday_end,
-                        tuesday_start,
-                        tuesday_end,
-                        wednesday_start,
-                        wednesday_end,
-                        thursday_start,
-                        thursday_end,
-                        friday_start,
-                        friday_end,
-                        saturday_start,
-                        saturday_end
+                        IFNULL(sunday_start,"00:00:00") sunday_start,
+                        IFNULL(sunday_end,"00:00:01") sunday_end,
+                        IFNULL(monday_start,"00:00:00") monday_start,
+                        IFNULL(monday_end,"00:00:01") monday_end,
+                        IFNULL(tuesday_start,"00:00:00") tuesday_start,
+                        IFNULL(tuesday_end,"00:00:01") tuesday_end,
+                        IFNULL(wednesday_start,"00:00:00") wednesday_start,
+                        IFNULL(wednesday_end,"00:00:01") wednesday_end,
+                        IFNULL(thursday_start,"00:00:00") thursday_start,
+                        IFNULL(thursday_end,"00:00:01") thursday_end,
+                        IFNULL(friday_start,"00:00:00") friday_start,
+                        IFNULL(friday_end,"00:00:01") friday_end,
+                        IFNULL(saturday_start,"00:00:00") saturday_start,
+                        IFNULL(saturday_end,"00:00:01") saturday_end
                     FROM technician_schedules t1
                     WHERE t1.user_id = ?
                     AND t1.created_at = (
@@ -119,24 +108,13 @@ router.get('/api/technician_schedules/:user_id', function(req,res){
     resource.businessHours = [];
     resource.id = this_tech.user_id;
     resource.title =this_tech.user_name;
-
-    /*** DIRTY HACK to get around null resource days showing up as available all day instead of not available all day
-     - this might make people look like they're in on their days off in Month view!!! ***/
-    if (this_tech.sunday_start) {
-      resource.businessHours[0] = {dow:[0], start:this_tech.sunday_start, end:this_tech.sunday_end}; }
-    else { resource.businessHours[0] = {dow:[0], start:'00:00:00', end:'00:00:01'}; }
-    if (this_tech.monday_start) { resource.businessHours[1] = {dow:[1], start:this_tech.monday_start, end:this_tech.monday_end}; }
-    else { resource.businessHours[1] = {dow:[1], start:'00:00:00', end:'00:00:01'}; }
-    if (this_tech.tuesday_start) { resource.businessHours[2] = {dow:[2], start:this_tech.tuesday_start, end:this_tech.tuesday_end}; }
-    else { resource.businessHours[2] = {dow:[2], start:'00:00:00', end:'00:00:01'}; }
-    if (this_tech.wednesday_start) { resource.businessHours[3] = {dow:[3], start:this_tech.wednesday_start, end:this_tech.wednesday_end}; }
-    else { resource.businessHours[3] = {dow:[3], start:'00:00:00', end:'00:00:01'}; }
-    if (this_tech.thursday_start) { resource.businessHours[4] = {dow:[4], start:this_tech.thursday_start, end:this_tech.thursday_end}; }
-    else { resource.businessHours[4] = {dow:[4], start:'00:00:00', end:'00:00:01'}; }
-    if (this_tech.friday_start) { resource.businessHours[5] = {dow:[5], start:this_tech.friday_start, end:this_tech.friday_end}; }
-    else { resource.businessHours[5] = {dow:[5], start:'00:00:00', end:'00:00:01'}; }
-    if (this_tech.saturday_start) { resource.businessHours[6] = {dow:[6], start:this_tech.saturday_start, end:this_tech.saturday_end}; }
-    else { resource.businessHours[6] = {dow:[6], start:'00:00:00', end:'00:00:01'}; }
+    resource.businessHours[0] = {dow:[0], start:this_tech.sunday_start, end:this_tech.sunday_end};
+    resource.businessHours[1] = {dow:[1], start:this_tech.monday_start, end:this_tech.monday_end};
+    resource.businessHours[2] = {dow:[2], start:this_tech.tuesday_start, end:this_tech.tuesday_end};
+    resource.businessHours[3] = {dow:[3], start:this_tech.wednesday_start, end:this_tech.wednesday_end};
+    resource.businessHours[4] = {dow:[4], start:this_tech.thursday_start, end:this_tech.thursday_end};
+    resource.businessHours[5] = {dow:[5], start:this_tech.friday_start, end:this_tech.friday_end};
+    resource.businessHours[6] = {dow:[6], start:this_tech.saturday_start, end:this_tech.saturday_end};
 
     resources.push(resource);
     response.resources = resources;
@@ -388,20 +366,20 @@ router.get('/api/resources_and_events', function(req,res){
 // *** copied the guts of getAllTechnicianSchedules into this api get request
 var con = db.connectToScheduleDB();
 var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
-                      sunday_start,
-                      sunday_end,
-                      monday_start,
-                      monday_end,
-                      tuesday_start,
-                      tuesday_end,
-                      wednesday_start,
-                      wednesday_end,
-                      thursday_start,
-                      thursday_end,
-                      friday_start,
-                      friday_end,
-                      saturday_start,
-                      saturday_end
+                      IFNULL(sunday_start,"00:00:00") sunday_start,
+                      IFNULL(sunday_end,"00:00:01") sunday_end,
+                      IFNULL(monday_start,"00:00:00") monday_start,
+                      IFNULL(monday_end,"00:00:01") monday_end,
+                      IFNULL(tuesday_start,"00:00:00") tuesday_start,
+                      IFNULL(tuesday_end,"00:00:01") tuesday_end,
+                      IFNULL(wednesday_start,"00:00:00") wednesday_start,
+                      IFNULL(wednesday_end,"00:00:01") wednesday_end,
+                      IFNULL(thursday_start,"00:00:00") thursday_start,
+                      IFNULL(thursday_end,"00:00:01") thursday_end,
+                      IFNULL(friday_start,"00:00:00") friday_start,
+                      IFNULL(friday_end,"00:00:01") friday_end,
+                      IFNULL(saturday_start,"00:00:00") saturday_start,
+                      IFNULL(saturday_end,"00:00:01") saturday_end
                   FROM technician_schedules t1
                   WHERE t1.created_at = (
                     SELECT MAX(t2.created_at)
@@ -423,30 +401,13 @@ var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
       resource.businessHours = [];
       resource.id = ts_rows[i].user_id;
       resource.title = ts_rows[i].user_name;
-    //   resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end};
-    //   resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end};
-    //   resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end};
-    //   resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end};
-    //   resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end};
-    //   resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end};
-    //   resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end};
-
-      /*** DIRTY HACK to get around null resource days showing up as available all day instead of not available all day
-       - this might make people look like they're in on their days off in Month view!!! ***/
-      if (ts_rows[i].sunday_start) { resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end}; }
-      else { resource.businessHours[0] = {dow:[0], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].monday_start) { resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end}; }
-      else { resource.businessHours[1] = {dow:[1], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].tuesday_start) { resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end}; }
-      else { resource.businessHours[2] = {dow:[2], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].wednesday_start) { resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end}; }
-      else { resource.businessHours[3] = {dow:[3], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].thursday_start) { resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end}; }
-      else { resource.businessHours[4] = {dow:[4], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].friday_start) { resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end}; }
-      else { resource.businessHours[5] = {dow:[5], start:'00:00:00', end:'00:00:01'}; }
-      if (ts_rows[i].saturday_start) { resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end}; }
-      else { resource.businessHours[6] = {dow:[6], start:'00:00:00', end:'00:00:01'}; }
+      resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end};
+      resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end};
+      resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end};
+      resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end};
+      resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end};
+      resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end};
+      resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end};
 
       resources.push(resource);
     }
