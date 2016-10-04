@@ -13,7 +13,6 @@ var todayDate = new Date().toISOString().substring(0,10);
 // GET each tech's most recent working hours from technician_schedules table
 router.get('/api/technician_schedules', function(req,res){
   var con = db.connectToScheduleDB();
-  // *** get the data as is from the db
   var queryString =  `SELECT t1.schedule_id, t1.user_id, t1.user_name,
                         sunday_start,
                         sunday_end,
@@ -105,7 +104,7 @@ router.get('/api/technician_schedules/:user_id', function(req,res){
                       SELECT MAX(t2.created_at)
                       FROM technician_schedules t2
                       WHERE t2.user_id = t1.user_id)`;
-  var con = db.connectToScheduleDB();
+  var con = db.connectToScheduleDB(); // ********* pretty sure this should be deleted - check later
   con.query(queryString, [key], function(err,ts_rows){
     if(err) throw err;
     console.log('\nSchedule of Tech with user_id = ' + user_id + ':');
@@ -140,38 +139,6 @@ router.get('/api/technician_schedules/:user_id', function(req,res){
     else { resource.businessHours[6] = {dow:[6], start:'00:00:00', end:'00:00:01'}; }
 
     resources.push(resource);
-
-
-    // // iterate over ts_rows into a valid JSON string
-    // for (var i = 0; i < ts_rows.length; i++) {
-    //   console.log('ts_rows ' + i + ':\n' + ts_rows[i]);
-    //   console.log('ts_rows ' + i + ' user_id:\n' + ts_rows[i].user_id);
-    //   // one resource is one tech's working hours
-    //   var resource = new Object();
-    //   resource.businessHours = [];
-    //   resource.id = ts_rows[i].user_id;
-    //   resource.title =ts_rows[i].user_name;
-
-    //   /*** DIRTY HACK to get around null resource days showing up as available all day instead of not available all day
-    //    - this might make people look like they're in on their days off in Month view!!! ***/
-    //   if (ts_rows[i].sunday_start) {
-    //     resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end}; }
-    //   else { resource.businessHours[0] = {dow:[0], start:'00:00:00', end:'00:00:01'}; }
-    //   if (ts_rows[i].monday_start) { resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end}; }
-    //   else { resource.businessHours[1] = {dow:[1], start:'00:00:00', end:'00:00:01'}; }
-    //   if (ts_rows[i].tuesday_start) { resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end}; }
-    //   else { resource.businessHours[2] = {dow:[2], start:'00:00:00', end:'00:00:01'}; }
-    //   if (ts_rows[i].wednesday_start) { resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end}; }
-    //   else { resource.businessHours[3] = {dow:[3], start:'00:00:00', end:'00:00:01'}; }
-    //   if (ts_rows[i].thursday_start) { resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end}; }
-    //   else { resource.businessHours[4] = {dow:[4], start:'00:00:00', end:'00:00:01'}; }
-    //   if (ts_rows[i].friday_start) { resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end}; }
-    //   else { resource.businessHours[5] = {dow:[5], start:'00:00:00', end:'00:00:01'}; }
-    //   if (ts_rows[i].saturday_start) { resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end}; }
-    //   else { resource.businessHours[6] = {dow:[6], start:'00:00:00', end:'00:00:01'}; }
-
-    //   resources.push(resource);
-    // }
     response.resources = resources;
     res.json(response);
   });
@@ -225,6 +192,57 @@ router.get('/api/appointments', function(req,res){
     // for debugging purposes
     // response = appt_rows;
 
+    res.json(response);
+  });
+});
+
+
+
+// GET an appointment by appointment_id
+router.get('/api/appointments/:appointment_id', function(req,res){
+  var con = db.connectToScheduleDB();
+  var appointment_id = req.param('appointment_id');
+  var key = appointment_id;
+  var appointmentQueryString = `SELECT appointment_id,
+                                  title,
+                                  ticket_id,
+                                  appointment_type,
+                                  description,
+                                  appt_start_iso_8601,
+                                  appt_end_iso_8601,
+                                  status,
+                                  tech_id
+                                FROM appointments
+                                WHERE appointment_id = ?`;
+  con.query(appointmentQueryString, [key], function(err,appt_rows){
+    if(err) throw err;
+    console.log('\nAppointment ' + appointment_id + ':\n');
+    console.log('appt_rows:\n' + appt_rows);
+
+    var response = new Object();
+    var appointments = [];
+    eventSources = [];
+
+    // iterate over appt_rows into a valid JSON string
+    for (var i = 0; i < appt_rows.length; i++) {
+      console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
+      console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
+      var appointment = new Object();
+      appointment.id = appt_rows[i].appointment_id;
+      appointment.title = appt_rows[i].title;
+      appointment.ticketId = appt_rows[i].ticket_id;
+      appointment.appointmentType = appt_rows[i].appointment_type;
+      appointment.description = appt_rows[i].description;
+      appointment.start = appt_rows[i].appt_start_iso_8601;
+      appointment.end = appt_rows[i].appt_end_iso_8601;
+      appointment.status = appt_rows[i].status;  // (0, 1 or 2)
+      // ************************ comment out for testing events without resources
+      // appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
+      appointments.push(appointment);
+      // console.log(appointment);
+    }
+    eventSources.push(appointments);
+    response.eventSources = eventSources;
     res.json(response);
   });
 });
