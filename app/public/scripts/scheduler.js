@@ -32,6 +32,7 @@ $(document).ready(function() {
       // console.log('inside loadTechCalendar - tech id = ' + techId);
       console.log('inside loadTechCalendar - /api/resources_and_events/' + techId);
       $.getJSON('/api/resources_and_events/' + techId, function(data) {
+        $('#fullcalendar').replaceWith('<div id="fullcalendar"></div>');
         agendaDayView(data);
       });
     }
