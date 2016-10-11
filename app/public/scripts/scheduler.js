@@ -123,6 +123,8 @@ $(document).ready(function() {
 
       selectable: true,
       selectHelper: true,
+      // *** this bit lets you click the calendar to create an event
+      // *** TODO: make this actually work in a useful way
       select: function(start, end, allDay)
       {
         var title = prompt('Event Title:');
