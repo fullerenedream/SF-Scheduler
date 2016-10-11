@@ -11,8 +11,7 @@
 # Ignore my notes
 /zzz-*
 
-# Ignore database dump
-/dump-1.sql
-/dump-2.sql
+# Ignore database dumps
+/dump-*.sql
 
 .nodemon-find-ref

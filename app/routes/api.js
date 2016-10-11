@@ -249,7 +249,7 @@ router.get('/api/time_off', function(req,res){
       timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
       timeOffEvent.notes = toff_rows[i].notes;
       // ************************ comment out for testing events without resources
-      // timeOffEvent.resourceID = toff_rows[i].tech_id;  // (user_id in technician_schedules)
+      // timeOffEvent.resourceId = toff_rows[i].tech_id;  // (user_id in technician_schedules)
       timeOffEvents.push(timeOffEvent);
     }
     eventSources.push(timeOffEvents);
@@ -289,7 +289,7 @@ router.get('/api/time_off/:time_off_id', function(req,res){
     timeOffEvent.end = this_toff.toff_end_iso_8601;
     timeOffEvent.notes = this_toff.notes;
     // ************************ comment out for testing events without resources
-    // timeOffEvent.resourceID = this_toff.tech_id;  // (user_id in technician_schedules)
+    // timeOffEvent.resourceId = this_toff.tech_id;  // (user_id in technician_schedules)
     timeOffEvents.push(timeOffEvent);
     eventSources.push(timeOffEvents);
     response.eventSources = eventSources;
@@ -449,81 +449,33 @@ router.get('/api/resources_and_events', function(req,res){
     // *** trying rearranging the code - put appointments inside time_off ***************
     // *** comment/uncomment this whole section when switching back & forth *************
 
-    // get all time off events
-    var timeOffQueryString = `SELECT time_off_id,
-                                tech_id,
-                                toff_start_iso_8601,
-                                toff_end_iso_8601,
-                                notes
-                              FROM time_off`;
-    con.query(timeOffQueryString,function(err,toff_rows){
-      if(err) throw err;
-      var timeOffEvents = [];
-      for (var i = 0; i < toff_rows.length; i++) {
-        // console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
-        var timeOffEvent = new Object();
-        timeOffEvent.id = toff_rows[i].time_off_id;
-        timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
-        timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
-        timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
-        timeOffEvent.notes = toff_rows[i].notes;
-        // ************************ comment out for testing events without resources
-        timeOffEvent.resourceID = toff_rows[i].tech_id;  // (user_id in technician_schedules)
-        timeOffEvents.push(timeOffEvent);
-      }
-      eventSources.push(timeOffEvents);
-      // response.eventSources = eventSources;
+    // // get all time off events
+    // var timeOffQueryString = `SELECT time_off_id,
+    //                             tech_id,
+    //                             toff_start_iso_8601,
+    //                             toff_end_iso_8601,
+    //                             notes
+    //                           FROM time_off`;
+    // con.query(timeOffQueryString,function(err,toff_rows){
+    //   if(err) throw err;
+    //   var timeOffEvents = [];
+    //   for (var i = 0; i < toff_rows.length; i++) {
+    //     // console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
+    //     var timeOffEvent = new Object();
+    //     timeOffEvent.id = toff_rows[i].time_off_id;
+    //     timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
+    //     timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
+    //     timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
+    //     timeOffEvent.notes = toff_rows[i].notes;
+    //     // ************************ comment out for testing events without resources
+    //     timeOffEvent.resourceId = toff_rows[i].tech_id;  // (user_id in technician_schedules)
+    //     timeOffEvents.push(timeOffEvent);
+    //   }
+    //   eventSources.push(timeOffEvents);
+    //   // response.eventSources = eventSources;
 
-      // get all appointments
-      var appointmentQueryString = `SELECT appointment_id,
-                                    title,
-                                    ticket_id,
-                                    appointment_type,
-                                    description,
-                                    appt_start_iso_8601,
-                                    appt_end_iso_8601,
-                                    status,
-                                    tech_id
-                                  FROM appointments`;
-      con.query(appointmentQueryString,function(err,appt_rows){
-        if(err) throw err;
-        var appointments = [];
-        for (var i = 0; i < appt_rows.length; i++) {
-          // console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
-          // console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
-          var appointment = new Object();
-          appointment.id = appt_rows[i].appointment_id;
-          appointment.title = appt_rows[i].title;
-          appointment.ticketId = appt_rows[i].ticket_id;
-          appointment.appointmentType = appt_rows[i].appointment_type;
-          appointment.description = appt_rows[i].description;
-          appointment.start = appt_rows[i].appt_start_iso_8601;
-          appointment.end = appt_rows[i].appt_end_iso_8601;
-          appointment.status = appt_rows[i].status;  // (0, 1 or 2)
-          // ************************ comment out for testing events without resources
-          appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
-          appointments.push(appointment);
-          // console.log(appointment);
-        }
-        eventSources.push(appointments);
-        response.eventSources = eventSources;
-
-        console.log('response: ' + JSON.stringify(response));
-        res.json(response);
-      }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
-    }); // closes 'con.query(timeOffQueryString,function(err,toff_rows)'
-
-    // *** this is the end of where I'm trying rearranging the code *********************
-    // *** comment/uncomment this whole section when switching back & forth *************
-
-
-
-
-    // *** this is the real code that I'm trying to fix *********************************
-    // *** comment/uncomment this whole section when switching back & forth *************
-
-    // // get all appointments
-    // var appointmentQueryString = `SELECT appointment_id,
+    //   // get all appointments
+    //   var appointmentQueryString = `SELECT appointment_id,
     //                                 title,
     //                                 ticket_id,
     //                                 appointment_type,
@@ -533,61 +485,185 @@ router.get('/api/resources_and_events', function(req,res){
     //                                 status,
     //                                 tech_id
     //                               FROM appointments`;
-    // con.query(appointmentQueryString,function(err,appt_rows){
-    //   if(err) throw err;
-    //   var appointments = [];
-    //   for (var i = 0; i < appt_rows.length; i++) {
-    //     // console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
-    //     // console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
-    //     var appointment = new Object();
-    //     appointment.id = appt_rows[i].appointment_id;
-    //     appointment.title = appt_rows[i].title;
-    //     appointment.ticketId = appt_rows[i].ticket_id;
-    //     appointment.appointmentType = appt_rows[i].appointment_type;
-    //     appointment.description = appt_rows[i].description;
-    //     appointment.start = appt_rows[i].appt_start_iso_8601;
-    //     appointment.end = appt_rows[i].appt_end_iso_8601;
-    //     appointment.status = appt_rows[i].status;  // (0, 1 or 2)
-    //     // ************************ comment out for testing events without resources
-    //     appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
-    //     appointments.push(appointment);
-    //     // console.log(appointment);
-    //   }
-    //   eventSources.push(appointments);
-    //   // response.eventSources = eventSources;
-
-    //   // get all time off events
-    //   var timeOffQueryString = `SELECT time_off_id,
-    //                               tech_id,
-    //                               toff_start_iso_8601,
-    //                               toff_end_iso_8601,
-    //                               notes
-    //                             FROM time_off`;
-    //   con.query(timeOffQueryString,function(err,toff_rows){
+    //   con.query(appointmentQueryString,function(err,appt_rows){
     //     if(err) throw err;
-    //     console.log('\nAll timeOffEvents:\n');
-    //     console.log('toff_rows:\n' + toff_rows);
-    //     var timeOffEvents = [];
-    //     // iterate over toff_rows into a valid JSON string
-    //     for (var i = 0; i < toff_rows.length; i++) {
-    //       console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
-    //       var timeOffEvent = new Object();
-    //       timeOffEvent.id = toff_rows[i].time_off_id;
-    //       timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
-    //       timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
-    //       timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
-    //       timeOffEvent.notes = toff_rows[i].notes;
+    //     var appointments = [];
+    //     for (var i = 0; i < appt_rows.length; i++) {
+    //       // console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
+    //       // console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
+    //       var appointment = new Object();
+    //       appointment.id = appt_rows[i].appointment_id;
+    //       appointment.title = appt_rows[i].title;
+    //       appointment.ticketId = appt_rows[i].ticket_id;
+    //       appointment.appointmentType = appt_rows[i].appointment_type;
+    //       appointment.description = appt_rows[i].description;
+    //       appointment.start = appt_rows[i].appt_start_iso_8601;
+    //       appointment.end = appt_rows[i].appt_end_iso_8601;
+    //       appointment.status = appt_rows[i].status;  // (0, 1 or 2)
     //       // ************************ comment out for testing events without resources
-    //       timeOffEvent.resourceID = toff_rows[i].tech_id;  // (user_id in technician_schedules)
-    //       timeOffEvents.push(timeOffEvent);
+    //       appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
+    //       appointments.push(appointment);
+    //       // console.log(appointment);
     //     }
-    //     eventSources.push(timeOffEvents);
+    //     eventSources.push(appointments);
     //     response.eventSources = eventSources;
 
-    //     console.log('response: ' + JSON.stringify(response));
+    //     // console.log('response: ' + JSON.stringify(response));
     //     res.json(response);
-    //   }); // closes 'con.query(timeOffQueryString,function(err,toff_rows)'
-    // }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
+    //   }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
+    // }); // closes 'con.query(timeOffQueryString,function(err,toff_rows)'
+
+    // *** this is the end of where I'm trying rearranging the code *********************
+    // *** comment/uncomment this whole section when switching back & forth *************
+
+
+
+
+
+    // *** try put appointments & time_off in same array, don't distinguish *************
+    // *** comment/uncomment this whole section when switching back & forth *************
+
+    // // get all time off events
+    // var allEvents = [];
+    // var timeOffQueryString = `SELECT time_off_id,
+    //                             tech_id,
+    //                             toff_start_iso_8601,
+    //                             toff_end_iso_8601,
+    //                             notes
+    //                           FROM time_off`;
+    // con.query(timeOffQueryString,function(err,toff_rows){
+    //   if(err) throw err;
+    //   // var timeOffEvents = [];
+
+    //   for (var i = 0; i < toff_rows.length; i++) {
+    //     // console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
+    //     var timeOffEvent = new Object();
+    //     timeOffEvent.id = toff_rows[i].time_off_id;
+    //     timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
+    //     timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
+    //     timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
+    //     timeOffEvent.notes = toff_rows[i].notes;
+    //     // ************************ comment out for testing events without resources
+    //     timeOffEvent.resourceId = toff_rows[i].tech_id;  // (user_id in technician_schedules)
+    //     allEvents.push(timeOffEvent);
+    //   }
+    //   // eventSources.push(allEvents);
+    //   // response.eventSources = eventSources;
+
+    //   // get all appointments
+    //   var appointmentQueryString = `SELECT appointment_id,
+    //                                 title,
+    //                                 ticket_id,
+    //                                 appointment_type,
+    //                                 description,
+    //                                 appt_start_iso_8601,
+    //                                 appt_end_iso_8601,
+    //                                 status,
+    //                                 tech_id
+    //                               FROM appointments`;
+    //   con.query(appointmentQueryString,function(err,appt_rows){
+    //     if(err) throw err;
+    //     // var appointments = [];
+    //     for (var i = 0; i < appt_rows.length; i++) {
+    //       // console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
+    //       // console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
+    //       var appointment = new Object();
+    //       appointment.id = appt_rows[i].appointment_id;
+    //       appointment.title = appt_rows[i].title;
+    //       appointment.ticketId = appt_rows[i].ticket_id;
+    //       appointment.appointmentType = appt_rows[i].appointment_type;
+    //       appointment.description = appt_rows[i].description;
+    //       appointment.start = appt_rows[i].appt_start_iso_8601;
+    //       appointment.end = appt_rows[i].appt_end_iso_8601;
+    //       appointment.status = appt_rows[i].status;  // (0, 1 or 2)
+    //       // ************************ comment out for testing events without resources
+    //       appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
+    //       allEvents.push(appointment);
+    //       // console.log(appointment);
+    //     }
+    //     eventSources.push(allEvents);
+    //     response.eventSources = eventSources;
+
+    //   //   // console.log('response: ' + JSON.stringify(response));
+    //     res.json(response);
+    //   }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
+    // }); // closes 'con.query(timeOffQueryString,function(err,toff_rows)'
+
+    // *** end try put appointments & time_off in same array, don't distinguish *********
+    // *** comment/uncomment this whole section when switching back & forth *************
+
+
+
+
+    // *** this is the real code that I'm trying to fix *********************************
+    // *** comment/uncomment this whole section when switching back & forth *************
+
+    // get all appointments
+    var appointmentQueryString = `SELECT appointment_id,
+                                    title,
+                                    ticket_id,
+                                    appointment_type,
+                                    description,
+                                    appt_start_iso_8601,
+                                    appt_end_iso_8601,
+                                    status,
+                                    tech_id
+                                  FROM appointments`;
+    con.query(appointmentQueryString,function(err,appt_rows){
+      if(err) throw err;
+      var appointments = [];
+      for (var i = 0; i < appt_rows.length; i++) {
+        // console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
+        // console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
+        var appointment = new Object();
+        appointment.id = appt_rows[i].appointment_id;
+        appointment.title = appt_rows[i].title;
+        appointment.ticketId = appt_rows[i].ticket_id;
+        appointment.appointmentType = appt_rows[i].appointment_type;
+        appointment.description = appt_rows[i].description;
+        appointment.start = appt_rows[i].appt_start_iso_8601;
+        appointment.end = appt_rows[i].appt_end_iso_8601;
+        appointment.status = appt_rows[i].status;  // (0, 1 or 2)
+        // ************************ comment out for testing events without resources
+        appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
+        appointments.push(appointment);
+        // console.log(appointment);
+      }
+      eventSources.push(appointments);
+      // response.eventSources = eventSources;
+
+      // get all time off events
+      var timeOffQueryString = `SELECT time_off_id,
+                                  tech_id,
+                                  toff_start_iso_8601,
+                                  toff_end_iso_8601,
+                                  notes
+                                FROM time_off`;
+      con.query(timeOffQueryString,function(err,toff_rows){
+        if(err) throw err;
+        console.log('\nAll timeOffEvents:\n');
+        console.log('toff_rows:\n' + toff_rows);
+        var timeOffEvents = [];
+        // iterate over toff_rows into a valid JSON string
+        for (var i = 0; i < toff_rows.length; i++) {
+          console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
+          var timeOffEvent = new Object();
+          timeOffEvent.id = toff_rows[i].time_off_id;
+          timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
+          timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
+          timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
+          timeOffEvent.notes = toff_rows[i].notes;
+          // ************************ comment out for testing events without resources
+          timeOffEvent.resourceId = toff_rows[i].tech_id;  // (user_id in technician_schedules)
+          timeOffEvents.push(timeOffEvent);
+        }
+        eventSources.push(timeOffEvents);
+        response.eventSources = eventSources;
+
+        console.log('response: ' + JSON.stringify(response));
+        res.json(response);
+      }); // closes 'con.query(timeOffQueryString,function(err,toff_rows)'
+    }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
 
     // *** this is the end of the code that I'm trying to fix ***************************
     // *** comment/uncomment this whole section when switching back & forth *************
