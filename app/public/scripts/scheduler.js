@@ -7,10 +7,12 @@ $(document).ready(function() {
   var todayDate = new Date().toISOString().substring(0,10);
   console.log(todayDate);
 
+  // get all technicians and send them to tech dropdown
   var allUsers = $.getJSON('/api/users', function(data) {
     initTechDropdown(data);
   });
 
+  // make the tech dropdown menu work
   function initTechDropdown(data) {
     console.log('all users:');
     console.log(data);
@@ -19,7 +21,9 @@ $(document).ready(function() {
       var user = '<option value="' + data.users[i].id + '">' + data.users[i].username + '</option>';
       users += user;
     }
+    // populate dropdown with technicians
     $('select#installer-selector').append(users);
+    // when new tech is selected, call loadTechCalendar() for that tech
     $('select#installer-selector').change(function() {
       var selectedTechId = $('select#installer-selector').val();
       console.log('selectedTechId: ' + selectedTechId);
@@ -28,34 +32,42 @@ $(document).ready(function() {
   }
 
   function loadTechCalendar(techId) {
+    // store the current calendar view (day/week/month) in a variable
+    var currentView = $('#fullcalendar').fullCalendar('getView');
+    // if techID is a number > 0, re-draw calendar with resources and events of the tech with that techID
+    // *** this seems vulnerable - should make condition stronger to protect against weird inputs
     if (techId > 0) {
       // console.log('inside loadTechCalendar - tech id = ' + techId);
       console.log('inside loadTechCalendar - /api/resources_and_events/' + techId);
+      // GET all resources and events for a given tech
       $.getJSON('/api/resources_and_events/' + techId, function(data) {
+        // clear the fullcalendar div, then draw it with the data from the GET request
         $('#fullcalendar').replaceWith('<div id="fullcalendar"></div>');
-        agendaDayView(data);
+        drawFullCalendar(data);
+        // make the view (day/week/month) match what it was before we re-drew the calendar
+        $('#fullcalendar').fullCalendar('changeView', currentView.name);
       });
     }
+    // if techID is 'AllInstallers', re-draw calendar with resources and events of all techs
+    else if (techId == 'AllInstallers') {
+      console.log('inside loadTechCalendar - /api/resources_and_events/' + techId);
+      $.getJSON('/api/resources_and_events', function(data) {
+        $('#fullcalendar').replaceWith('<div id="fullcalendar"></div>');
+        drawFullCalendar(data);
+        $('#fullcalendar').fullCalendar('changeView', currentView.name);
+      });
+    }
+    // *** TODO: add an 'else' here that displays an error message for values of techID
+    // that are neither a real techID nor the string 'AllInstallers'
   }
 
 
-  // var url = '/api/appointments/' + String(selectedTechId);
-  // console.log('url: ' + url);
 
-
-   // **** when testing new routes, remember to change them here too
-   // **** e.g. change '/api/technician_schedules' to '/api/appointments'
-  var allTheThings = $.getJSON('/api/resources_and_events', function(data) {
-    // once we have the response to the get request, call gotAllTheThings to draw the calendar
-    gotAllTheThings(data);
+  // draw the calendar with all resources and events
+  $.getJSON('/api/resources_and_events', function(data) {
+    drawFullCalendar(data);
   });
 
-  function gotAllTheThings(data) {
-    console.log('inside gotAllTheThings');
-    // draw the calendar with the data, in Agenda Day view
-    agendaDayView(data);
-    // console.log(data);
-  }
 
 
   /* initialize the external events
@@ -84,11 +96,11 @@ $(document).ready(function() {
   /* initialize the calendar
   -----------------------------------------------------------------*/
 
-  function agendaDayView(allTheThings) {
-    console.log('allTheThings.resources:')
-    console.log(allTheThings.resources);
-    console.log('inside agendaDayView - allTheThings: ')
-    console.log(allTheThings);
+  function drawFullCalendar(calendarData) {
+    console.log('calendarData.resources:')
+    console.log(calendarData.resources);
+    console.log('inside drawFullCalendar - calendarData: ')
+    console.log(calendarData);
     var calendar = $('#fullcalendar').fullCalendar({
       schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
 
@@ -102,7 +114,6 @@ $(document).ready(function() {
       allDaySlot: false,
       eventOverlap: false,
       // TODO: change buttons so 'today' shows today's date, get rid of title
-      // TODO: make week and month views have dropdown to select one installer (or all installers)
       header: {
         left: 'prev,today,next',
         center: 'title',
@@ -133,70 +144,11 @@ $(document).ready(function() {
       resourceLabelText: 'Installers',
 
       // ************************ comment out for testing events without resources
-      resources: allTheThings.resources,
+      resources: calendarData.resources,
       // ************************ comment out for testing resources without events
-      eventSources: allTheThings.eventSources,
+      eventSources: calendarData.eventSources,
 
-      // // some demo resources
-      // resources: [
-      //   {
-      //     id: 'a',
-      //     title: 'Sam',
-      //     businessHours: {
-      //         start: '07:00',
-      //         end: '15:00'
-      //     }
-      //   },
-      //   {
-      //     id: 'b',
-      //     title: 'Pat',
-      //     businessHours: {
-      //         start: '09:00',
-      //         end: '17:00'
-      //     }
-      //   },
-      //   {
-      //     id: 'c',
-      //     title: 'Kim',
-      //     businessHours: {
-      //         start: '11:00',
-      //         end: '19:00'
-      //     }
-      //   }
-      // ],
-      // some demo appointments
-      // events: [
-      //   {
-      //     id: '1',
-      //     title: 'Full Install',
-      //     ticketId: '101',
-      //     description: 'Install wifi chez Joe Blow',
-      //     start: todayDate + 'T10:00:00',
-      //     end: todayDate + 'T12:00:00',
-      //     resourceId: 'a',
-      //     color: '#533A7B'
-      //   },
-      //   {
-      //     id: '2',
-      //     title: 'Service Call',
-      //     ticketId: '95',
-      //     description: "Replace broken thing at Mrs. Tiggywinkle's",
-      //     start: todayDate + 'T14:30:00',
-      //     end: todayDate + 'T15:30:00',
-      //     resourceId: 'b',
-      //     color: '#E05263'
-      //   },
-      //   {
-      //     id: '3',
-      //     title: 'Service Call',
-      //     ticketId: '109',
-      //     description: 'Fix router at the library',
-      //     start: todayDate + 'T17:00:00',
-      //     end: todayDate + 'T18:00:00',
-      //     resourceId: 'c',
-      //     color: '#E05263'
-      //   }
-      // ],
+
       eventRender: function(event, element) {
         if (event.description) {
           // add event description after event title
@@ -222,7 +174,7 @@ $(document).ready(function() {
   }
 
   makeOnDeckSection(); // when On Deck events are loaded
-  // agendaDayView(allTheThings); // when allTheThings are loaded
+  // drawFullCalendar(calendarData); // when calendarData is loaded
 
 
 });
