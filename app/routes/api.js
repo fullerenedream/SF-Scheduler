@@ -675,6 +675,131 @@ router.get('/api/resources_and_events', function(req,res){
 
 
 
+// GET one resource and all its events - technician working hours + appointments + time off events
+router.get('/api/resources_and_events/:user_id', function(req,res){
+  var con = db.connectToScheduleDB();
+  var user_id = req.param('user_id');
+  var key = user_id;
+  console.log('inside GET request for one resource and all its events - /api/resources_and_events/' + user_id);
+  var response = new Object();
+  // using eventSources array to combine appointments and time_off events
+  var eventSources = [];
+  // get this technician's working hours
+  var tsQueryString =  `SELECT schedule_id,
+                          user_id,
+                          user_name,
+                          IFNULL(sunday_start,"00:00:00") sunday_start,
+                          IFNULL(sunday_end,"00:00:01") sunday_end,
+                          IFNULL(monday_start,"00:00:00") monday_start,
+                          IFNULL(monday_end,"00:00:01") monday_end,
+                          IFNULL(tuesday_start,"00:00:00") tuesday_start,
+                          IFNULL(tuesday_end,"00:00:01") tuesday_end,
+                          IFNULL(wednesday_start,"00:00:00") wednesday_start,
+                          IFNULL(wednesday_end,"00:00:01") wednesday_end,
+                          IFNULL(thursday_start,"00:00:00") thursday_start,
+                          IFNULL(thursday_end,"00:00:01") thursday_end,
+                          IFNULL(friday_start,"00:00:00") friday_start,
+                          IFNULL(friday_end,"00:00:01") friday_end,
+                          IFNULL(saturday_start,"00:00:00") saturday_start,
+                          IFNULL(saturday_end,"00:00:01") saturday_end
+                        FROM technician_schedules
+                        WHERE user_id = ?
+                        ORDER BY created_at DESC LIMIT 1`;
+
+  con.query(tsQueryString, [key], function(err,ts_rows){
+    if(err) throw err;
+    var resources = [];
+    for (var i = 0; i < ts_rows.length; i++) {
+      // console.log('ts_rows ' + i + ' user_name:\n' + ts_rows[i].user_name);
+      // console.log('ts_rows ' + i + ':\n' + ts_rows[i]);
+      var resource = new Object();
+      resource.businessHours = [];
+      resource.id = ts_rows[i].user_id;
+      resource.title = ts_rows[i].user_name;
+      resource.businessHours[0] = {dow:[0], start:ts_rows[i].sunday_start, end:ts_rows[i].sunday_end};
+      resource.businessHours[1] = {dow:[1], start:ts_rows[i].monday_start, end:ts_rows[i].monday_end};
+      resource.businessHours[2] = {dow:[2], start:ts_rows[i].tuesday_start, end:ts_rows[i].tuesday_end};
+      resource.businessHours[3] = {dow:[3], start:ts_rows[i].wednesday_start, end:ts_rows[i].wednesday_end};
+      resource.businessHours[4] = {dow:[4], start:ts_rows[i].thursday_start, end:ts_rows[i].thursday_end};
+      resource.businessHours[5] = {dow:[5], start:ts_rows[i].friday_start, end:ts_rows[i].friday_end};
+      resource.businessHours[6] = {dow:[6], start:ts_rows[i].saturday_start, end:ts_rows[i].saturday_end};
+      resources.push(resource);
+    }
+    response.resources = resources;
+
+    // get all appointments
+    var appointmentQueryString = `SELECT appointment_id,
+                                    title,
+                                    ticket_id,
+                                    appointment_type,
+                                    description,
+                                    appt_start_iso_8601,
+                                    appt_end_iso_8601,
+                                    status,
+                                    tech_id
+                                  FROM appointments
+                                  WHERE tech_id = ?`;
+    con.query(appointmentQueryString, [key], function(err,appt_rows){
+      if(err) throw err;
+      var appointments = [];
+      for (var i = 0; i < appt_rows.length; i++) {
+        // console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
+        // console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
+        var appointment = new Object();
+        appointment.id = appt_rows[i].appointment_id;
+        appointment.title = appt_rows[i].title;
+        appointment.ticketId = appt_rows[i].ticket_id;
+        appointment.appointmentType = appt_rows[i].appointment_type;
+        appointment.description = appt_rows[i].description;
+        appointment.start = appt_rows[i].appt_start_iso_8601;
+        appointment.end = appt_rows[i].appt_end_iso_8601;
+        appointment.status = appt_rows[i].status;  // (0, 1 or 2)
+        // ************************ comment out for testing events without resources
+        appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
+        appointments.push(appointment);
+        // console.log(appointment);
+      }
+      eventSources.push(appointments);
+      // response.eventSources = eventSources;
+
+      // get all time off events
+      var timeOffQueryString = `SELECT time_off_id,
+                                  tech_id,
+                                  toff_start_iso_8601,
+                                  toff_end_iso_8601,
+                                  notes
+                                FROM time_off
+                                WHERE tech_id = ?`;
+      con.query(timeOffQueryString, [key], function(err,toff_rows){
+        if(err) throw err;
+        console.log('\nAll timeOffEvents:\n');
+        console.log('toff_rows:\n' + toff_rows);
+        var timeOffEvents = [];
+        // iterate over toff_rows into a valid JSON string
+        for (var i = 0; i < toff_rows.length; i++) {
+          console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
+          var timeOffEvent = new Object();
+          timeOffEvent.id = toff_rows[i].time_off_id;
+          timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
+          timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
+          timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
+          timeOffEvent.notes = toff_rows[i].notes;
+          // ************************ comment out for testing events without resources
+          timeOffEvent.resourceId = toff_rows[i].tech_id;  // (user_id in technician_schedules)
+          timeOffEvents.push(timeOffEvent);
+        }
+        eventSources.push(timeOffEvents);
+        response.eventSources = eventSources;
+
+        console.log('response: ' + JSON.stringify(response));
+        res.json(response);
+      }); // closes 'con.query(timeOffQueryString,function(err,toff_rows)'
+    }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
+  }); // closes 'con.query(tsQueryString,function(err,ts_rows)'
+}); // closes 'router.get('/api/resources_and_events', function(req,res)'
+
+
+
 // receive a form post and save it to the sample file (later we want this to save to the db)
 router.post('/api',function(req,res){
   sampleData.unshift(req.body);

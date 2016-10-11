@@ -29,7 +29,9 @@ $(document).ready(function() {
 
   function loadTechCalendar(techId) {
     if (techId > 0) {
-      $.getJSON('/api/technician_schedules/' + techId, function(data) {
+      // console.log('inside loadTechCalendar - tech id = ' + techId);
+      console.log('inside loadTechCalendar - /api/resources_and_events/' + techId);
+      $.getJSON('/api/resources_and_events/' + techId, function(data) {
         agendaDayView(data);
       });
     }
