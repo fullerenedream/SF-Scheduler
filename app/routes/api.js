@@ -634,14 +634,14 @@ router.post('/api/test', function(req, res) {
 // *** TODO: test with wrong data types
 router.post('/api/time_off', function (req, res) {
   time_off_item = [req.body.tech_id, req.body.toff_date, req.body.toff_start_time, req.body.toff_end_time, req.body.toff_start_iso_8601, req.body.toff_end_iso_8601, req.body.notes, req.body.time_off_id];
-  console.log(req.body.time_off_id); // this will be empty string if new time_off event
-  console.log(req.body.tech_id); // if this form field is blank, db has nothing to update & so nothing happens
-  console.log(req.body.toff_date); // if this form field is blank, will be '0000-00-00' in db entry
-  console.log(req.body.toff_start_time); // if this form field is blank, will be '00:00:00' in db entry
-  console.log(req.body.toff_end_time); // if this form field is blank, will be '00:00:00' in db entry
-  console.log(req.body.toff_start_iso_8601); // if this form field is blank, will be left blank in db entry
-  console.log(req.body.toff_end_iso_8601); // if this form field is blank, will be left blank in db entry
-  console.log(req.body.notes); // if this form field is blank, will be left blank in db entry
+  console.log(req.body.time_off_id);
+  console.log(req.body.tech_id);
+  console.log(req.body.toff_date);
+  console.log(req.body.toff_start_time);
+  console.log(req.body.toff_end_time);
+  console.log(req.body.toff_start_iso_8601);
+  console.log(req.body.toff_end_iso_8601);
+  console.log(req.body.notes);
   if (req.body.time_off_id > 0) {
     var con = db.connectToScheduleDB();
     var timeOffQueryString = `UPDATE time_off
@@ -657,6 +657,7 @@ router.post('/api/time_off', function (req, res) {
       if(err) throw err;
       else {
         console.log('timeOffQueryString sent to db as update to existing item');
+        console.log('affected rows: ' + result.affectedRows);
         res.json("success"); // response says whether save was success or failure
       }
     });
@@ -671,7 +672,8 @@ router.post('/api/time_off', function (req, res) {
     con.query(timeOffQueryString, time_off_item, function(err, result){
       if(err) throw err;
       else {
-        console.log('timeOffQueryString sent to db as new item');
+        console.log('timeOffQueryString sent to db as new item. time_off_id = ' + result.insertId);
+        console.log('affected rows: ' + result.affectedRows);
         res.json("success"); // response says whether save was success or failure
       }
     });
