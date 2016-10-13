@@ -16,12 +16,13 @@ $(document).ready(function() {
   function initTechDropdown(data) {
     console.log('all users:');
     console.log(data);
+    // generate html for each tech to go in dropdown
     var users = '';
     for (i = 0; i < data.users.length; i++) {
       var user = '<option value="' + data.users[i].id + '">' + data.users[i].username + '</option>';
       users += user;
     }
-    // populate dropdown with technicians
+    // populate dropdown with techs
     $('select#installer-selector').append(users);
     // when new tech is selected, call loadTechCalendar() for that tech
     $('select#installer-selector').change(function() {
@@ -31,6 +32,7 @@ $(document).ready(function() {
     });
   }
 
+  // re-draw fullcalendar based on what was selected in dropdown
   function loadTechCalendar(techId) {
     // store the current calendar view (day/week/month) in a variable
     var currentView = $('#fullcalendar').fullCalendar('getView');
@@ -57,8 +59,10 @@ $(document).ready(function() {
         $('#fullcalendar').fullCalendar('changeView', currentView.name);
       });
     }
-    // *** TODO: add an 'else' here that displays an error message for values of techID
-    // that are neither a real techID nor the string 'AllInstallers'
+    // if techID is neither a real techID nor the string 'AllInstallers', show an error message
+    else {
+      console.log('Error! Unexpected value in Installers dropdown');
+    }
   }
 
 

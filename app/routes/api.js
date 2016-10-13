@@ -577,12 +577,12 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
                                 WHERE tech_id = ?`;
       con.query(timeOffQueryString, [key], function(err,toff_rows){
         if(err) throw err;
-        console.log('\nAll timeOffEvents:\n');
-        console.log('toff_rows:\n' + toff_rows);
+        // console.log('\nAll timeOffEvents:\n');
+        // console.log('toff_rows:\n' + toff_rows);
         var timeOffEvents = [];
         // iterate over toff_rows into a valid JSON string
         for (var i = 0; i < toff_rows.length; i++) {
-          console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
+          // console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
           var timeOffEvent = new Object();
           timeOffEvent.id = toff_rows[i].time_off_id;
           timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
@@ -606,6 +606,7 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
 
 
 // receive a form post and save it to the sample file (later we want this to save to the db)
+// TODO: make this actually save things to the db (e.g. save an appointment to the appointments table)
 router.post('/api',function(req,res){
   sampleData.unshift(req.body);
   fs.writeFile('app/data/sample.json', JSON.stringify(sampleData),'utf8',function(err){
@@ -616,10 +617,77 @@ router.post('/api',function(req,res){
   res.json(sampleData);
 });
 
+
+router.use(bodyParser.json());
+// parses data from form into JSON, so then you access e.g. 'name' field from form
+// as req.body.name ... if you want all the data from the form, you access it as
+// req.body
+router.use(bodyParser.urlencoded({ extended: false }));
+// parses urlencoded bodies
+router.post('/api/test', function(req, res) {
+  console.log(req.body);
+  res.json("success"); // response says whether save was success or failure
+});
+
+
+// receive a form post for a time_off event and save it to the database
+// *** TODO: test with wrong data types
+router.post('/api/time_off', function (req, res) {
+  time_off_item = [req.body.tech_id, req.body.toff_date, req.body.toff_start_time, req.body.toff_end_time, req.body.toff_start_iso_8601, req.body.toff_end_iso_8601, req.body.notes, req.body.time_off_id];
+  console.log(req.body.time_off_id); // this will be empty string if new time_off event
+  console.log(req.body.tech_id); // if this form field is blank, db has nothing to update & so nothing happens
+  console.log(req.body.toff_date); // if this form field is blank, will be '0000-00-00' in db entry
+  console.log(req.body.toff_start_time); // if this form field is blank, will be '00:00:00' in db entry
+  console.log(req.body.toff_end_time); // if this form field is blank, will be '00:00:00' in db entry
+  console.log(req.body.toff_start_iso_8601); // if this form field is blank, will be left blank in db entry
+  console.log(req.body.toff_end_iso_8601); // if this form field is blank, will be left blank in db entry
+  console.log(req.body.notes); // if this form field is blank, will be left blank in db entry
+  if (req.body.time_off_id > 0) {
+    var con = db.connectToScheduleDB();
+    var timeOffQueryString = `UPDATE time_off
+                              SET tech_id = ?,
+                                toff_date = ?,
+                                toff_start_time = ?,
+                                toff_end_time = ?,
+                                toff_start_iso_8601 = ?,
+                                toff_end_iso_8601 = ?,
+                                notes = ?
+                              WHERE time_off_id = ?;`;
+    con.query(timeOffQueryString, time_off_item, function(err, result){
+      if(err) throw err;
+      else {
+        console.log('timeOffQueryString sent to db as update to existing item');
+        res.json("success"); // response says whether save was success or failure
+      }
+    });
+  }
+  // if no time_off_id is given, a new time_off event is created in the db
+  else if (req.body.time_off_id == '') {
+    var con = db.connectToScheduleDB();
+    var timeOffQueryString = `INSERT INTO time_off
+                                (tech_id, toff_date, toff_start_time, toff_end_time, toff_start_iso_8601, toff_end_iso_8601, notes)
+                              VALUES
+                                (?, ?, ?, ?, ?, ?, ?);`;
+    con.query(timeOffQueryString, time_off_item, function(err, result){
+      if(err) throw err;
+      else {
+        console.log('timeOffQueryString sent to db as new item');
+        res.json("success"); // response says whether save was success or failure
+      }
+    });
+  }
+});
+// ***** Getting the ID of an inserted row, and getting the number of affected rows:
+// https://github.com/mysqljs/mysql#getting-the-id-of-an-inserted-row
+// use this to send more useful response messages
+
+
+
 // on a click, calls api with a DELETE request that includes the ID (index) of the object to delete
-router.delete('/api/:id', function(req,res) {
+// TODO: make this work in some sensible manner
+router.delete('/api/:id', function(req, res) {
   sampleData.splice(req.params.id,1);
-  fs.writeFile('app/data/sample.json', JSON.stringify(sampleData),'utf8',function(err){
+  fs.writeFile('app/data/sample.json', JSON.stringify(sampleData), 'utf8', function(err){
     if(err){
       console.log(err);
     }
