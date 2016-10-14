@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
+var moment = require('../public/fullcalendar-scheduler-1.4.0/lib/moment.min.js');
 var fs = require('fs');
 var sampleData = require('../data/sample.json');
 var process_data = require('../public/scripts/process_data.js');
@@ -636,16 +637,50 @@ router.post('/api/test', function(req, res) {
 // otherwise they can overwrite existing data with stuff like '0000-00-00'
 // - am I going to use a bunch of conditionals to procedurally generate the query string?
 router.post('/api/time_off', function (req, res) {
-  // var time_off_item = [req.body.tech_id, req.body.toff_date, req.body.toff_start_time, req.body.toff_end_time, req.body.toff_start_iso_8601, req.body.toff_end_iso_8601, req.body.notes, req.body.time_off_id];
+  var time_off_item = [
+    req.body.tech_id,
+    req.body.toff_date,
+    req.body.toff_start_time,
+    req.body.toff_end_time,
+    req.body.toff_date + 'T' + req.body.toff_start_time, // start_time in ISO8601
+    req.body.toff_date + 'T' + req.body.toff_end_time, // end_time in ISO8601
+    req.body.notes,
+    req.body.time_off_id
+  ];
+
+  for (i = 0; i < time_off_item.length; i++) {
+    console.log(time_off_item[i]);
+  }
+
+
+  // var timeOffEvent = new Object();
+  // timeOffEvent.time_off_id = req.body.time_off_id;
+  // timeOffEvent.tech_id = req.body.tech_id;
+  // timeOffEvent.toff_date = req.body.toff_date;
+  // timeOffEvent.toff_start_time = req.body.toff_start_time;
+  // timeOffEvent.toff_end_time = req.body.toff_end_time;
+  // timeOffEvent.toff_start_iso_8601 = req.body.toff_date + 'T' + req.body.toff_start_time;
+  // timeOffEvent.toff_end_iso_8601 = req.body.toff_date + 'T' + req.body.toff_end_time;
+  // timeOffEvent.notes = req.body.notes;
+
+  // console.log(timeOffEvent.time_off_id);
+  // console.log(timeOffEvent.tech_id);
+  // console.log(timeOffEvent.toff_date);
+  // console.log(timeOffEvent.toff_start_time);
+  // console.log(timeOffEvent.toff_end_time);
+  // console.log(timeOffEvent.toff_start_iso_8601);
+  // console.log(timeOffEvent.toff_end_iso_8601);
+  // console.log(timeOffEvent.notes);
+
 
   /*
     WRITING VALIDATIONS
     what are the things you need to check in order for this to insert/update properly?
     time_off_id - must be either blank (=new time off event), OR a number that matches an existing time_off_id
-    tech_id - must be a whole number > 0 that matches an existing tech_id (ISP currently has tech_id = 0... ISP doesn't need time off)
-    toff_date - must be a date of the form YYYY-MM-DD (could put some upper and lower bounds on the dates)
-    toff_start_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds)
-    toff_end_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds)
+    tech_id - must be a whole number > 0
+    toff_date - must be a date of the form YYYY-MM-DD (could put some upper and lower bounds on the dates), or empty
+    toff_start_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds), or empty
+    toff_end_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds), or empty
     toff_start_iso_8601 - generated from toff_date and toff_start_time, in the form YYYY-MM-DDTHH:MM:SS
     toff_end_iso_8601 - generated from toff_date and toff_end_time, in the form YYYY-MM-DDTHH:MM:SS
     notes - anything, including empty.
@@ -653,57 +688,64 @@ router.post('/api/time_off', function (req, res) {
     See Josh's email about validations & validation middleware
   */
 
-  var timeOffEvent = new Object();
+  // TODO: move validations into a different file
+  function isPositiveInt(val) {
+    // check that input is a number
+    if (isNaN(val)) {
+      return false;
+    }
+    // check that input is greater than zero
+    else if (val < 0) {
+      return false;
+    }
+    // check that input is an integer
+    else if(val % 1 != 0){
+      return false;
+    }
+    // All tests have passed, so return true
+    else {
+      console.log(val + ' is a positive integer');
+      return true;
+    }
+  }
 
-  if (!Number.isInteger(tech_id) || tech_id <= 0)
+  if ( (req.body.time_off_id != '') && isPositiveInt(req.body.time_off_id) == false ) {
+    console.log('time_off_id is invalid: it is neither a positive integer nor an empty string');
+  }
+  else if ( moment(req.body.toff_date, 'YYYY-MM-DD', true).isValid() == false ) {
+    console.log('toff_date is invalid: it is not of the form YYYY-MM-DD');
+  }
+  else if ( moment(req.body.toff_start_time, 'HH:mm:ss', true).isValid() == false ) {
+    console.log('toff_start_time is invalid: it is not of the form HH:mm:ss');
+  }
+  else if ( moment(req.body.toff_end_time, 'HH:mm:ss', true).isValid() == false ) {
+    console.log('toff_end_time is invalid: it is not of the form HH:mm:ss');
+  }
 
-
-  timeOffEvent.time_off_id = req.body.time_off_id;
-  timeOffEvent.tech_id = req.body.tech_id;
-  timeOffEvent.toff_date = req.body.toff_date;
-  timeOffEvent.toff_start_time = req.body.toff_start_time;
-  timeOffEvent.toff_end_time = req.body.toff_end_time;
-  timeOffEvent.toff_start_iso_8601 = req.body.toff_start_iso_8601;
-  timeOffEvent.toff_end_iso_8601 = req.body.toff_end_iso_8601;
-  timeOffEvent.notes = req.body.notes;
-  // console.log(req.body.time_off_id);
-  // console.log(req.body.tech_id);
-  // console.log(req.body.toff_date);
-  // console.log(req.body.toff_start_time);
-  // console.log(req.body.toff_end_time);
-  // console.log(req.body.toff_start_iso_8601);
-  // console.log(req.body.toff_end_iso_8601);
-  // console.log(req.body.notes);
-  console.log(timeOffEvent.time_off_id);
-  console.log(timeOffEvent.tech_id);
-  console.log(timeOffEvent.toff_date);
-  console.log(timeOffEvent.toff_start_time);
-  console.log(timeOffEvent.toff_end_time);
-  console.log(timeOffEvent.toff_start_iso_8601);
-  console.log(timeOffEvent.toff_end_iso_8601);
-  console.log(timeOffEvent.notes);
-  if (req.body.time_off_id > 0) {
+  else if (isPositiveInt(req.body.time_off_id)) {
+  // if (req.body.time_off_id > 0) {
     var con = db.connectToScheduleDB();
-    // var timeOffQueryString = `UPDATE time_off
-    //                           SET tech_id = ?,
-    //                             toff_date = ?,
-    //                             toff_start_time = ?,
-    //                             toff_end_time = ?,
-    //                             toff_start_iso_8601 = ?,
-    //                             toff_end_iso_8601 = ?,
-    //                             notes = ?
-    //                           WHERE time_off_id = ?;`;
     var timeOffQueryString = `UPDATE time_off
-                              SET tech_id = ` + con.escape(timeOffEvent.tech_id) + `,
-                                toff_date = ` + con.escape(timeOffEvent.toff_date) + `,
-                                toff_start_time = ` + con.escape(timeOffEvent.toff_start_time) + `,
-                                toff_end_time = ` + con.escape(timeOffEvent.toff_end_time) + `,
-                                toff_start_iso_8601 = ` + con.escape(timeOffEvent.toff_start_iso_8601) + `,
-                                toff_end_iso_8601 = ` + con.escape(timeOffEvent.toff_end_iso_8601) + `,
-                                notes = ` + con.escape(timeOffEvent.notes) + `
-                              WHERE time_off_id = ` + con.escape(timeOffEvent.time_off_id) + `;`;
-    // con.query(timeOffQueryString, time_off_item, function(err, result){
-      con.query(timeOffQueryString, function(err, result){
+                              SET tech_id = ?,
+                                toff_date = ?,
+                                toff_start_time = ?,
+                                toff_end_time = ?,
+                                toff_start_iso_8601 = ?,
+                                toff_end_iso_8601 = ?,
+                                notes = ?
+                              WHERE time_off_id = ?;`;
+    // var timeOffQueryString = `UPDATE time_off
+    //                           SET tech_id = ` + con.escape(timeOffEvent.tech_id) + `,
+    //                             toff_date = ` + con.escape(timeOffEvent.toff_date) + `,
+    //                             toff_start_time = ` + con.escape(timeOffEvent.toff_start_time) + `,
+    //                             toff_end_time = ` + con.escape(timeOffEvent.toff_end_time) + `,
+    //                             toff_start_iso_8601 = ` + con.escape(timeOffEvent.toff_start_iso_8601) + `,
+    //                             toff_end_iso_8601 = ` + con.escape(timeOffEvent.toff_end_iso_8601) + `,
+    //                             notes = ` + con.escape(timeOffEvent.notes) + `
+    //                           WHERE time_off_id = ` + con.escape(timeOffEvent.time_off_id) + `;`;
+
+    con.query(timeOffQueryString, time_off_item, function(err, result){
+      // con.query(timeOffQueryString, function(err, result){
       if(err) throw err;
       else {
         console.log('timeOffQueryString sent to db as update to existing item');
@@ -719,7 +761,19 @@ router.post('/api/time_off', function (req, res) {
                                 (tech_id, toff_date, toff_start_time, toff_end_time, toff_start_iso_8601, toff_end_iso_8601, notes)
                               VALUES
                                 (?, ?, ?, ?, ?, ?, ?);`;
+    // var timeOffQueryString = `INSERT INTO time_off
+    //                             (tech_id, toff_date, toff_start_time, toff_end_time, toff_start_iso_8601, toff_end_iso_8601, notes)
+    //                           VALUES
+    //                            (`con.escape(timeOffEvent.tech_id) + `,` +
+    //                              con.escape(timeOffEvent.toff_date) + `,` +
+    //                              con.escape(timeOffEvent.toff_start_time) + `,` +
+    //                              con.escape(timeOffEvent.toff_end_time) + `,` +
+    //                              con.escape(timeOffEvent.toff_start_iso_8601) + `,` +
+    //                              con.escape(timeOffEvent.toff_end_iso_8601) + `,` +
+    //                              con.escape(timeOffEvent.notes) + `);`;
+
     con.query(timeOffQueryString, time_off_item, function(err, result){
+    // con.query(timeOffQueryString, function(err, result){
       if(err) throw err;
       else {
         console.log('timeOffQueryString sent to db as new item. time_off_id = ' + result.insertId);
@@ -729,9 +783,6 @@ router.post('/api/time_off', function (req, res) {
     });
   }
 });
-// ***** Getting the ID of an inserted row, and getting the number of affected rows:
-// https://github.com/mysqljs/mysql#getting-the-id-of-an-inserted-row
-// use this to send more useful response messages
 
 
 
