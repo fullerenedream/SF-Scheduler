@@ -688,26 +688,6 @@ router.post('/api/time_off', function (req, res) {
     See Josh's email about validations & validation middleware
   */
 
-  // TODO: move validations into a different file
-  function isPositiveInt(val) {
-    // check that input is a number
-    if (isNaN(val)) {
-      return false;
-    }
-    // check that input is greater than zero
-    else if (val < 0) {
-      return false;
-    }
-    // check that input is an integer
-    else if(val % 1 != 0){
-      return false;
-    }
-    // All tests have passed, so return true
-    else {
-      console.log(val + ' is a positive integer');
-      return true;
-    }
-  }
 
   if ( (req.body.time_off_id != '') && isPositiveInt(req.body.time_off_id) == false ) {
     console.log('time_off_id is invalid: it is neither a positive integer nor an empty string');
@@ -797,5 +777,52 @@ router.delete('/api/:id', function(req, res) {
   });
   res.json(sampleData);
 });
+
+
+router.delete('/api/time_off/:id', function(req, res) {
+  var con = db.connectToScheduleDB();
+  // var time_off_id = req.param('time_off_id');
+  var time_off_id = 8;
+  var key = time_off_id;
+
+  if (isPositiveInt(time_off_id) == false) {
+    console.log('time_off_id is invalid: it is not a positive integer');
+  }
+  var timeOffQueryString = `DELETE FROM time_off
+                            WHERE time_off_id = ?`;
+  con.query(timeOffQueryString, [key], function(err, result){
+    if(err) throw err;
+    else {
+      console.log('deleting time_off row with time_off_id ' + time_off_id);
+      res.json("success"); // response says whether save was success or failure
+    }
+  });
+});
+
+
+// TODO: move validation helper functions into a different file
+function isPositiveInt(val) {
+  // check that input is a number
+  if (isNaN(val)) {
+    console.log(val + ' is not a number');
+    return false;
+  }
+  // check that input is greater than zero
+  else if (val <= 0) {
+    console.log(val + ' is a not a positive number');
+    return false;
+  }
+  // check that input is an integer
+  else if(val % 1 != 0){
+    console.log(val + ' is not an integer');
+    return false;
+  }
+  // All tests have passed, so return true
+  else {
+    console.log(val + ' is a positive integer');
+    return true;
+  }
+}
+
 
 module.exports = router;
