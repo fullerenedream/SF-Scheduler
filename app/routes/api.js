@@ -452,12 +452,12 @@ router.get('/api/resources_and_events', function(req,res){
                                 FROM time_off`;
       con.query(timeOffQueryString,function(err,toff_rows){
         if(err) throw err;
-        console.log('\nAll timeOffEvents:\n');
-        console.log('toff_rows:\n' + toff_rows);
+        // console.log('\nAll timeOffEvents:\n');
+        // console.log('toff_rows:\n' + toff_rows);
         var timeOffEvents = [];
         // iterate over toff_rows into a valid JSON string
         for (var i = 0; i < toff_rows.length; i++) {
-          console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
+          // console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
           var timeOffEvent = new Object();
           timeOffEvent.id = toff_rows[i].time_off_id;
           timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
@@ -632,28 +632,78 @@ router.post('/api/test', function(req, res) {
 
 // receive a form post for a time_off event and save it to the database
 // *** TODO: test with wrong data types
+// *** TODO: set up conditionals so that no empty fields from form are put into an UPDATE query,
+// otherwise they can overwrite existing data with stuff like '0000-00-00'
+// - am I going to use a bunch of conditionals to procedurally generate the query string?
 router.post('/api/time_off', function (req, res) {
-  time_off_item = [req.body.tech_id, req.body.toff_date, req.body.toff_start_time, req.body.toff_end_time, req.body.toff_start_iso_8601, req.body.toff_end_iso_8601, req.body.notes, req.body.time_off_id];
-  console.log(req.body.time_off_id);
-  console.log(req.body.tech_id);
-  console.log(req.body.toff_date);
-  console.log(req.body.toff_start_time);
-  console.log(req.body.toff_end_time);
-  console.log(req.body.toff_start_iso_8601);
-  console.log(req.body.toff_end_iso_8601);
-  console.log(req.body.notes);
+  // var time_off_item = [req.body.tech_id, req.body.toff_date, req.body.toff_start_time, req.body.toff_end_time, req.body.toff_start_iso_8601, req.body.toff_end_iso_8601, req.body.notes, req.body.time_off_id];
+
+  /*
+    WRITING VALIDATIONS
+    what are the things you need to check in order for this to insert/update properly?
+    time_off_id - must be either blank (=new time off event), OR a number that matches an existing time_off_id
+    tech_id - must be a whole number > 0 that matches an existing tech_id (ISP currently has tech_id = 0... ISP doesn't need time off)
+    toff_date - must be a date of the form YYYY-MM-DD (could put some upper and lower bounds on the dates)
+    toff_start_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds)
+    toff_end_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds)
+    toff_start_iso_8601 - generated from toff_date and toff_start_time, in the form YYYY-MM-DDTHH:MM:SS
+    toff_end_iso_8601 - generated from toff_date and toff_end_time, in the form YYYY-MM-DDTHH:MM:SS
+    notes - anything, including empty.
+
+    See Josh's email about validations & validation middleware
+  */
+
+  var timeOffEvent = new Object();
+
+  if (!Number.isInteger(tech_id) || tech_id <= 0)
+
+
+  timeOffEvent.time_off_id = req.body.time_off_id;
+  timeOffEvent.tech_id = req.body.tech_id;
+  timeOffEvent.toff_date = req.body.toff_date;
+  timeOffEvent.toff_start_time = req.body.toff_start_time;
+  timeOffEvent.toff_end_time = req.body.toff_end_time;
+  timeOffEvent.toff_start_iso_8601 = req.body.toff_start_iso_8601;
+  timeOffEvent.toff_end_iso_8601 = req.body.toff_end_iso_8601;
+  timeOffEvent.notes = req.body.notes;
+  // console.log(req.body.time_off_id);
+  // console.log(req.body.tech_id);
+  // console.log(req.body.toff_date);
+  // console.log(req.body.toff_start_time);
+  // console.log(req.body.toff_end_time);
+  // console.log(req.body.toff_start_iso_8601);
+  // console.log(req.body.toff_end_iso_8601);
+  // console.log(req.body.notes);
+  console.log(timeOffEvent.time_off_id);
+  console.log(timeOffEvent.tech_id);
+  console.log(timeOffEvent.toff_date);
+  console.log(timeOffEvent.toff_start_time);
+  console.log(timeOffEvent.toff_end_time);
+  console.log(timeOffEvent.toff_start_iso_8601);
+  console.log(timeOffEvent.toff_end_iso_8601);
+  console.log(timeOffEvent.notes);
   if (req.body.time_off_id > 0) {
     var con = db.connectToScheduleDB();
+    // var timeOffQueryString = `UPDATE time_off
+    //                           SET tech_id = ?,
+    //                             toff_date = ?,
+    //                             toff_start_time = ?,
+    //                             toff_end_time = ?,
+    //                             toff_start_iso_8601 = ?,
+    //                             toff_end_iso_8601 = ?,
+    //                             notes = ?
+    //                           WHERE time_off_id = ?;`;
     var timeOffQueryString = `UPDATE time_off
-                              SET tech_id = ?,
-                                toff_date = ?,
-                                toff_start_time = ?,
-                                toff_end_time = ?,
-                                toff_start_iso_8601 = ?,
-                                toff_end_iso_8601 = ?,
-                                notes = ?
-                              WHERE time_off_id = ?;`;
-    con.query(timeOffQueryString, time_off_item, function(err, result){
+                              SET tech_id = ` + con.escape(timeOffEvent.tech_id) + `,
+                                toff_date = ` + con.escape(timeOffEvent.toff_date) + `,
+                                toff_start_time = ` + con.escape(timeOffEvent.toff_start_time) + `,
+                                toff_end_time = ` + con.escape(timeOffEvent.toff_end_time) + `,
+                                toff_start_iso_8601 = ` + con.escape(timeOffEvent.toff_start_iso_8601) + `,
+                                toff_end_iso_8601 = ` + con.escape(timeOffEvent.toff_end_iso_8601) + `,
+                                notes = ` + con.escape(timeOffEvent.notes) + `
+                              WHERE time_off_id = ` + con.escape(timeOffEvent.time_off_id) + `;`;
+    // con.query(timeOffQueryString, time_off_item, function(err, result){
+      con.query(timeOffQueryString, function(err, result){
       if(err) throw err;
       else {
         console.log('timeOffQueryString sent to db as update to existing item');
