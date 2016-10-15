@@ -110,7 +110,6 @@ $(document).ready(function() {
 
       // You can also dynamically set a calendar's height after initialization - see docs
       height: 600,
-      now: todayDate,
       editable: true, // enable draggable events
       droppable: true, // this allows things to be dropped onto the calendar
       aspectRatio: 1.8,
