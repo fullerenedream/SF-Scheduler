@@ -115,6 +115,7 @@ $(document).ready(function() {
       aspectRatio: 1.8,
       scrollTime: '06:00', // 6am is default scrollTime, but we may wish to change this
       allDaySlot: false,
+      navLinks: true,
       eventOverlap: false,
       // TODO: change buttons so 'today' shows today's date, get rid of title
       header: {
@@ -127,23 +128,19 @@ $(document).ready(function() {
       selectable: true,
       selectHelper: true,
       // *** this bit lets you click the calendar to create an event
-      // *** TODO: make this actually work in a useful way
-      select: function(start, end, allDay)
+      // *** TODO: make this actually work in a useful way ********************
+      select: function(start, end, jsEvent, view, resource)
       {
+        var newEvent = new Object();
         var title = prompt('Event Title:');
-        if (title)
-        {
-          calendar.fullCalendar('renderEvent',
-            {
-              title: title,
-              start: start,
-              end: end,
-              allDay: allDay
-            },
-            true // make the event "stick"
-          );
+        if (title) {
+          newEvent.title = title;
+          newEvent.start = start;
+          newEvent.end = end;
+          newEvent.resourceId = resource;
+          calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
         }
-        calendar.fullCalendar('unselect');
+        // calendar.fullCalendar('unselect');
       },
 
       resourceLabelText: 'Installers',
