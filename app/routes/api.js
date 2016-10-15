@@ -606,18 +606,6 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
 
 
 
-// receive a form post and save it to the sample file (later we want this to save to the db)
-// TODO: make this actually save things to the db (e.g. save an appointment to the appointments table)
-router.post('/api',function(req,res){
-  sampleData.unshift(req.body);
-  fs.writeFile('app/data/sample.json', JSON.stringify(sampleData),'utf8',function(err){
-    if(err){
-      console.log(err);
-    }
-  });
-  res.json(sampleData);
-});
-
 
 router.use(bodyParser.json());
 // parses data from form into JSON, so then you access e.g. 'name' field from form
@@ -625,17 +613,143 @@ router.use(bodyParser.json());
 // req.body
 router.use(bodyParser.urlencoded({ extended: false }));
 // parses urlencoded bodies
-router.post('/api/test', function(req, res) {
-  console.log(req.body);
-  res.json("success"); // response says whether save was success or failure
+
+
+
+// receive a form post for an appointment and save it to the database
+router.post('/api/appointments', function (req, res) {
+  var appointment = [
+    req.body.customer_id,
+    req.body.tech_id,
+    req.body.ticket_id,
+    req.body.appt_date,
+    req.body.appt_start_time,
+    req.body.appt_end_time,
+    req.body.appt_date + 'T' + req.body.appt_start_time, // start_time in ISO8601
+    req.body.appt_date + 'T' + req.body.appt_end_time, // end_time in ISO8601
+    req.body.title,
+    req.body.appointment_type,
+    req.body.status,
+    req.body.description,
+    req.body.appointment_id
+  ];
+
+  for (i = 0; i < appointment.length; i++) {
+    console.log(appointment[i]);
+  }
+
+  if (req.body.title == '') {req.body.title = 'No Title';}
+  if (req.body.description == '') {req.body.description = 'No Description';}
+
+  // appointment_id must be either blank (=new appointment) or a positive integer
+  if ( (req.body.appointment_id != '') && isPositiveInt(req.body.appointment_id) == false ) {
+    console.log('appointment_id is invalid: it is neither a positive integer nor an empty string');
+  }
+  // TODO: create validation for customer_id - positive integer, matching an existing customer_id (TODO: make customers table)
+  // TODO: create validation for tech_id - must match an existing tech_id (= user_id in users table)
+  // TODO: decide if ticket_id is actually a required field (it's not required in the db)
+  // else if ( isPositiveInt(req.body.ticket_id) == false ) {
+  //   console.log('ticket_id is invalid: it is not a positive integer');
+  // }
+  else if ( moment(req.body.appt_date, 'YYYY-MM-DD', true).isValid() == false ) {
+    console.log('appt_date is invalid: it is not of the form YYYY-MM-DD');
+  }
+  else if ( moment(req.body.appt_start_time, 'HH:mm:ss', true).isValid() == false ) {
+    console.log('appt_start_time is invalid: it is not of the form HH:mm:ss');
+  }
+  else if ( moment(req.body.appt_end_time, 'HH:mm:ss', true).isValid() == false ) {
+    console.log('appt_end_time is invalid: it is not of the form HH:mm:ss');
+  }
+  // TODO: create validation for appointment_type - there should be a few set appointment types to choose from
+  // TODO: improve validation for status - there should only be a few set statuses to choose from
+  else if ( isInt(req.body.status) == false ) {
+    console.log('appointment status is invalid: it is not a positive integer');
+  }
+
+  // if appointment_id is valid, appointment with that id is updated in the db
+  else if (isPositiveInt(req.body.appointment_id)) {
+    var con = db.connectToScheduleDB();
+    var appointmentQueryString = `UPDATE appointments
+                                  SET customer_id = ?,
+                                    tech_id = ?,
+                                    ticket_id = ?,
+                                    appt_date = ?,
+                                    appt_start_time = ?,
+                                    appt_end_time = ?,
+                                    appt_start_iso_8601 = ?,
+                                    appt_end_iso_8601 = ?,
+                                    title = ?,
+                                    appointment_type = ?,
+                                    status = ?,
+                                    description = ?
+                                  WHERE appointment_id = ?;`;
+
+    con.query(appointmentQueryString, appointment, function(err, result){
+      if(err) throw err;
+      else {
+        console.log('appointmentQueryString sent to db as update to existing item');
+        console.log('affected rows: ' + result.affectedRows);
+        res.json("success"); // response says whether save was success or failure - TODO: make this a useful response message
+      }
+    });
+  }
+  // if no appointment_id is given, a new appointment is created in the db
+  // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
+  else if (req.body.appointment_id == '') {
+    var con = db.connectToScheduleDB();
+    var appointmentQueryString = `INSERT INTO appointments
+                                   (customer_id,
+                                    tech_id,
+                                    ticket_id,
+                                    appt_date,
+                                    appt_start_time,
+                                    appt_end_time,
+                                    appt_start_iso_8601,
+                                    appt_end_iso_8601,
+                                    title,
+                                    appointment_type,
+                                    status,
+                                    description)
+                                  VALUES
+                                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+
+    con.query(appointmentQueryString, appointment, function(err, result){
+      if(err) throw err;
+      else {
+        console.log('appointmentQueryString sent to db as new item. appointment_id = ' + result.insertId);
+        console.log('affected rows: ' + result.affectedRows);
+        res.json("success"); // response says whether save was success or failure - TODO: make this a useful response message
+      }
+    });
+  }
 });
 
 
+// on a click, calls api with a DELETE request that includes the ID (index) of the object to delete
+// this one is for a appointment, specified by appointment_id
+// **** TODO: GET THIS WORKING PROPERLY
+router.delete('/api/appointment/:id', function(req, res) {
+  var con = db.connectToScheduleDB();
+  var appointment_id = req.param('appointment_id');
+  var key = appointment_id;
+
+  if (isPositiveInt(appointment_id) == false) {
+    console.log('appointment_id is invalid: it is not a positive integer');
+  }
+  var appointmentQueryString = `DELETE FROM appointments
+                            WHERE appointment_id = ?`;
+  con.query(appointmentQueryString, [key], function(err, result){
+    if(err) throw err;
+    else {
+      console.log('deleting appointment row with appointment_id ' + appointment_id);
+      res.json("success"); // response says whether save was success or failure - TODO: make this a useful response message
+    }
+  });
+});
+
+
+
 // receive a form post for a time_off event and save it to the database
-// *** TODO: test with wrong data types
-// *** TODO: set up conditionals so that no empty fields from form are put into an UPDATE query,
-// otherwise they can overwrite existing data with stuff like '0000-00-00'
-// - am I going to use a bunch of conditionals to procedurally generate the query string?
 router.post('/api/time_off', function (req, res) {
   var time_off_item = [
     req.body.tech_id,
@@ -676,8 +790,8 @@ router.post('/api/time_off', function (req, res) {
   /*
     WRITING VALIDATIONS
     what are the things you need to check in order for this to insert/update properly?
-    time_off_id - must be either blank (=new time off event), OR a number that matches an existing time_off_id
-    tech_id - must be a whole number > 0
+    time_off_id - must be either blank (=new time off event), OR a positive integer
+    tech_id - must be a positive integer
     toff_date - must be a date of the form YYYY-MM-DD (could put some upper and lower bounds on the dates), or empty
     toff_start_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds), or empty
     toff_end_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds), or empty
@@ -702,6 +816,7 @@ router.post('/api/time_off', function (req, res) {
     console.log('toff_end_time is invalid: it is not of the form HH:mm:ss');
   }
 
+  // if time_off_id is valid, time_off event with that id is updated in the db
   else if (isPositiveInt(req.body.time_off_id)) {
   // if (req.body.time_off_id > 0) {
     var con = db.connectToScheduleDB();
@@ -730,11 +845,12 @@ router.post('/api/time_off', function (req, res) {
       else {
         console.log('timeOffQueryString sent to db as update to existing item');
         console.log('affected rows: ' + result.affectedRows);
-        res.json("success"); // response says whether save was success or failure
+        res.json("success"); // response says whether save was success or failure - TODO: make this a useful response message
       }
     });
   }
   // if no time_off_id is given, a new time_off event is created in the db
+  // *** TODO: check if new event is in the past, and write a warning that requires an OK to continue creating it
   else if (req.body.time_off_id == '') {
     var con = db.connectToScheduleDB();
     var timeOffQueryString = `INSERT INTO time_off
@@ -758,7 +874,7 @@ router.post('/api/time_off', function (req, res) {
       else {
         console.log('timeOffQueryString sent to db as new item. time_off_id = ' + result.insertId);
         console.log('affected rows: ' + result.affectedRows);
-        res.json("success"); // response says whether save was success or failure
+        res.json("success"); // response says whether save was success or failure - TODO: make this a useful response message
       }
     });
   }
@@ -767,22 +883,11 @@ router.post('/api/time_off', function (req, res) {
 
 
 // on a click, calls api with a DELETE request that includes the ID (index) of the object to delete
-// TODO: make this work in some sensible manner
-router.delete('/api/:id', function(req, res) {
-  sampleData.splice(req.params.id,1);
-  fs.writeFile('app/data/sample.json', JSON.stringify(sampleData), 'utf8', function(err){
-    if(err){
-      console.log(err);
-    }
-  });
-  res.json(sampleData);
-});
-
-
+// this one is for a time_off event, specified by time_off_id
 router.delete('/api/time_off/:id', function(req, res) {
   var con = db.connectToScheduleDB();
   // var time_off_id = req.param('time_off_id');
-  var time_off_id = 8;
+  var time_off_id = 8; // **** TODO: GET THIS WORKING PROPERLY
   var key = time_off_id;
 
   if (isPositiveInt(time_off_id) == false) {
@@ -794,22 +899,18 @@ router.delete('/api/time_off/:id', function(req, res) {
     if(err) throw err;
     else {
       console.log('deleting time_off row with time_off_id ' + time_off_id);
-      res.json("success"); // response says whether save was success or failure
+      res.json("success"); // response says whether save was success or failure - TODO: make this a useful response message
     }
   });
 });
 
 
 // TODO: move validation helper functions into a different file
-function isPositiveInt(val) {
+
+function isInt(val) {
   // check that input is a number
   if (isNaN(val)) {
     console.log(val + ' is not a number');
-    return false;
-  }
-  // check that input is greater than zero
-  else if (val <= 0) {
-    console.log(val + ' is a not a positive number');
     return false;
   }
   // check that input is an integer
@@ -819,10 +920,25 @@ function isPositiveInt(val) {
   }
   // All tests have passed, so return true
   else {
-    console.log(val + ' is a positive integer');
+    console.log(val + ' is an integer');
     return true;
   }
 }
 
+function isPositiveInt(val) {
+  if (isInt(val) == false) {
+    console.log(val + ' is a not an integer');
+  }
+  // check that input is greater than zero
+  else if (val <= 0) {
+    console.log(val + ' is a not a positive number');
+    return false;
+  }
+  // All tests have passed, so return true
+  else {
+    console.log(val + ' is a positive integer');
+    return true;
+  }
+}
 
 module.exports = router;
