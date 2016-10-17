@@ -44,16 +44,19 @@
           <div id='external-events'>
             <h2>On Deck</h2>
             <!-- TODO: put an 'Add New Appointment' button here, styled like an fc-event but different color -->
-            <div class='fc-event'>Appointment 1</div>
-            <div class='fc-event'>Appointment 2</div>
-            <div class='fc-event'>Appointment 3</div>
-            <div class='fc-event'>Appointment 4</div>
-            <div class='fc-event'>Appointment 5</div>
+            <!-- <div class='fc-event'>Appointment 1</div> -->
           </div> <!-- /#external-events -->
 
           <div id="fullcalendar"></div>
 
           <div style='clear:both'></div>
+
+          <div id="eventContent" title="Event Details" style="display:none;">
+            Start: <span id="startTime"></span><br>
+            End: <span id="endTime"></span><br><br>
+            <p id="eventInfo"></p>
+            <p><strong><a id="eventLink" href="" target="_blank">Read More</a></strong></p>
+          </div>
 
         </div> <!-- /#wrap -->
       </div> <!-- /.tab-pane active /#scheduletab -->
