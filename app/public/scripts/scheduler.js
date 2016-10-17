@@ -137,7 +137,7 @@ $(document).ready(function() {
           newEvent.title = title;
           newEvent.start = start;
           newEvent.end = end;
-          newEvent.resourceId = resource;
+          newEvent.resourceId = resource.id;
           calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
         }
         // calendar.fullCalendar('unselect');
