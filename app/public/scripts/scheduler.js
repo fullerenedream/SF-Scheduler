@@ -77,13 +77,26 @@ $(document).ready(function() {
   /* initialize the external events
   -----------------------------------------------------------------*/
 
-  // it's also still using dummy data in index.ejs
   function makeOnDeckSection() {
-    $('#external-events .fc-event').each(function() {
 
+    // generate html for some dummy external events for makeOnDeckSection to operate on
+    var onDeckEvent1 = "<div class='fc-event' data-title='Install at the Boathouse' data-customer_id=20 data-ticket_id=120 data-appointment_type='Full Install' data-status=0 data-description='Say hi to Henry Fuller'>Install at the Boathouse</div>";
+    var onDeckEvent2 = "<div class='fc-event' data-title='Fix router for Grandma Jenkins' data-customer_id=21 data-ticket_id=121 data-appointment_type='Service Call' data-status=0 data-description='Good cookies, avoid lemonade'>Fix router for Grandma Jenkins</div>";
+    var onDeckEvent3 = "<div class='fc-event' data-title='Install at Harris farm' data-customer_id=22 data-ticket_id=122 data-appointment_type='Full Install' data-status=0 data-description='on the green barn'>Install at Harris farm</div>";
+    $('#external-events').append(onDeckEvent1);
+    $('#external-events').append(onDeckEvent2);
+    $('#external-events').append(onDeckEvent3);
+
+
+    $('#external-events .fc-event').each(function() {
       // store data so the calendar knows to render an event upon drop
       $(this).data('event', {
-        title: $.trim($(this).text()), // use the element's text as the event title
+        title: $(this).data('title'),
+        customer_id: $(this).data('customer_id'),
+        ticket_id: $(this).data('ticket_id'),
+        appointment_type: $(this).data('appointment_type'),
+        status: $(this).data('status'),
+        description: $(this).data('description'),
         stick: true // maintain when user navigates (see docs on the renderEvent method)
       });
 
@@ -129,10 +142,10 @@ $(document).ready(function() {
       selectHelper: true,
       // *** this bit lets you click the calendar to create an event
       // *** TODO: make this actually work in a useful way ********************
-      select: function(start, end, jsEvent, view, resource)
-      {
+      select: function(start, end, jsEvent, view, resource) {
         var newEvent = new Object();
         var title = prompt('Event Title:');
+        alert(start.format('YYYY-MM-DD HH:mm:ss') + " to " + end.format('YYYY-MM-DD HH:mm:ss') + " in view " + view.name);
         if (title) {
           newEvent.title = title;
           newEvent.start = start;
@@ -140,7 +153,7 @@ $(document).ready(function() {
           newEvent.resourceId = resource.id;
           calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
         }
-        // calendar.fullCalendar('unselect');
+        calendar.fullCalendar('unselect');
       },
 
       resourceLabelText: 'Installers',
@@ -157,20 +170,35 @@ $(document).ready(function() {
           var descriptionDiv = '<div>' + event.description + '</div>';
           $('div.fc-title', element).append(descriptionDiv);
         };
+        if (event.notes) {
+          // add event notes after event title
+          var notesDiv = '<div>' + event.notes + '</div>';
+          $('div.fc-title', element).append(notesDiv);
+        };
       },
       drop: function(date, jsEvent, ui, resourceId) {
         console.log('drop', date.format(), resourceId);
         // remove the element from the "Draggable Events" list
         $(this).remove();
       },
-      // called when a proper external event is dropped
+      // called when an external element, containing event data, is dropped on the calendar
       eventReceive: function(event) {
         console.log('eventReceive', event);
       },
-      // called when an event (already on the calendar) is moved
-      eventDrop: function(event) {
+      // called when an event (already on the calendar) is moved -
+      // triggered when dragging stops and the event has moved to a *different* day/time
+      eventDrop: function (event, delta, revertFunc, jsEvent, view) {
         console.log('eventDrop', event);
-      }
+      },
+      eventClick: function (event, jsEvent, view) {
+        var newTitle = prompt('Enter a new title for this event', event.title);
+        if (newTitle) {
+          // update event
+          event.title = newTitle;
+          // call the updateEvent method
+          $('#fullcalendar').fullCalendar('updateEvent', event);
+        }
+      } // end of callback eventClick
       // other options go here...
     });
   }
