@@ -376,7 +376,8 @@ router.get('/api/resources_and_events', function(req,res){
       }
       eventSources.push(appointments);
       response.eventSources = eventSources;
-      console.log('response: ' + JSON.stringify(response));
+      // console.log('response: ' + JSON.stringify(response));
+      console.log('sending response');
       res.json(response);
     }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
   }); // closes 'con.query(tsQueryString,function(err,ts_rows)'
@@ -475,7 +476,8 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
       }
       eventSources.push(appointments);
       response.eventSources = eventSources;
-      console.log('response: ' + JSON.stringify(response));
+      // console.log('response: ' + JSON.stringify(response));
+      console.log('sending response');
       res.json(response);
     }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
   }); // closes 'con.query(tsQueryString,function(err,ts_rows)'
@@ -525,13 +527,18 @@ router.post('/api/appointments', function (req, res) {
   // TODO: create validation for customer_id - must be blank (time off) or positive integer, matching an existing customer_id (TODO: make customers table)
   // TODO: create validation for tech_id - must be blank (On Deck/Unassigned) or an existing tech_id (= user_id in users table)
 
-  // *** TODO: rewrite date and time logic
+  // *** TODO: rewrite appointment_type, date and time logic
   // - if appointment_type = 10 (time off), date, times and tech_id are required
   // - else if no date or time -> appointment is On Deck
   // - else if date and time but no tech_id -> appointment is Unassigned
   // - if start time but no end time, find default duration from appointment_type and generate end time
+  if (isTimeOff(appointment)) {
+    console.log('appointment ' + req.body.title + ' is Time Off');
+    // TODO: fill this out to check for requirements as above
+  }
 
-  else if (isValidDate(req.body.appt_date) == false) {
+
+  if (isValidDate(req.body.appt_date) == false) {
     console.log('appt_date is invalid');
   }
   else if (isValidTime(req.body.appt_start_time) == false) {
@@ -540,7 +547,6 @@ router.post('/api/appointments', function (req, res) {
   else if (isValidTime(req.body.appt_end_time) == false) {
     console.log('appt_end_time is invalid');
   }
-  // **** TODO: create logic for appointment_type ***
   // TODO: improve validation for status - there should only be a few set statuses to choose from
   else if ( isInt(req.body.status) == false ) {
     console.log('appointment status is invalid: it is not a positive integer');
@@ -548,6 +554,15 @@ router.post('/api/appointments', function (req, res) {
 
   // if appointment_id is valid, appointment with that id is updated in the db
   else if (isPositiveInt(req.body.appointment_id)) {
+    updateAppointment();
+  }
+  // if no appointment_id is given, a new appointment is created in the db
+  // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
+  else if (req.body.appointment_id == '') {
+    createAppointment();
+  }
+
+  function updateAppointment() {
     var con = db.connectToScheduleDB();
     var appointmentQueryString = `UPDATE appointments
                                   SET appointment_type = ?,
@@ -573,9 +588,8 @@ router.post('/api/appointments', function (req, res) {
       }
     });
   }
-  // if no appointment_id is given, a new appointment is created in the db
-  // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
-  else if (req.body.appointment_id == '') {
+
+  function createAppointment() {
     var con = db.connectToScheduleDB();
     var appointmentQueryString = `INSERT INTO appointments
                                    (appointment_type,
@@ -602,6 +616,7 @@ router.post('/api/appointments', function (req, res) {
       }
     });
   }
+
 });
 
 
@@ -680,6 +695,27 @@ function isValidTime(time) {
   else return true;
 }
 
+  // *** TODO: rewrite appointment_type, date and time logic
+  // - if appointment_type = 10 (time off), date, times and tech_id are required
+  // - else if no date or time -> appointment is On Deck
+  // - else if date and time but no tech_id -> appointment is Unassigned
+  // - if start time but no end time, find default duration from appointment_type and generate end time
+
+function isTimeOff(appointment) {
+  if (appointment[0] == '10') {
+    console.log(appointment[0]);
+    console.log('appointment is Time Off');
+  }
+  else {
+    console.log(appointment[0]);
+    console.log('appointment is not Time Off');
+  }
+  return appointment[0] == '10' ? true : false;
+}
+
+function isOnDeck(appointment) {
+
+}
 
 
 module.exports = router;
