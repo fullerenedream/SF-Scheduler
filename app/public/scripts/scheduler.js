@@ -72,6 +72,11 @@ $(document).ready(function() {
     drawFullCalendar(data);
   });
 
+  // // draw the calendar with all appointments but no resources (for testing)
+  // $.getJSON('/api/appointments', function(data) {
+  //   drawFullCalendar(data);
+  // });
+
 
 
   /* initialize the external events
