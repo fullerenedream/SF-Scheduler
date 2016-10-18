@@ -229,83 +229,6 @@ router.get('/api/appointments/:appointment_id', function(req,res){
 
 
 
-// // GET all time_off events
-// router.get('/api/time_off', function(req,res){
-//   var con = db.connectToScheduleDB();
-//   var timeOffQueryString = `SELECT time_off_id,
-//                               tech_id,
-//                               toff_start_iso_8601,
-//                               toff_end_iso_8601,
-//                               notes
-//                             FROM time_off`;
-//   con.query(timeOffQueryString,function(err,toff_rows){
-//     if(err) throw err;
-//     console.log('\nAll timeOffEvents:\n');
-//     console.log('toff_rows:\n' + toff_rows);
-//     var response = new Object();
-//     var timeOffEvents = [];
-//     eventSources = [];
-
-//     // iterate over toff_rows into a valid JSON string
-//     for (var i = 0; i < toff_rows.length; i++) {
-//       console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
-//       var timeOffEvent = new Object();
-//       timeOffEvent.id = toff_rows[i].time_off_id;
-//       timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
-//       timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
-//       timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
-//       timeOffEvent.notes = toff_rows[i].notes;
-//       // ************************ comment out for testing events without resources
-//       // timeOffEvent.resourceId = toff_rows[i].tech_id;  // (user_id in technician_schedules)
-//       timeOffEvents.push(timeOffEvent);
-//     }
-//     eventSources.push(timeOffEvents);
-//     response.eventSources = eventSources;
-//     res.json(response);
-//   });
-// });
-
-
-
-// // GET a time_off event by time_off_id
-// router.get('/api/time_off/:time_off_id', function(req,res){
-//   var con = db.connectToScheduleDB();
-//   var time_off_id = req.param('time_off_id');
-//   var key = time_off_id;
-//   var timeOffQueryString = `SELECT time_off_id,
-//                               tech_id,
-//                               toff_start_iso_8601,
-//                               toff_end_iso_8601,
-//                               notes
-//                             FROM time_off
-//                             WHERE time_off_id = ?`;
-//   con.query(timeOffQueryString, [key], function(err,toff_rows){
-//     if(err) throw err;
-//     console.log('\ntimeOffEvent with time_off_id = ' + time_off_id + ':\n');
-//     console.log('toff_rows:\n' + toff_rows);
-
-//     var response = new Object();
-//     var timeOffEvents = [];
-//     var this_toff = toff_rows[0];
-//     eventSources = [];
-
-//     var timeOffEvent = new Object();
-//     timeOffEvent.id = this_toff.time_off_id;
-//     timeOffEvent.title = 'Tech ' + this_toff.tech_id + ' Off';
-//     timeOffEvent.start = this_toff.toff_start_iso_8601;
-//     timeOffEvent.end = this_toff.toff_end_iso_8601;
-//     timeOffEvent.notes = this_toff.notes;
-//     // ************************ comment out for testing events without resources
-//     // timeOffEvent.resourceId = this_toff.tech_id;  // (user_id in technician_schedules)
-//     timeOffEvents.push(timeOffEvent);
-//     eventSources.push(timeOffEvents);
-//     response.eventSources = eventSources;
-//     res.json(response);
-//   });
-// });
-
-
-
 // GET all users from users table
 router.get('/api/users', function(req,res){
   var con = db.connectToScheduleDB();
@@ -367,11 +290,11 @@ router.get('/api/users/:user_id', function(req,res){
 
 
 
-// GET all the resources and events - technician working hours + appointments + time off events
+// GET all the resources and events - technician working hours + appointments
 router.get('/api/resources_and_events', function(req,res){
   var con = db.connectToScheduleDB();
   var response = new Object();
-  // using eventSources array to combine appointments and time_off events
+  // using eventSources array to combine appointments and time_off events - TODO: undo this
   var eventSources = [];
 
   // get all technician working hours
@@ -450,57 +373,25 @@ router.get('/api/resources_and_events', function(req,res){
         appointment.status = appt_rows[i].status;  // (0, 1 or 2)
         appointment.description = appt_rows[i].description;
         appointments.push(appointment);
-        // console.log(appointment);
       }
       eventSources.push(appointments);
-      // response.eventSources = eventSources;
-
-      // // get all time off events
-      // var timeOffQueryString = `SELECT time_off_id,
-      //                             tech_id,
-      //                             toff_start_iso_8601,
-      //                             toff_end_iso_8601,
-      //                             notes
-      //                           FROM time_off`;
-      // con.query(timeOffQueryString,function(err,toff_rows){
-      //   if(err) throw err;
-      //   // console.log('\nAll timeOffEvents:\n');
-      //   // console.log('toff_rows:\n' + toff_rows);
-      //   var timeOffEvents = [];
-      //   // iterate over toff_rows into a valid JSON string
-      //   for (var i = 0; i < toff_rows.length; i++) {
-      //     // console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
-      //     var timeOffEvent = new Object();
-      //     timeOffEvent.id = toff_rows[i].time_off_id;
-      //     timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
-      //     timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
-      //     timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
-      //     timeOffEvent.notes = toff_rows[i].notes;
-      //     // ************************ comment out for testing events without resources
-      //     timeOffEvent.resourceId = toff_rows[i].tech_id;  // (user_id in technician_schedules)
-      //     timeOffEvents.push(timeOffEvent);
-      //   }
-      //   eventSources.push(timeOffEvents);
-
-        response.eventSources = eventSources;
-
-        console.log('response: ' + JSON.stringify(response));
-        res.json(response);
-      // }); // closes 'con.query(timeOffQueryString,function(err,toff_rows)'
+      response.eventSources = eventSources;
+      console.log('response: ' + JSON.stringify(response));
+      res.json(response);
     }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
   }); // closes 'con.query(tsQueryString,function(err,ts_rows)'
 }); // closes 'router.get('/api/resources_and_events', function(req,res)'
 
 
 
-// GET one resource and all its events - technician working hours + appointments + time off events
+// GET one resource and all its events - technician working hours + appointments
 router.get('/api/resources_and_events/:user_id', function(req,res){
   var con = db.connectToScheduleDB();
   var user_id = req.param('user_id');
   var key = user_id;
   console.log('inside GET request for one resource and all its events - /api/resources_and_events/' + user_id);
   var response = new Object();
-  // using eventSources array to combine appointments and time_off events
+  // using eventSources array to combine appointments and time_off events - TODO: undo this
   var eventSources = [];
   // get this technician's working hours
   var tsQueryString =  `SELECT schedule_id,
@@ -584,39 +475,8 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
       }
       eventSources.push(appointments);
       response.eventSources = eventSources;
-
-      // // get all time off events
-      // var timeOffQueryString = `SELECT time_off_id,
-      //                             tech_id,
-      //                             toff_start_iso_8601,
-      //                             toff_end_iso_8601,
-      //                             notes
-      //                           FROM time_off
-      //                           WHERE tech_id = ?`;
-      // con.query(timeOffQueryString, [key], function(err,toff_rows){
-      //   if(err) throw err;
-      //   // console.log('\nAll timeOffEvents:\n');
-      //   // console.log('toff_rows:\n' + toff_rows);
-      //   var timeOffEvents = [];
-      //   // iterate over toff_rows into a valid JSON string
-      //   for (var i = 0; i < toff_rows.length; i++) {
-      //     // console.log('toff_rows ' + i + ':\n' + toff_rows[i]);
-      //     var timeOffEvent = new Object();
-      //     timeOffEvent.id = toff_rows[i].time_off_id;
-      //     timeOffEvent.title = 'Tech ' + toff_rows[i].tech_id + ' Off';
-      //     timeOffEvent.start = toff_rows[i].toff_start_iso_8601;
-      //     timeOffEvent.end = toff_rows[i].toff_end_iso_8601;
-      //     timeOffEvent.notes = toff_rows[i].notes;
-      //     // ************************ comment out for testing events without resources
-      //     timeOffEvent.resourceId = toff_rows[i].tech_id;  // (user_id in technician_schedules)
-      //     timeOffEvents.push(timeOffEvent);
-      //   }
-      //   eventSources.push(timeOffEvents);
-      //   response.eventSources = eventSources;
-
-        console.log('response: ' + JSON.stringify(response));
-        res.json(response);
-      // }); // closes 'con.query(timeOffQueryString,function(err,toff_rows)'
+      console.log('response: ' + JSON.stringify(response));
+      res.json(response);
     }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
   }); // closes 'con.query(tsQueryString,function(err,ts_rows)'
 }); // closes 'router.get('/api/resources_and_events', function(req,res)'
@@ -662,31 +522,25 @@ router.post('/api/appointments', function (req, res) {
   if ( (req.body.appointment_id != '') && isPositiveInt(req.body.appointment_id) == false ) {
     console.log('appointment_id is invalid: it is neither a positive integer nor an empty string');
   }
-  // TODO: create validation for customer_id - positive integer, matching an existing customer_id (TODO: make customers table)
+  // TODO: create validation for customer_id - must be blank (time off) or positive integer, matching an existing customer_id (TODO: make customers table)
   // TODO: create validation for tech_id - must be blank (On Deck/Unassigned) or an existing tech_id (= user_id in users table)
-  // TODO: decide if ticket_id is actually a required field (it's not required in the db)
-  // else if ( isPositiveInt(req.body.ticket_id) == false ) {
-  //   console.log('ticket_id is invalid: it is not a positive integer');
-  // }
+
+  // *** TODO: rewrite date and time logic
+  // - if appointment_type = 10 (time off), date, times and tech_id are required
+  // - else if no date or time -> appointment is On Deck
+  // - else if date and time but no tech_id -> appointment is Unassigned
+  // - if start time but no end time, find default duration from appointment_type and generate end time
+
   else if (isValidDate(req.body.appt_date) == false) {
     console.log('appt_date is invalid');
   }
-  // else if ( moment(req.body.appt_date, 'YYYY-MM-DD', true).isValid() == false ) {
-  //   console.log('appt_date is invalid: it is not of the form YYYY-MM-DD');
-  // }
   else if (isValidTime(req.body.appt_start_time) == false) {
     console.log('appt_start_time is invalid');
   }
   else if (isValidTime(req.body.appt_end_time) == false) {
     console.log('appt_end_time is invalid');
   }
-  // else if ( moment(req.body.appt_start_time, 'HH:mm:ss', true).isValid() == false ) {
-  //   console.log('appt_start_time is invalid: it is not of the form HH:mm:ss');
-  // }
-  // else if ( moment(req.body.appt_end_time, 'HH:mm:ss', true).isValid() == false ) {
-  //   console.log('appt_end_time is invalid: it is not of the form HH:mm:ss');
-  // }
-  // TODO: create validation for appointment_type - there should be a few set appointment types to choose from
+  // **** TODO: create logic for appointment_type ***
   // TODO: improve validation for status - there should only be a few set statuses to choose from
   else if ( isInt(req.body.status) == false ) {
     console.log('appointment status is invalid: it is not a positive integer');
@@ -772,162 +626,6 @@ router.delete('/api/appointment/:id', function(req, res) {
   });
 });
 
-
-
-// // receive a form post for a time_off event and save it to the database
-// router.post('/api/time_off', function (req, res) {
-//   var time_off_item = [
-//     req.body.tech_id,
-//     req.body.toff_date,
-//     req.body.toff_start_time,
-//     req.body.toff_end_time,
-//     req.body.toff_date + 'T' + req.body.toff_start_time, // start_time in ISO8601
-//     req.body.toff_date + 'T' + req.body.toff_end_time, // end_time in ISO8601
-//     req.body.notes,
-//     req.body.time_off_id
-//   ];
-
-//   for (i = 0; i < time_off_item.length; i++) {
-//     console.log(time_off_item[i]);
-//   }
-
-
-  // var timeOffEvent = new Object();
-  // timeOffEvent.time_off_id = req.body.time_off_id;
-  // timeOffEvent.tech_id = req.body.tech_id;
-  // timeOffEvent.toff_date = req.body.toff_date;
-  // timeOffEvent.toff_start_time = req.body.toff_start_time;
-  // timeOffEvent.toff_end_time = req.body.toff_end_time;
-  // timeOffEvent.toff_start_iso_8601 = req.body.toff_date + 'T' + req.body.toff_start_time;
-  // timeOffEvent.toff_end_iso_8601 = req.body.toff_date + 'T' + req.body.toff_end_time;
-  // timeOffEvent.notes = req.body.notes;
-
-  // console.log(timeOffEvent.time_off_id);
-  // console.log(timeOffEvent.tech_id);
-  // console.log(timeOffEvent.toff_date);
-  // console.log(timeOffEvent.toff_start_time);
-  // console.log(timeOffEvent.toff_end_time);
-  // console.log(timeOffEvent.toff_start_iso_8601);
-  // console.log(timeOffEvent.toff_end_iso_8601);
-  // console.log(timeOffEvent.notes);
-
-
-  /*
-    WRITING VALIDATIONS
-    what are the things you need to check in order for this to insert/update properly?
-    time_off_id - must be either blank (=new time off event), OR a positive integer
-    tech_id - must be a positive integer
-    toff_date - must be a date of the form YYYY-MM-DD (could put some upper and lower bounds on the dates), or empty
-    toff_start_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds), or empty
-    toff_end_time - must be a time of the form HH:MM:SS, in 24-hour time, with no seconds (or we'll ignore seconds), or empty
-    toff_start_iso_8601 - generated from toff_date and toff_start_time, in the form YYYY-MM-DDTHH:MM:SS
-    toff_end_iso_8601 - generated from toff_date and toff_end_time, in the form YYYY-MM-DDTHH:MM:SS
-    notes - anything, including empty.
-
-    See Josh's email about validations & validation middleware
-  */
-
-
-//   if ( (req.body.time_off_id != '') && isPositiveInt(req.body.time_off_id) == false ) {
-//     console.log('time_off_id is invalid: it is neither a positive integer nor an empty string');
-//   }
-//   else if ( moment(req.body.toff_date, 'YYYY-MM-DD', true).isValid() == false ) {
-//     console.log('toff_date is invalid: it is not of the form YYYY-MM-DD');
-//   }
-//   else if ( moment(req.body.toff_start_time, 'HH:mm:ss', true).isValid() == false ) {
-//     console.log('toff_start_time is invalid: it is not of the form HH:mm:ss');
-//   }
-//   else if ( moment(req.body.toff_end_time, 'HH:mm:ss', true).isValid() == false ) {
-//     console.log('toff_end_time is invalid: it is not of the form HH:mm:ss');
-//   }
-
-//   // if time_off_id is valid, time_off event with that id is updated in the db
-//   else if (isPositiveInt(req.body.time_off_id)) {
-//   // if (req.body.time_off_id > 0) {
-//     var con = db.connectToScheduleDB();
-//     var timeOffQueryString = `UPDATE time_off
-//                               SET tech_id = ?,
-//                                 toff_date = ?,
-//                                 toff_start_time = ?,
-//                                 toff_end_time = ?,
-//                                 toff_start_iso_8601 = ?,
-//                                 toff_end_iso_8601 = ?,
-//                                 notes = ?
-//                               WHERE time_off_id = ?;`;
-//     // var timeOffQueryString = `UPDATE time_off
-//     //                           SET tech_id = ` + con.escape(timeOffEvent.tech_id) + `,
-//     //                             toff_date = ` + con.escape(timeOffEvent.toff_date) + `,
-//     //                             toff_start_time = ` + con.escape(timeOffEvent.toff_start_time) + `,
-//     //                             toff_end_time = ` + con.escape(timeOffEvent.toff_end_time) + `,
-//     //                             toff_start_iso_8601 = ` + con.escape(timeOffEvent.toff_start_iso_8601) + `,
-//     //                             toff_end_iso_8601 = ` + con.escape(timeOffEvent.toff_end_iso_8601) + `,
-//     //                             notes = ` + con.escape(timeOffEvent.notes) + `
-//     //                           WHERE time_off_id = ` + con.escape(timeOffEvent.time_off_id) + `;`;
-
-//     con.query(timeOffQueryString, time_off_item, function(err, result){
-//       // con.query(timeOffQueryString, function(err, result){
-//       if(err) throw err;
-//       else {
-//         console.log('timeOffQueryString sent to db as update to existing item');
-//         console.log('affected rows: ' + result.affectedRows);
-//         res.json("success"); // response says whether save was success or failure - TODO: make this a useful response message
-//       }
-//     });
-//   }
-//   // if no time_off_id is given, a new time_off event is created in the db
-//   // *** TODO: check if new event is in the past, and write a warning that requires an OK to continue creating it
-//   else if (req.body.time_off_id == '') {
-//     var con = db.connectToScheduleDB();
-//     var timeOffQueryString = `INSERT INTO time_off
-//                                 (tech_id, toff_date, toff_start_time, toff_end_time, toff_start_iso_8601, toff_end_iso_8601, notes)
-//                               VALUES
-//                                 (?, ?, ?, ?, ?, ?, ?);`;
-//     // var timeOffQueryString = `INSERT INTO time_off
-//     //                             (tech_id, toff_date, toff_start_time, toff_end_time, toff_start_iso_8601, toff_end_iso_8601, notes)
-//     //                           VALUES
-//     //                            (`con.escape(timeOffEvent.tech_id) + `,` +
-//     //                              con.escape(timeOffEvent.toff_date) + `,` +
-//     //                              con.escape(timeOffEvent.toff_start_time) + `,` +
-//     //                              con.escape(timeOffEvent.toff_end_time) + `,` +
-//     //                              con.escape(timeOffEvent.toff_start_iso_8601) + `,` +
-//     //                              con.escape(timeOffEvent.toff_end_iso_8601) + `,` +
-//     //                              con.escape(timeOffEvent.notes) + `);`;
-
-//     con.query(timeOffQueryString, time_off_item, function(err, result){
-//     // con.query(timeOffQueryString, function(err, result){
-//       if(err) throw err;
-//       else {
-//         console.log('timeOffQueryString sent to db as new item. time_off_id = ' + result.insertId);
-//         console.log('affected rows: ' + result.affectedRows);
-//         res.json("success"); // response says whether save was success or failure - TODO: make this a useful response message
-//       }
-//     });
-//   }
-// });
-
-
-
-// // on a click, calls api with a DELETE request that includes the ID (index) of the object to delete
-// // this one is for a time_off event, specified by time_off_id
-// router.delete('/api/time_off/:id', function(req, res) {
-//   var con = db.connectToScheduleDB();
-//   // var time_off_id = req.param('time_off_id');
-//   var time_off_id = 8; // **** TODO: GET THIS WORKING PROPERLY
-//   var key = time_off_id;
-
-//   if (isPositiveInt(time_off_id) == false) {
-//     console.log('time_off_id is invalid: it is not a positive integer');
-//   }
-//   var timeOffQueryString = `DELETE FROM time_off
-//                             WHERE time_off_id = ?`;
-//   con.query(timeOffQueryString, [key], function(err, result){
-//     if(err) throw err;
-//     else {
-//       console.log('deleting time_off row with time_off_id ' + time_off_id);
-//       res.json("success"); // response says whether save was success or failure - TODO: make this a useful response message
-//     }
-//   });
-// });
 
 
 // TODO: move validation helper functions into a different file
