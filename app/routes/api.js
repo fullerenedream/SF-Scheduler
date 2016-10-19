@@ -498,19 +498,19 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // receive a form post for an appointment and save it to the database
 router.post('/api/appointments', function (req, res) {
   var appointment = [
-    req.body.appointment_type,
-    req.body.title,
-    req.body.tech_id,
-    req.body.appt_date,
-    req.body.appt_start_time,
-    req.body.appt_end_time,
-    req.body.appt_date + 'T' + req.body.appt_start_time, // start_time in ISO8601
-    req.body.appt_date + 'T' + req.body.appt_end_time, // end_time in ISO8601
-    req.body.customer_id,
-    req.body.ticket_id,
-    req.body.status,
-    req.body.description,
-    req.body.appointment_id
+    req.body.appointment_type,  // 0
+    req.body.title,             // 1
+    req.body.tech_id,           // 2
+    req.body.appt_date,         // 3
+    req.body.appt_start_time,   // 4
+    req.body.appt_end_time,     // 5
+    req.body.appt_date + 'T' + req.body.appt_start_time,  // 6  (start_time in ISO8601)
+    req.body.appt_date + 'T' + req.body.appt_end_time,    // 7  (end_time in ISO8601)
+    req.body.customer_id,       // 8
+    req.body.ticket_id,         // 9
+    req.body.status,            // 10
+    req.body.description,       // 11
+    req.body.appointment_id     // 12
   ];
 
   for (i = 0; i < appointment.length; i++) {
@@ -524,43 +524,128 @@ router.post('/api/appointments', function (req, res) {
   if ( (req.body.appointment_id != '') && isPositiveInt(req.body.appointment_id) == false ) {
     console.log('appointment_id is invalid: it is neither a positive integer nor an empty string');
   }
+
+  // TODO: improve validation for status - there should only be a few set statuses to choose from
+  // - and there should be a default status - let's say it's 0
+  if ( isInt(req.body.status) == false ) {
+    console.log('appointment status is invalid: it is not an integer - setting it to 0');
+    req.body.status = 0;
+  }
+
   // TODO: create validation for customer_id - must be blank (time off) or positive integer, matching an existing customer_id (TODO: make customers table)
   // TODO: create validation for tech_id - must be blank (On Deck/Unassigned) or an existing tech_id (= user_id in users table)
 
   // *** TODO: rewrite appointment_type, date and time logic
-  // - if appointment_type = 10 (time off), date, times and tech_id are required
-  // - else if no date or time -> appointment is On Deck
-  // - else if date and time but no tech_id -> appointment is Unassigned
-  // - if start time but no end time, find default duration from appointment_type and generate end time
+  // - if has no tech_id, is not Time Off, and has date and start time -> appointment is Unassigned
+  // - if not Unassigned, date and start time are required
+  // - if appointment is Time Off, date, times and tech_id are required
+  // - if not Time Off, and has no date or start time -> appointment is On Deck
+  // *** TODO: if appointment (not Time Off) has start time but no end time, find default duration from appointment_type and generate end time
+
+
+  // *** TODO: figure out the right order for these and set up some else if's or something
+  // because these don't all need to run every time
+
+  // Time Off - require date, times and tech_id
   if (isTimeOff(appointment)) {
-    console.log('appointment ' + req.body.title + ' is Time Off');
-    // TODO: fill this out to check for requirements as above
-  }
+    console.log('appointment ' + req.body.title + ' is Time Off - it will be a different color');
+    // require date
+    if (isValidDate(req.body.appt_date) == false) {
+    console.log('appt_date is invalid - please try again');
+    }
+    // require start time and end time... TODO: change so that blank start or end time makes Time Off be All Day
+    else if (isValidTime(req.body.appt_start_time) == false) {
+      console.log('appt_start_time is invalid - please try again');
+    }
+    else if (isValidTime(req.body.appt_end_time) == false) {
+      console.log('appt_end_time is invalid - please try again');
+    }
+    // require tech_id to be of an existing tech
+    // WARNING: tech_id's are temporarily hard-coded (to 1, 2, and 3) in isValidTechId()
+    else if (!isValidTechId(req.body.tech_id)) {
+      console.log('there is no tech with tech_id ' + req.body.tech_id + ' - please try again');
+    }
+    // we have cleared the validations, now create or update the Time Off appointment
+    // if appointment_id is valid, appointment with that id is updated in the db
+    else if (isPositiveInt(req.body.appointment_id)) {
+      updateAppointment();
+    }
+    // if no appointment_id is given, a new appointment is created in the db
+    // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
+    else if (req.body.appointment_id == '') {
+      createAppointment();
+    }
+  } // end Time Off section
 
 
-  if (isValidDate(req.body.appt_date) == false) {
-    console.log('appt_date is invalid');
-  }
-  else if (isValidTime(req.body.appt_start_time) == false) {
-    console.log('appt_start_time is invalid');
-  }
-  else if (isValidTime(req.body.appt_end_time) == false) {
-    console.log('appt_end_time is invalid');
-  }
-  // TODO: improve validation for status - there should only be a few set statuses to choose from
-  else if ( isInt(req.body.status) == false ) {
-    console.log('appointment status is invalid: it is not a positive integer');
-  }
+  // Unassigned - set tech_id to 0 so appointment goes into Unassigned column
+  if (isUnassigned(appointment)) {
+    console.log('Unassigned. Setting tech_id to 0');
+    appointment[2] = 0;
+  } // end Unassigned section
 
-  // if appointment_id is valid, appointment with that id is updated in the db
-  else if (isPositiveInt(req.body.appointment_id)) {
-    updateAppointment();
-  }
-  // if no appointment_id is given, a new appointment is created in the db
-  // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
-  else if (req.body.appointment_id == '') {
-    createAppointment();
-  }
+
+  // On Deck: if appointment is not time off, and date or start time are blank, appointment is an On Deck item
+  // TODO: feed On Deck appointments to makeOnDeckSection() in scheduler.js
+  if (isOnDeck(appointment)) {
+    console.log('On Deck appointment - needs to be fed to makeOnDeckSection() in scheduler.js');
+  } // end On Deck section
+
+
+  // Regular Appointment - requires tech_id, date, start time, appointment_type
+  // TODO: figure out if more validations are necessary, and if so, create them
+  if ( !isTimeOff(appointment) ) {
+    // require tech_id to be of an existing tech
+    // WARNING: tech_id's are temporarily hard-coded (to 1, 2, and 3) in isValidTechId()
+    if (!isValidTechId(req.body.tech_id)) {
+      console.log('there is no tech with tech_id ' + req.body.tech_id + ' - please try again');
+    }
+    if (isValidDate(req.body.appt_date) == false) {
+    console.log('appt_date is invalid - please try again');
+    }
+    // require start time and end time... TODO: change so that blank start or end time makes Time Off be All Day
+    else if (isValidTime(req.body.appt_start_time) == false) {
+      console.log('appt_start_time is invalid - please try again');
+    }
+    // WARNING: appointment_type values are temporarily hard-coded in this function
+    else if (isValidAppointmentType(req.body.appointment_type) == false) {
+      console.log('appointment_type is invalid - please try again');
+    }
+    // we have cleared the validations, now create or update the Time Off appointment
+    // if appointment_id is valid, appointment with that id is updated in the db
+    else if (isPositiveInt(req.body.appointment_id)) {
+      updateAppointment();
+    }
+    // if no appointment_id is given, a new appointment is created in the db
+    // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
+    else if (req.body.appointment_id == '') {
+      createAppointment();
+    }
+  } // end Regular Appointment section
+
+
+
+
+  // if (isValidDate(req.body.appt_date) == false) {
+  //   console.log('appt_date is invalid');
+  // }
+  // else if (isValidTime(req.body.appt_start_time) == false) {
+  //   console.log('appt_start_time is invalid');
+  // }
+  // else if (isValidTime(req.body.appt_end_time) == false) {
+  //   console.log('appt_end_time is invalid');
+  // }
+
+
+  // // if appointment_id is valid, appointment with that id is updated in the db
+  // else if (isPositiveInt(req.body.appointment_id)) {
+  //   updateAppointment();
+  // }
+  // // if no appointment_id is given, a new appointment is created in the db
+  // // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
+  // else if (req.body.appointment_id == '') {
+  //   createAppointment();
+  // }
 
   function updateAppointment() {
     var con = db.connectToScheduleDB();
@@ -645,6 +730,19 @@ router.delete('/api/appointment/:id', function(req, res) {
 
 // TODO: move validation helper functions into a different file
 
+function isBlank(val) {
+    if (val == '') {
+    console.log(val);
+    console.log('val is blank. val: ' + val);
+  }
+  else {
+    console.log(val);
+    console.log('val is not blank. val: ' + val);
+  }
+  return val == '' ? true : false;
+}
+
+// TODO: bugfix - isInt() seems to have accepted '' as an integer
 function isInt(val) {
   // check that input is a number
   if (isNaN(val)) {
@@ -695,12 +793,40 @@ function isValidTime(time) {
   else return true;
 }
 
-  // *** TODO: rewrite appointment_type, date and time logic
-  // - if appointment_type = 10 (time off), date, times and tech_id are required
-  // - else if no date or time -> appointment is On Deck
-  // - else if date and time but no tech_id -> appointment is Unassigned
-  // - if start time but no end time, find default duration from appointment_type and generate end time
+// WARNING: tech_id's are temporarily hard-coded in this function
+// TODO: make function check to see if this tech_id exists in db
+function isValidTechId(tech_id) {
+  if (tech_id == 1 || tech_id == 2 || tech_id == 3) {
+    console.log('valid tech_id: ' + tech_id);
+    return true;
+  }
+  else {
+    console.log('invalid tech_id: ' + tech_id);
+    return false;
+  }
+}
 
+// WARNING: appointment_type values are temporarily hard-coded in this function
+// TODO: make function check to see if this appointment_type exists in db
+function isValidAppointmentType(appointment_type) {
+  if ( (appointment_type >= 1 && appointment_type <= 5) || appointment_type == 8 || appointment_type == 10 ) {
+    console.log('appointment_type is valid');
+    return true;
+  }
+  else {
+    console.log('appointment_type is invalid');
+    return false;
+  }
+}
+
+  // *** TODO: rewrite appointment_type, date and time logic
+  // - if has no tech_id, is not Time Off, and has date and start time -> appointment is Unassigned
+  // - if not Unassigned, date and start time are required
+  // - if appointment is Time Off, date, times and tech_id are required
+  // - if not Time Off, and has no date or start time -> appointment is On Deck
+  // - if has start time but no end time, find default duration from appointment_type and generate end time
+
+// checks appointment_type to see if it is Time Off (=10)
 function isTimeOff(appointment) {
   if (appointment[0] == '10') {
     console.log(appointment[0]);
@@ -713,8 +839,28 @@ function isTimeOff(appointment) {
   return appointment[0] == '10' ? true : false;
 }
 
+// if appointment is not time off, and date or start time are blank, appointment is an On Deck item
 function isOnDeck(appointment) {
+  if (  (!isTimeOff(appointment)) && ( isBlank(appointment[3]) || isBlank(appointment[4]) )  ) {
+    console.log('appointment is On Deck');
+    return true;
+  }
+  else {
+    console.log('appointment is not On Deck');
+    return false;
+  }
+}
 
+// if appointment has no tech_id, is not Time off, has date and time -> appointment is Unassigned
+function isUnassigned(appointment) {
+  if ( isBlank(appointment[2]) && (!isTimeOff(appointment)) &&  isValidDate(appointment[3]) && isValidTime(appointment[4]) && isValidTime(appointment[5]) ) {
+    console.log('appointment is Unassigned');
+    return true;
+  }
+  else {
+    console.log('appointment is not Unassigned');
+    return false;
+  }
 }
 
 
