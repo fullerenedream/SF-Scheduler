@@ -161,6 +161,25 @@ $(document).ready(function() {
         calendar.fullCalendar('unselect');
       },
 
+      // FROM 'USING FULLCALENDAR' BOOK
+      // select: function(start, end, jsEvent, view, resource) {
+      //       // Set title from the description or use default if description empty
+      //       var title = $('#eventDescription').val().trim() != "" ? $('#eventDescription').val(): "Appointment";
+      //       // Description shows dates and times. Needs to be adjusted
+      //       // depending on the current calendar view.
+      //       // We will do that later.
+      //       $('#eventDescription').html("<b>" + start.format("YYYY-MM-DD") +
+      //         " from " + start.format("HH:mm:ss") + " to " + end.format("HH:mm:ss") + "</b>");
+      //       // Attach start and end data to dialog `data` payload
+      //       // so we can use them inside the dialog code
+      //       $('#calCreateEventDialog').data({ 'start':start, 'end':end });
+      //       // Set dialog title dynamically, according to selected dates
+      //       // and times.
+      //       $('#calCreateEventDialog').dialog({title: "Event: " + title});
+      //       // Open dialog
+      //       $('#calCreateEventDialog').dialog('open');
+      //   }, // End select callback
+
       resourceLabelText: 'Installers',
 
       // ************************ comment out for testing events without resources
@@ -213,3 +232,48 @@ $(document).ready(function() {
 
 
 });
+
+
+
+// // FROM 'USING FULLCALENDAR' BOOK
+// // Create Event Dialog JavaScript **************************************
+//     $('#calCreateEventDialog').dialog({
+//         resizable: false,
+//         autoOpen: false,
+//         modal: true,
+//         width: 500,
+//         buttons: {
+//             Create: function() {
+
+//                     // Get start and end dates from data payload
+//                     var start = $(this).data('start');
+//                     var end = $(this).data('end');
+//                     var eventTitle = $("#eventTitle").val().trim();
+//                     var resourceId = $(this.data(resource.id));
+
+//                     // Build event
+//                     var event = {
+//                         title: eventTitle != "" ? eventTitle: "Appointment",
+//                         color: 'DeepSkyBlue',
+//                         textColor: 'black',
+//                         start: start.format(),
+//                         end: end.format(),
+//                         resourceId: resourceId
+//                     }
+
+//                     // Save event locally in fullCalendar's event array
+//                     $calendar.fullCalendar('renderEvent', event, true /*make the event "stick"?*/);
+
+//                 // Unselect event. Selection trail will disappear.
+//                 $calendar.fullCalendar('unselect');
+
+//                 // Close dialog
+//                 $(this).dialog('close');
+
+//             },
+
+//             Cancel: function() {
+//                 $(this).dialog('close');
+//             }
+//         }
+//     });
