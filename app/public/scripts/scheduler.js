@@ -82,16 +82,47 @@ $(document).ready(function() {
   /* initialize the external events
   -----------------------------------------------------------------*/
 
+  // dummy external events
+  var externalEvent1 = new Object();
+  externalEvent1.appointmentType = 1;
+  externalEvent1.title = 'Install at the Boathouse';
+  externalEvent1.customerId = 20;
+  externalEvent1.ticketId = 120;
+  externalEvent1.status = 0;
+  externalEvent1.description = 'Say hi to Henry Fuller';
+
+  var externalEvent2 = new Object();
+  externalEvent2.appointmentType = 2;
+  externalEvent2.title = 'Fix router for Grandma Jenkins';
+  externalEvent2.customerId = 21;
+  externalEvent2.ticketId = 121;
+  externalEvent2.status = 0;
+  externalEvent2.description = 'Good cookies, avoid lemonade';
+
+  var externalEvent3 = new Object();
+  externalEvent3.appointmentType = 1;
+  externalEvent3.title = 'Install at Harris farm';
+  externalEvent3.customerId = 22;
+  externalEvent3.ticketId = 122;
+  externalEvent3.status = 0;
+  externalEvent3.description = 'on the green barn';
+
+  var externalEventArray = [externalEvent1, externalEvent2, externalEvent3];
+
+
   function makeOnDeckSection() {
 
-    // generate html for some dummy external events for makeOnDeckSection to operate on
-    var onDeckEvent1 = "<div class='fc-event' data-title='Install at the Boathouse' data-customer_id=20 data-ticket_id=120 data-appointment_type='Full Install' data-status=0 data-description='Say hi to Henry Fuller'>Install at the Boathouse</div>";
-    var onDeckEvent2 = "<div class='fc-event' data-title='Fix router for Grandma Jenkins' data-customer_id=21 data-ticket_id=121 data-appointment_type='Service Call' data-status=0 data-description='Good cookies, avoid lemonade'>Fix router for Grandma Jenkins</div>";
-    var onDeckEvent3 = "<div class='fc-event' data-title='Install at Harris farm' data-customer_id=22 data-ticket_id=122 data-appointment_type='Full Install' data-status=0 data-description='on the green barn'>Install at Harris farm</div>";
-    $('#external-events').append(onDeckEvent1);
-    $('#external-events').append(onDeckEvent2);
-    $('#external-events').append(onDeckEvent3);
-
+    // generate html for external events for makeOnDeckSection to operate on
+    for (var i = 0; i < externalEventArray.length; i++) {
+      var onDeckEvent = "<div class='fc-event' data-title='" + externalEventArray[i].title +
+                        "' data-customer_id='" + externalEventArray[i].customerId +
+                        "' data-ticket_id='" + externalEventArray[i].ticketId +
+                        "' data-appointment_type='" + externalEventArray[i].appointmentType +
+                        "' data-status='" + externalEventArray[i].status +
+                        "' data-description='" + externalEventArray[i].description +
+                        "'>" + externalEventArray[i].title +"</div>";
+      $('#external-events').append(onDeckEvent);
+    }
 
     $('#external-events .fc-event').each(function() {
       // store data so the calendar knows to render an event upon drop
