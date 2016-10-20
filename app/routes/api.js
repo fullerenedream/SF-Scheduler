@@ -535,7 +535,7 @@ router.post('/api/appointments', function (req, res) {
   // TODO: create validation for customer_id - must be blank (time off) or positive integer, matching an existing customer_id (TODO: make customers table)
   // TODO: create validation for tech_id - must be blank (On Deck/Unassigned) or an existing tech_id (= user_id in users table)
 
-  // *** TODO: rewrite appointment_type, date and time logic
+  // *** appointment_type, date and time logic
   // - if has no tech_id, is not Time Off, and has date and start time -> appointment is Unassigned
   // - if not Unassigned, date and start time are required
   // - if appointment is Time Off, date, times and tech_id are required
@@ -543,7 +543,7 @@ router.post('/api/appointments', function (req, res) {
   // *** TODO: if appointment (not Time Off) has start time but no end time, find default duration from appointment_type and generate end time
 
 
-  // *** TODO: figure out the right order for these and set up some else if's or something
+  // *** TODO: figure out the right order for these and set up some else-if's or something
   // because these don't all need to run every time
 
   // Time Off - require date, times and tech_id
