@@ -259,16 +259,21 @@ $(document).ready(function() {
 
 
       eventRender: function(event, element) {
+        // if event is Unassigned, allow overlap
+        // TODO: bugfix - right now you can't drag an On Deck event straight onto
+        // an Unassigned event - you have to drag it onto an empty calendar spot first
+        // you ought to be able to drag an On Deck event straight onto the Unassigned
+        // column, even if it's overlapping with a preexisting Unassigned event
         if (event.resourceId == 0) {
           event.overlap = true;
         }
+        // add event description after event title
         if (event.description) {
-          // add event description after event title
           var descriptionDiv = '<div>' + event.description + '</div>';
           $('div.fc-title', element).append(descriptionDiv);
         };
+        // add event notes after event title
         if (event.notes) {
-          // add event notes after event title
           var notesDiv = '<div>' + event.notes + '</div>';
           $('div.fc-title', element).append(notesDiv);
         };
