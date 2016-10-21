@@ -217,16 +217,42 @@ $(document).ready(function() {
           newEvent.customerId = $('#customerId').val();
           newEvent.ticketId = $('#ticketId').val();
           newEvent.description = $('#description').val();
-          console.log('new event:\n' + JSON.stringify(newEvent));
+          console.log('JSON.stringify(new event):\n' + JSON.stringify(newEvent));
           calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
 
           $('#fullCalModalNewEvent').modal('hide');
           calendar.fullCalendar('unselect');
 
-          // *** TODO: send POST request to /api/appointments to save newEvent to db
-          // note that newEvent.start & newEvent.end are of the form '2016-10-20T12:30:00'
-          // but validations are looking for date, start time & end time
-          // -> change validations to fit input type
+          // create event object to be stored in db
+          // var postEvent = new Object();
+          // postEvent.appointment_type = newEvent.appointmentType;
+          // postEvent.title = newEvent.title;
+          // postEvent.tech_id = newEvent.resourceId;
+          // postEvent.appt_start_iso_8601 = newEvent.start;
+          // postEvent.appt_end_iso_8601 = newEvent.end;
+          // postEvent.customer_id = newEvent.customerId;
+          // postEvent.ticket_id = newEvent.ticketId;
+          // postEvent.description = newEvent.description;
+          // console.log('JSON.stringify(postEvent):\n' + JSON.stringify(postEvent));
+
+          // send POST request to /api/appointments to save postEvent to db
+          // $.ajax({
+          //   type: 'POST',
+          //   url: '/api/appointments',
+          //   data: postEvent,
+          //   success: console.log(data),
+          //   dataType:
+          // })
+
+
+          // $.post('/api/appointments', JSON.stringify(postEvent)).done(function(data) {
+          //   console.log('data sent to /api/appointments: ' + data);
+          // }, 'json');
+
+          // $.post('/api/appointments', postEvent).done(function(data) {
+          //   console.log('data sent to /api/appointments: ' + data);
+          // });
+
         });
 
       },
