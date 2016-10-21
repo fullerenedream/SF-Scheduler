@@ -224,16 +224,16 @@ $(document).ready(function() {
           calendar.fullCalendar('unselect');
 
           // create event object to be stored in db
-          var postEvent = new Object();
-          postEvent.appointment_type = newEvent.appointmentType;
-          postEvent.title = newEvent.title;
-          postEvent.tech_id = newEvent.resourceId;
-          postEvent.appt_start_iso_8601 = newEvent.start;
-          postEvent.appt_end_iso_8601 = newEvent.end;
-          postEvent.customer_id = newEvent.customerId;
-          postEvent.ticket_id = newEvent.ticketId;
-          postEvent.description = newEvent.description;
-          console.log('JSON.stringify(postEvent):\n' + JSON.stringify(postEvent));
+          // var postEvent = new Object();
+          // postEvent.appointment_type = newEvent.appointmentType;
+          // postEvent.title = newEvent.title;
+          // postEvent.tech_id = newEvent.resourceId;
+          // postEvent.appt_start_iso_8601 = newEvent.start;
+          // postEvent.appt_end_iso_8601 = newEvent.end;
+          // postEvent.customer_id = newEvent.customerId;
+          // postEvent.ticket_id = newEvent.ticketId;
+          // postEvent.description = newEvent.description;
+          // console.log('JSON.stringify(postEvent):\n' + JSON.stringify(postEvent));
 
           // send POST request to /api/appointments to save postEvent to db
           // $.ajax({
