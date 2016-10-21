@@ -259,6 +259,9 @@ $(document).ready(function() {
 
 
       eventRender: function(event, element) {
+        if (event.resourceId == 0) {
+          event.overlap = true;
+        }
         if (event.description) {
           // add event description after event title
           var descriptionDiv = '<div>' + event.description + '</div>';
