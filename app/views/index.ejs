@@ -63,6 +63,80 @@
           </div> --> <!-- /#calCreateEventDialog -->
 
 
+          <!-- bootstrap modal for when you click an event on the calendar -->
+          <div id="fullCalModal" class="modal fade">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                  <h4 id="modalTitle" class="modal-title"></h4>
+                </div> <!-- /.modal-header -->
+
+                <div id="modalBody" class="modal-body"></div>
+
+                <div class="modal-footer">
+                <!--   <button type="button" class="btn btn-primary">Save changes</button> -->
+                </div> <!-- /.modal-footer -->
+              </div> <!-- /.modal-content -->
+            </div> <!-- /.modal-dialog -->
+          </div> <!-- /#fullCalModal /.modal fade -->
+
+
+          <!-- bootstrap modal for when you click on the calendar where there is no event -->
+          <!-- *** TODO: modify this to work with fullcalendar select: function(start, end, jsEvent, view, resource) -->
+          <div id="fullCalModalNewEvent" class="modal fade">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                  <h4 id="modalTitle" class="modal-title">New Appointment</h4>
+                </div> <!-- /.modal-header -->
+
+                <div id="modalBody" class="modal-body">
+                  <form>
+                    <div class="dropdown">
+                      <button class="btn btn-default dropdown-toggle" type="button" id="appointmentType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        Appointment Type
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
+                        <li><a data-appointment_type="1" href="#">Install</a></li>
+                        <li><a data-appointment_type="2" href="#">Service Call</a></li>
+                        <li><a data-appointment_type="3" href="#">Infrastructure</a></li>
+                        <li><a data-appointment_type="4" href="#">Other</a></li>
+                        <li><a data-appointment_type="5" href="#">Uninstall</a></li>
+                        <li><a data-appointment_type="8" href="#">Site Audit</a></li>
+                        <li><a data-appointment_type="10" href="#">Time Off</a></li>
+                      </ul>
+                    </div>
+                    <div class="form-group">
+                      <label for="appointment-title">Title</label>
+                      <input type="text" class="form-control" id="appointmentTitle" placeholder="Title">
+                    </div>
+                    <div class="form-group">
+                      <label for="customer-id">Customer ID</label>
+                      <input type="text" class="form-control" id="customerId" placeholder="Customer ID">
+                    </div>
+                    <div class="form-group">
+                      <label for="ticket-id">Ticket ID</label>
+                      <input type="text" class="form-control" id="ticketId" placeholder="Ticket ID">
+                    </div>
+                    <div class="form-group">
+                      <label for="description">Description</label>
+                      <input type="text" class="form-control" id="description" placeholder="Description">
+                    </div>
+                    <button type="submit" class="btn btn-default" id="submitNewEventFromCalendar">Submit</button>
+                  </form>
+                </div> <!-- /#modalBody --> <!-- /.modal-body -->
+
+                <div class="modal-footer">
+                <!--   <button type="button" class="btn btn-primary">Save changes</button> -->
+                </div> <!-- /.modal-footer -->
+              </div> <!-- /.modal-content -->
+            </div> <!-- /.modal-dialog -->
+          </div> <!-- /#fullCalModal /.modal fade -->
+
+
 
           <div style='clear:both'></div>
 

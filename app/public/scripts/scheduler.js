@@ -7,6 +7,11 @@ $(document).ready(function() {
   var todayDate = new Date().toISOString().substring(0,10);
   console.log(todayDate);
 
+  // reset all bootstrap modals upon close
+  $('.modal').on('hidden.bs.modal', function(e){
+    $(this).removeData();
+  });
+
   // get all technicians and send them to tech dropdown
   var allUsers = $.getJSON('/api/users', function(data) {
     initTechDropdown(data);
@@ -177,19 +182,53 @@ $(document).ready(function() {
       selectable: true,
       selectHelper: true,
       // *** this bit lets you click the calendar to create an event
-      // *** TODO: make this actually work in a useful way ********************
+      // *** TODO: modify this to work with bootstrap modal for making new event with click & drag ********************
       select: function(start, end, jsEvent, view, resource) {
         var newEvent = new Object();
-        var title = prompt('Event Title:');
-        alert(start.format('YYYY-MM-DD HH:mm:ss') + " to " + end.format('YYYY-MM-DD HH:mm:ss') + " in view " + view.name);
-        if (title) {
-          newEvent.title = title;
-          newEvent.start = start;
-          newEvent.end = end;
-          newEvent.resourceId = resource.id;
+        // var title = prompt('Event Title:');
+        // alert(start.format('YYYY-MM-DD HH:mm:ss') + " to " + end.format('YYYY-MM-DD HH:mm:ss') + " in view " + view.name);
+        // if (title) {
+        //   newEvent.title = title;
+        //   newEvent.start = start;
+        //   newEvent.end = end;
+        //   newEvent.resourceId = resource.id;
+        //   calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
+        // }
+
+        // from click-and-drag selection on calendar
+        newEvent.start = start;
+        newEvent.end = end;
+        newEvent.resourceId = resource.id;
+
+        // from bootstrap modal
+        $('#fullCalModalNewEvent').modal();
+        $('#appointmentTypeDropdown li a').click(function() {
+          console.log('dropdown item was selected!');
+          newEvent.appointmentType = $(this).data('appointment_type');
+          console.log('appointment type = ' + newEvent.appointmentType);
+          $(this).parents(".btn-group").find('.selection').text($(this).text());
+          $(this).parents(".btn-group").find('.selection').val($(this).text());
+        });
+
+        // when 'submit' button is clicked
+        $('#submitNewEventFromCalendar').click(function(){
+          console.log('#submitNewEventFromCalendar was clicked!');
+          newEvent.title = $('#appointmentTitle').val();
+          newEvent.customerId = $('#customerId').val();
+          newEvent.ticketId = $('#ticketId').val();
+          newEvent.description = $('#description').val();
+          console.log('new event:\n' + JSON.stringify(newEvent));
           calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
-        }
-        calendar.fullCalendar('unselect');
+
+          $('#fullCalModalNewEvent').modal('hide');
+          calendar.fullCalendar('unselect');
+
+          // *** TODO: send POST request to /api/appointments to save newEvent to db
+          // note that newEvent.start & newEvent.end are of the form '2016-10-20T12:30:00'
+          // but validations are looking for date, start time & end time
+          // -> change validations to fit input type
+        });
+
       },
 
       // FROM 'USING FULLCALENDAR' BOOK
@@ -246,13 +285,19 @@ $(document).ready(function() {
         console.log('eventDrop', event);
       },
       eventClick: function (event, jsEvent, view) {
-        var newTitle = prompt('Enter a new title for this event', event.title);
-        if (newTitle) {
-          // update event
-          event.title = newTitle;
-          // call the updateEvent method
-          $('#fullcalendar').fullCalendar('updateEvent', event);
-        }
+        // var newTitle = prompt('Enter a new title for this event', event.title);
+        // if (newTitle) {
+        //   // update event
+        //   event.title = newTitle;
+        //   // call the updateEvent method
+        //   $('#fullcalendar').fullCalendar('updateEvent', event);
+        // }
+
+        // for bootstrap modal
+        $('#modalTitle').html(event.title);
+        $('#modalBody').html(event.description + '<br>Tech ID: ' + event.resourceId);
+        $('#fullCalModal').modal();
+
       } // end of callback eventClick
       // other options go here...
     });
