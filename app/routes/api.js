@@ -497,20 +497,44 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // CREATE or UPDATE event
 // receive a form post for an appointment and save it to the database
 router.post('/api/appointments', function (req, res) {
+
+  // build date & times out of ISO8601 or vice versa, as needed
+  if ( isValidISO8601(req.body.appt_start_iso_8601) ) {
+    if (req.body.appt_date == '') {
+      req.body.appt_date = req.body.appt_start_iso_8601.substring(0, 10);
+    }
+    if (req.body.appt_start_time == '') {
+      req.body.appt_start_time = req.body.appt_start_iso_8601.substring(11);
+    }
+  }
+  if ( isValidISO8601(req.body.appt_end_iso_8601) ) {
+    if (req.body.appt_end_time == '') {
+      req.body.appt_end_time = req.body.appt_end_iso_8601.substring(11);
+    }
+  }
+  if ( isValidDate(req.body.appt_date) ) {
+    if (req.body.appt_start_iso_8601 == '' && isValidTime(req.body.appt_start_time) ){
+      req.body.appt_start_iso_8601 = req.body.appt_date + 'T' + req.body.appt_start_time;
+    }
+    if (req.body.appt_end_iso_8601 == '' && isValidTime(req.body.appt_end_time) ){
+      req.body.appt_end_iso_8601 = req.body.appt_date + 'T' + req.body.appt_end_time;
+    }
+  }
+
   var appointment = [
-    req.body.appointment_type,  // 0
-    req.body.title,             // 1
-    req.body.tech_id,           // 2
-    req.body.appt_date,         // 3
-    req.body.appt_start_time,   // 4
-    req.body.appt_end_time,     // 5
-    req.body.appt_date + 'T' + req.body.appt_start_time,  // 6  (start_time in ISO8601)
-    req.body.appt_date + 'T' + req.body.appt_end_time,    // 7  (end_time in ISO8601)
-    req.body.customer_id,       // 8
-    req.body.ticket_id,         // 9
-    req.body.status,            // 10
-    req.body.description,       // 11
-    req.body.appointment_id     // 12
+    req.body.appointment_type,    // 0
+    req.body.title,               // 1
+    req.body.tech_id,             // 2
+    req.body.appt_date,           // 3
+    req.body.appt_start_time,     // 4
+    req.body.appt_end_time,       // 5
+    req.body.appt_start_iso_8601, // 6
+    req.body.appt_end_iso_8601,   // 7
+    req.body.customer_id,         // 8
+    req.body.ticket_id,           // 9
+    req.body.status,              // 10
+    req.body.description,         // 11
+    req.body.appointment_id       // 12
   ];
 
   for (i = 0; i < appointment.length; i++) {
@@ -791,6 +815,47 @@ function isValidTime(time) {
     return false;
   }
   else return true;
+}
+
+function isValidISO8601(ISO8601) {
+  if ( moment(ISO8601, 'YYYY-MM-DDTHH:mm:ss', true).isValid() == false ) {
+    console.log(ISO8601 + ' is invalid ISO8601: it is not of the form YYYY-MM-DDTHH:mm:ss');
+    return false;
+  }
+  else {
+  console.log(ISO8601 + ' is valid ISO8601');
+  return true;
+  }
+}
+
+function hasDateAndStartTime(appointment) {
+  if ( isValidDate(appointment[3]) && isValidTime(appointment[4]) ) {
+    console.log('appointment has valid date and start time');
+    return true;
+  }
+  else if ( isValidISO8601(appointment[6]) ){
+    console.log('appointment has valid ISO8601 start time');
+    return true;
+  }
+  else {
+    console.log('appointment is missing date and/or start time');
+    return false;
+  }
+}
+
+function hasDateStartAndEndTime(appointment) {
+  if ( isValidDate(appointment[3]) && isValidTime(appointment[4]) && isValidTime(appointment[5])) {
+    console.log('appointment has valid date, start and end times');
+    return true;
+  }
+  else if ( isValidISO8601(appointment[6]) && isValidISO8601(appointment[7]) ){
+    console.log('appointment has valid ISO8601 start and end times');
+    return true;
+  }
+  else {
+    console.log('appointment is missing date, start or end time');
+    return false;
+  }
 }
 
 // WARNING: tech_id's are temporarily hard-coded in this function
