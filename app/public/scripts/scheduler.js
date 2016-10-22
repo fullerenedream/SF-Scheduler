@@ -184,97 +184,12 @@ $(document).ready(function() {
       // *** this bit lets you click the calendar to create an event
       // *** TODO: modify this to work with bootstrap modal for making new event with click & drag ********************
       select: function(start, end, jsEvent, view, resource) {
-        var newEvent = new Object();
-        // var title = prompt('Event Title:');
-        // alert(start.format('YYYY-MM-DD HH:mm:ss') + " to " + end.format('YYYY-MM-DD HH:mm:ss') + " in view " + view.name);
-        // if (title) {
-        //   newEvent.title = title;
-        //   newEvent.start = start;
-        //   newEvent.end = end;
-        //   newEvent.resourceId = resource.id;
-        //   calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
-        // }
-
-        // from click-and-drag selection on calendar
-        newEvent.start = start;
-        newEvent.end = end;
-        newEvent.resourceId = resource.id;
-
-        // from bootstrap modal
         $('#fullCalModalNewEvent').modal();
-        $('#appointmentTypeDropdown li a').click(function() {
-          console.log('dropdown item was selected!');
-          newEvent.appointmentType = $(this).data('appointment_type');
-          console.log('appointment type = ' + newEvent.appointmentType);
-          $(this).parents(".btn-group").find('.selection').text($(this).text());
-          $(this).parents(".btn-group").find('.selection').val($(this).text());
-        });
-
-        // when 'submit' button is clicked
-        $('#submitNewEventFromCalendar').click(function(){
-          console.log('#submitNewEventFromCalendar was clicked!');
-          newEvent.title = $('#appointmentTitle').val();
-          newEvent.customerId = $('#customerId').val();
-          newEvent.ticketId = $('#ticketId').val();
-          newEvent.description = $('#description').val();
-          console.log('JSON.stringify(new event):\n' + JSON.stringify(newEvent));
-          calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
-
-          $('#fullCalModalNewEvent').modal('hide');
-          calendar.fullCalendar('unselect');
-
-          // create event object to be stored in db
-          // var postEvent = new Object();
-          // postEvent.appointment_type = newEvent.appointmentType;
-          // postEvent.title = newEvent.title;
-          // postEvent.tech_id = newEvent.resourceId;
-          // postEvent.appt_start_iso_8601 = newEvent.start;
-          // postEvent.appt_end_iso_8601 = newEvent.end;
-          // postEvent.customer_id = newEvent.customerId;
-          // postEvent.ticket_id = newEvent.ticketId;
-          // postEvent.description = newEvent.description;
-          // console.log('JSON.stringify(postEvent):\n' + JSON.stringify(postEvent));
-
-          // send POST request to /api/appointments to save postEvent to db
-          // $.ajax({
-          //   type: 'POST',
-          //   url: '/api/appointments',
-          //   data: postEvent,
-          //   success: console.log(data),
-          //   dataType:
-          // })
+        // populate the form with initial values (start, end, resource)
 
 
-          // $.post('/api/appointments', JSON.stringify(postEvent)).done(function(data) {
-          //   console.log('data sent to /api/appointments: ' + data);
-          // }, 'json');
-
-          // $.post('/api/appointments', postEvent).done(function(data) {
-          //   console.log('data sent to /api/appointments: ' + data);
-          // });
-
-        });
-
+        calendar.fullCalendar('unselect');
       },
-
-      // FROM 'USING FULLCALENDAR' BOOK
-      // select: function(start, end, jsEvent, view, resource) {
-      //       // Set title from the description or use default if description empty
-      //       var title = $('#eventDescription').val().trim() != "" ? $('#eventDescription').val(): "Appointment";
-      //       // Description shows dates and times. Needs to be adjusted
-      //       // depending on the current calendar view.
-      //       // We will do that later.
-      //       $('#eventDescription').html("<b>" + start.format("YYYY-MM-DD") +
-      //         " from " + start.format("HH:mm:ss") + " to " + end.format("HH:mm:ss") + "</b>");
-      //       // Attach start and end data to dialog `data` payload
-      //       // so we can use them inside the dialog code
-      //       $('#calCreateEventDialog').data({ 'start':start, 'end':end });
-      //       // Set dialog title dynamically, according to selected dates
-      //       // and times.
-      //       $('#calCreateEventDialog').dialog({title: "Event: " + title});
-      //       // Open dialog
-      //       $('#calCreateEventDialog').dialog('open');
-      //   }, // End select callback
 
       resourceLabelText: 'Installers',
 
@@ -282,7 +197,6 @@ $(document).ready(function() {
       resources: calendarData.resources,
       // ************************ comment out for testing resources without events
       eventSources: calendarData.eventSources,
-
 
       eventRender: function(event, element) {
         // if event is Unassigned, allow overlap
@@ -317,6 +231,9 @@ $(document).ready(function() {
       // triggered when dragging stops and the event has moved to a *different* day/time
       eventDrop: function (event, delta, revertFunc, jsEvent, view) {
         console.log('eventDrop', event);
+
+        // TODO: write saveCalendarEvent function
+        // saveCalendarEvent(event);
       },
       eventClick: function (event, jsEvent, view) {
         // var newTitle = prompt('Enter a new title for this event', event.title);
@@ -333,57 +250,91 @@ $(document).ready(function() {
         $('#fullCalModal').modal();
 
       } // end of callback eventClick
+
       // other options go here...
-    });
-  }
+
+    }); // end of var calendar
+  } // end of function drawFullCalendar(calendarData)
+
 
   makeOnDeckSection(); // when On Deck events are loaded
   // drawFullCalendar(calendarData); // when calendarData is loaded
 
 
+  // when 'submit' button is clicked on #fullCalModalNewEvent bootstrap modal
+  // *** TODO: rewrite this so it makes sense in this scope
+  // get the data from the form inputs, save the new event object to the db,
+  // then draw the new event on the calendar
+  $('#submitNewEventFromCalendar').click(function(){
+    console.log('#submitNewEventFromCalendar was clicked!');
+
+    var newEvent = new Object();
+
+    // from click-and-drag selection on calendar
+    newEvent.start = start;
+    newEvent.end = end;
+    newEvent.resourceId = resource.id;
+
+    // from bootstrap modal
+    $('#appointmentTypeDropdown li a').click(function() {
+      console.log('dropdown item was selected!');
+      newEvent.appointmentType = $(this).data('appointment_type');
+      console.log('appointment type = ' + newEvent.appointmentType);
+      $(this).parents(".btn-group").find('.selection').text($(this).text());
+      $(this).parents(".btn-group").find('.selection').val($(this).text());
+    });
+    // $('#statusDropdown li a').click(function() {
+    //   console.log('dropdown item was selected!');
+    //   newEvent.status = $(this).data('status');
+    //   console.log('status = ' + newEvent.status);
+    //   $(this).parents(".btn-group").find('.selection').text($(this).text());
+    //   $(this).parents(".btn-group").find('.selection').val($(this).text());
+    // });
+
+    newEvent.title = $('#appointmentTitle').val();
+    newEvent.customerId = $('#customerId').val();
+    newEvent.ticketId = $('#ticketId').val();
+    newEvent.description = $('#description').val();
+    console.log('JSON.stringify(new event):\n' + JSON.stringify(newEvent));
+    calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
+
+    $('#fullCalModalNewEvent').modal('hide');
+
+    // create event object to be stored in db
+    // var postEvent = new Object();
+    // postEvent.appointment_type = newEvent.appointmentType;
+    // postEvent.title = newEvent.title;
+    // postEvent.tech_id = newEvent.resourceId;
+    // postEvent.appt_start_iso_8601 = newEvent.start;
+    // postEvent.appt_end_iso_8601 = newEvent.end;
+    // postEvent.customer_id = newEvent.customerId;
+    // postEvent.ticket_id = newEvent.ticketId;
+    // postEvent.description = newEvent.description;
+    // console.log('JSON.stringify(postEvent):\n' + JSON.stringify(postEvent));
+
+    // send POST request to /api/appointments to save postEvent to db
+    // $.ajax({
+    //   type: 'POST',
+    //   url: '/api/appointments',
+    //   data: postEvent,
+    //   success: console.log(data),
+    //   dataType:
+    // })
+
+
+    // $.post('/api/appointments', JSON.stringify(postEvent)).done(function(data) {
+    //   console.log('data sent to /api/appointments: ' + data);
+    // }, 'json');
+
+    // $.post('/api/appointments', postEvent).done(function(data) {
+    //   console.log('data sent to /api/appointments: ' + data);
+    // });
+
+
+
+
+
+  });
+
+
 });
-
-
-
-// // FROM 'USING FULLCALENDAR' BOOK
-// // Create Event Dialog JavaScript **************************************
-//     $('#calCreateEventDialog').dialog({
-//         resizable: false,
-//         autoOpen: false,
-//         modal: true,
-//         width: 500,
-//         buttons: {
-//             Create: function() {
-
-//                     // Get start and end dates from data payload
-//                     var start = $(this).data('start');
-//                     var end = $(this).data('end');
-//                     var eventTitle = $("#eventTitle").val().trim();
-//                     var resourceId = $(this.data(resource.id));
-
-//                     // Build event
-//                     var event = {
-//                         title: eventTitle != "" ? eventTitle: "Appointment",
-//                         color: 'DeepSkyBlue',
-//                         textColor: 'black',
-//                         start: start.format(),
-//                         end: end.format(),
-//                         resourceId: resourceId
-//                     }
-
-//                     // Save event locally in fullCalendar's event array
-//                     $calendar.fullCalendar('renderEvent', event, true /*make the event "stick"?*/);
-
-//                 // Unselect event. Selection trail will disappear.
-//                 $calendar.fullCalendar('unselect');
-
-//                 // Close dialog
-//                 $(this).dialog('close');
-
-//             },
-
-//             Cancel: function() {
-//                 $(this).dialog('close');
-//             }
-//         }
-//     });
