@@ -37,6 +37,15 @@ $(document).ready(function() {
     });
   }
 
+
+  // draw the calendar with all resources and events
+  function loadCalendar() {
+    $.getJSON('/api/resources_and_events', function(data) {
+      $('#fullcalendar').replaceWith('<div id="fullcalendar"></div>');
+      drawFullCalendar(data);
+    });
+  }
+
   // re-draw fullcalendar based on what was selected in dropdown
   function loadTechCalendar(techId) {
     // store the current calendar view (day/week/month) in a variable
@@ -70,12 +79,6 @@ $(document).ready(function() {
     }
   }
 
-
-
-  // draw the calendar with all resources and events
-  $.getJSON('/api/resources_and_events', function(data) {
-    drawFullCalendar(data);
-  });
 
   // // draw the calendar with all appointments but no resources (for testing)
   // $.getJSON('/api/appointments', function(data) {
@@ -153,6 +156,8 @@ $(document).ready(function() {
 
   /* initialize the calendar
   -----------------------------------------------------------------*/
+  // draw the calendar with all resources and events
+  loadCalendar();
 
   function drawFullCalendar(calendarData) {
     console.log('calendarData.resources:')
@@ -181,12 +186,28 @@ $(document).ready(function() {
 
       selectable: true,
       selectHelper: true,
-      // *** this bit lets you click the calendar to create an event
-      // *** TODO: modify this to work with bootstrap modal for making new event with click & drag ********************
+      // click & drag on the calendar to create an event
       select: function(start, end, jsEvent, view, resource) {
+        var start_ISO8601 = start.format('YYYY-MM-DD[T]HH:mm:ss');
+        var end_ISO8601 = end.format('YYYY-MM-DD[T]HH:mm:ss');
+        // summon the modal
         $('#fullCalModalNewEvent').modal();
-        // populate the form with initial values (start, end, resource)
-
+        // populate the form with initial values from click & drag (start, end, resource)
+        var appointmentStartDiv =  "<div class='form-group form-inline form-group-sm' id='appointmentStartDiv'>" +
+                        "<label class='control-label sr-only' for='appointment-start'></label>" +
+                        "<input type='text' class='form-control input-sm' id='startInput' " +
+                        "data-start_input='" + start_ISO8601 + "' placeholder='" + start_ISO8601 + "'></div>"
+        var appointmentEndDiv =  "<div class='form-group form-inline form-group-sm' id='appointmentEndDiv'>" +
+                      "<label class='control-label sr-only' for='appointment-end'></label>" +
+                      "<input type='text' class='form-control input-sm' id='endInput' " +
+                      "data-end_input='" + end_ISO8601 + "' placeholder='" + end_ISO8601 + "'></div>"
+        var appointmentResourceDiv =  "<div class='form-group form-inline form-group-sm' id='appointmentResourceDiv'>" +
+                            "<label class='control-label sr-only' for='resource'></label>" +
+                            "<input type='text' class='form-control input-sm' id='resourceInput' " +
+                            "data-resource_input='" + resource.id + "' placeholder='" + resource.id + "'></div>"
+        $('#appointmentTitleDiv').after(appointmentStartDiv);
+        $('#appointmentStartDiv').after(appointmentEndDiv);
+        $('#appointmentEndDiv').after(appointmentResourceDiv);
 
         calendar.fullCalendar('unselect');
       },
@@ -262,27 +283,32 @@ $(document).ready(function() {
 
 
   // when 'submit' button is clicked on #fullCalModalNewEvent bootstrap modal
-  // *** TODO: rewrite this so it makes sense in this scope
-  // get the data from the form inputs, save the new event object to the db,
-  // then draw the new event on the calendar
   $('#submitNewEventFromCalendar').click(function(){
     console.log('#submitNewEventFromCalendar was clicked!');
 
     var newEvent = new Object();
 
-    // from click-and-drag selection on calendar
-    newEvent.start = start;
-    newEvent.end = end;
-    newEvent.resourceId = resource.id;
-
     // from bootstrap modal
-    $('#appointmentTypeDropdown li a').click(function() {
-      console.log('dropdown item was selected!');
-      newEvent.appointmentType = $(this).data('appointment_type');
-      console.log('appointment type = ' + newEvent.appointmentType);
-      $(this).parents(".btn-group").find('.selection').text($(this).text());
-      $(this).parents(".btn-group").find('.selection').val($(this).text());
-    });
+
+    // TODO: fix this
+    // $('#appointmentTypeDropdown li a').click(function() {
+    //   console.log('dropdown item was selected!');
+    //   newEvent.appointment_type = $(this).data('appointment_type');
+    //   console.log('appointment type = ' + newEvent.appointmentType);
+    //   $(this).parents(".btn-group").find('.selection').text($(this).text());
+    //   $(this).parents(".btn-group").find('.selection').val($(this).text());
+    // });
+
+    // hard-coding temporarily
+    newEvent.appointment_type = 2;
+
+    newEvent.title = $('#appointmentTitleInput').val();
+    newEvent.tech_id = $('#resourceInput').data('resource_input');
+    newEvent.appt_start_iso_8601 = $('#startInput').data('start_input');
+    newEvent.appt_end_iso_8601 = $('#endInput').data('end_input');
+    newEvent.customer_id = $('#customerIdInput').val();
+    newEvent.ticket_id = $('#ticketIdInput').val();
+    newEvent.description = $('#descriptionInput').val();
     // $('#statusDropdown li a').click(function() {
     //   console.log('dropdown item was selected!');
     //   newEvent.status = $(this).data('status');
@@ -290,51 +316,47 @@ $(document).ready(function() {
     //   $(this).parents(".btn-group").find('.selection').text($(this).text());
     //   $(this).parents(".btn-group").find('.selection').val($(this).text());
     // });
-
-    newEvent.title = $('#appointmentTitle').val();
-    newEvent.customerId = $('#customerId').val();
-    newEvent.ticketId = $('#ticketId').val();
-    newEvent.description = $('#description').val();
     console.log('JSON.stringify(new event):\n' + JSON.stringify(newEvent));
-    calendar.fullCalendar('renderEvent', newEvent, true /* make the event "stick" */ );
 
+    var eventData = {
+      appointment_type: newEvent.appointment_type,
+      title: newEvent.title,
+      tech_id: newEvent.tech_id,
+      appt_start_iso_8601: newEvent.appt_start_iso_8601,
+      appt_end_iso_8601: newEvent.appt_end_iso_8601,
+      customer_id: newEvent.customer_id,
+      ticket_id: newEvent.ticket_id,
+      description: newEvent.description
+    }
+    console.log('JSON.stringify(eventData): ' + JSON.stringify(eventData));
+
+    saveEvent(eventData);
+
+    // hide modal once newEvent is created
     $('#fullCalModalNewEvent').modal('hide');
+    // clear data from modal
+    $('#fullCalModalNewEvent').on('hidden.bs.modal', function () {
+      // clear data from text fields
+      $('.modal-body').find('text,textarea,input').val('');
+      // remove procedurally generated divs
+      $('#appointmentStartDiv').remove();
+      $('#appointmentEndDiv').remove();
+      $('#appointmentResourceDiv').remove();
+    });
 
-    // create event object to be stored in db
-    // var postEvent = new Object();
-    // postEvent.appointment_type = newEvent.appointmentType;
-    // postEvent.title = newEvent.title;
-    // postEvent.tech_id = newEvent.resourceId;
-    // postEvent.appt_start_iso_8601 = newEvent.start;
-    // postEvent.appt_end_iso_8601 = newEvent.end;
-    // postEvent.customer_id = newEvent.customerId;
-    // postEvent.ticket_id = newEvent.ticketId;
-    // postEvent.description = newEvent.description;
-    // console.log('JSON.stringify(postEvent):\n' + JSON.stringify(postEvent));
-
-    // send POST request to /api/appointments to save postEvent to db
-    // $.ajax({
-    //   type: 'POST',
-    //   url: '/api/appointments',
-    //   data: postEvent,
-    //   success: console.log(data),
-    //   dataType:
-    // })
-
-
-    // $.post('/api/appointments', JSON.stringify(postEvent)).done(function(data) {
-    //   console.log('data sent to /api/appointments: ' + data);
-    // }, 'json');
-
-    // $.post('/api/appointments', postEvent).done(function(data) {
-    //   console.log('data sent to /api/appointments: ' + data);
-    // });
-
-
-
-
-
+    loadCalendar();
   });
 
+
+  // send POST request to /api/appointments to save event to db
+  function saveEvent(event) {
+    $.ajax({
+      type: 'POST',
+      url: '/api/appointments',
+      data: event,
+      success: function(data) {console.log(data)},
+      dataType: 'json'
+    });
+  }
 
 });

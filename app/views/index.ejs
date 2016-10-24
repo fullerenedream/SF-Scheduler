@@ -62,94 +62,6 @@
             </form>
           </div> --> <!-- /#calCreateEventDialog -->
 
-
-          <!-- bootstrap modal for when you click an event on the calendar -->
-          <div id="fullCalModal" class="modal fade">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                  <h4 id="modalTitle" class="modal-title"></h4>
-                </div> <!-- /.modal-header -->
-
-                <div id="modalBody" class="modal-body"></div>
-
-                <div class="modal-footer">
-                <!--   <button type="button" class="btn btn-primary">Save changes</button> -->
-                </div> <!-- /.modal-footer -->
-              </div> <!-- /.modal-content -->
-            </div> <!-- /.modal-dialog -->
-          </div> <!-- /#fullCalModal /.modal fade -->
-
-
-          <!-- bootstrap modal for when you click on the calendar where there is no event -->
-          <!-- *** TODO: modify this to work with fullcalendar select: function(start, end, jsEvent, view, resource) -->
-          <div id="fullCalModalNewEvent" class="modal fade">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                  <h5 id="modalTitle" class="modal-title">New Appointment</h5>
-                </div> <!-- /.modal-header -->
-
-                <div id="modalBody" class="modal-body">
-                  <form>
-                    <div class="dropdown">
-                      <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="appointmentType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                        Appointment Type
-                        <span class="caret"></span>
-                      </button>
-                      <ul class="dropdown-menu" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
-                        <li><a data-appointment_type="1" href="#">Install</a></li>
-                        <li><a data-appointment_type="2" href="#">Service Call</a></li>
-                        <li><a data-appointment_type="3" href="#">Infrastructure</a></li>
-                        <li><a data-appointment_type="4" href="#">Other</a></li>
-                        <li><a data-appointment_type="5" href="#">Uninstall</a></li>
-                        <li><a data-appointment_type="8" href="#">Site Audit</a></li>
-                        <li><a data-appointment_type="10" href="#">Time Off</a></li>
-                      </ul>
-                    </div>
-                    <div class="form-group form-inline form-group-sm">
-                      <label class="control-label sr-only" for="appointment-title"></label>
-                      <input type="text" class="form-control input-sm" id="appointmentTitle" placeholder="Title">
-                    </div>
-                    <div class="form-group form-inline form-group-sm">
-                      <label class="control-label sr-only" for="customer-id"></label>
-                      <input type="text" class="form-control input-sm" id="customerId" placeholder="Customer ID">
-                    </div>
-                    <div class="form-group form-inline form-group-sm">
-                      <label class="control-label sr-only" for="ticket-id"></label>
-                      <input type="text" class="form-control input-sm" id="ticketId" placeholder="Ticket ID">
-                    </div>
-                    <div class="form-group form-inline form-group-sm">
-                      <label class="control-label sr-only" for="description"></label>
-                      <!-- <input type="text" class="form-control input-sm" id="description" placeholder="Description"> -->
-                      <textarea class="form-control input-sm id="description" placeholder="Description" rows="4"></textarea>
-                    </div>
-<!--                     <div class="dropdown">
-                      <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="status" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                        Appointment Type
-                        <span class="caret"></span>
-                      </button>
-                      <ul class="dropdown-menu" id="statusDropdown" aria-labelledby="status">
-                        <li><a data-status="0" href="#">Active</a></li>
-                        <li><a data-status="1" href="#">Completed</a></li>
-                        <li><a data-status="2" href="#">Cancelled</a></li>
-                      </ul>
-                    </div> -->
-                    <button type="submit" class="btn btn-default" id="submitNewEventFromCalendar">Create Appointment</button>
-                  </form>
-                </div> <!-- /#modalBody --> <!-- /.modal-body -->
-
-                <div class="modal-footer">
-                <!--   <button type="button" class="btn btn-primary">Save changes</button> -->
-                </div> <!-- /.modal-footer -->
-              </div> <!-- /.modal-content -->
-            </div> <!-- /.modal-dialog -->
-          </div> <!-- /#fullCalModal /.modal fade -->
-
-
-
           <div style='clear:both'></div>
 
           <div id="eventContent" title="Event Details" style="display:none;">
@@ -173,6 +85,93 @@
     </div> <!-- /.tab-content -->
 
     <!-- this is where the main stuff was before I moved it -->
+
+
+    <!-- bootstrap modal for when you click an event on the calendar -->
+    <div id="fullCalModal" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+            <h4 id="modalTitle" class="modal-title"></h4>
+          </div> <!-- /.modal-header -->
+
+          <div id="modalBody" class="modal-body"></div>
+
+          <div class="modal-footer">
+          <!--   <button type="button" class="btn btn-primary">Save changes</button> -->
+          </div> <!-- /.modal-footer -->
+        </div> <!-- /.modal-content -->
+      </div> <!-- /.modal-dialog -->
+    </div> <!-- /#fullCalModal /.modal fade -->
+
+
+    <!-- bootstrap modal for when you click on the calendar where there is no event -->
+    <!-- *** TODO: modify this to work with fullcalendar select: function(start, end, jsEvent, view, resource) -->
+    <div id="fullCalModalNewEvent" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+            <h5 id="modalTitle" class="modal-title">New Appointment</h5>
+          </div> <!-- /.modal-header -->
+
+          <div id="modalBody" class="modal-body">
+            <form>
+              <div class="dropdown" id="appointmentTypeDiv">
+                <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="appointmentType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  Appointment Type
+                  <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
+                  <li><a data-appointment_type="1" href="#">Install</a></li>
+                  <li><a data-appointment_type="2" href="#">Service Call</a></li>
+                  <li><a data-appointment_type="3" href="#">Infrastructure</a></li>
+                  <li><a data-appointment_type="4" href="#">Other</a></li>
+                  <li><a data-appointment_type="5" href="#">Uninstall</a></li>
+                  <li><a data-appointment_type="8" href="#">Site Audit</a></li>
+                  <li><a data-appointment_type="10" href="#">Time Off</a></li>
+                </ul>
+              </div>
+              <div class="form-group form-inline form-group-sm" id="appointmentTitleDiv">
+                <label class="control-label sr-only" for="appointment-title"></label>
+                <input type="text" class="form-control input-sm" id="appointmentTitleInput" placeholder="Title">
+              </div>
+              <div class="form-group form-inline form-group-sm" id="customerIdDiv">
+                <label class="control-label sr-only" for="customer-id"></label>
+                <input type="text" class="form-control input-sm" id="customerIdInput" placeholder="Customer ID">
+              </div>
+              <div class="form-group form-inline form-group-sm" id="ticketIdDiv">
+                <label class="control-label sr-only" for="ticket-id"></label>
+                <input type="text" class="form-control input-sm" id="ticketIdInput" placeholder="Ticket ID">
+              </div>
+              <div class="form-group form-inline form-group-sm" id="descriptionDiv">
+                <label class="control-label sr-only" for="description"></label>
+                <!-- <input type="text" class="form-control input-sm" id="description" placeholder="Description"> -->
+                <textarea class="form-control input-sm" id="descriptionInput" placeholder="Description" rows="4"></textarea>
+              </div>
+<!--                     <div class="dropdown">
+                <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="status" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  Appointment Type
+                  <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" id="statusDropdown" aria-labelledby="status">
+                  <li><a data-status="0" href="#">Active</a></li>
+                  <li><a data-status="1" href="#">Completed</a></li>
+                  <li><a data-status="2" href="#">Cancelled</a></li>
+                </ul>
+              </div> -->
+              <button type="submit" class="btn btn-default" id="submitNewEventFromCalendar">Create Appointment</button>
+            </form>
+          </div> <!-- /#modalBody --> <!-- /.modal-body -->
+
+          <div class="modal-footer">
+          <!--   <button type="button" class="btn btn-primary">Save changes</button> -->
+          </div> <!-- /.modal-footer -->
+        </div> <!-- /.modal-content -->
+      </div> <!-- /.modal-dialog -->
+    </div> <!-- /#fullCalModal /.modal fade -->
+
 
   </div> <!-- /.container-fluid -->
   <% include parts/template/jsdefaults.ejs %>

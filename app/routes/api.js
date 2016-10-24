@@ -500,23 +500,23 @@ router.post('/api/appointments', function (req, res) {
 
   // build date & times out of ISO8601 or vice versa, as needed
   if ( isValidISO8601(req.body.appt_start_iso_8601) ) {
-    if (req.body.appt_date == '') {
+    if (req.body.appt_date == null) {
       req.body.appt_date = req.body.appt_start_iso_8601.substring(0, 10);
     }
-    if (req.body.appt_start_time == '') {
+    if (req.body.appt_start_time == null) {
       req.body.appt_start_time = req.body.appt_start_iso_8601.substring(11);
     }
   }
   if ( isValidISO8601(req.body.appt_end_iso_8601) ) {
-    if (req.body.appt_end_time == '') {
+    if (req.body.appt_end_time == null) {
       req.body.appt_end_time = req.body.appt_end_iso_8601.substring(11);
     }
   }
   if ( isValidDate(req.body.appt_date) ) {
-    if (req.body.appt_start_iso_8601 == '' && isValidTime(req.body.appt_start_time) ){
+    if (req.body.appt_start_iso_8601 == null && isValidTime(req.body.appt_start_time) ){
       req.body.appt_start_iso_8601 = req.body.appt_date + 'T' + req.body.appt_start_time;
     }
-    if (req.body.appt_end_iso_8601 == '' && isValidTime(req.body.appt_end_time) ){
+    if (req.body.appt_end_iso_8601 == null && isValidTime(req.body.appt_end_time) ){
       req.body.appt_end_iso_8601 = req.body.appt_date + 'T' + req.body.appt_end_time;
     }
   }
@@ -541,19 +541,19 @@ router.post('/api/appointments', function (req, res) {
     console.log(appointment[i]);
   }
 
-  if (req.body.title == '') {req.body.title = 'No Title';}
-  if (req.body.description == '') {req.body.description = 'No Description';}
+  if (req.body.title == null || req.body.title == '') {appointment[1] = 'No Title';}
+  if (req.body.description == null || req.body.description == '') {appointment[11] = 'No Description';}
 
   // appointment_id must be either blank (=new appointment) or a positive integer
-  if ( (req.body.appointment_id != '') && isPositiveInt(req.body.appointment_id) == false ) {
+  if ( (req.body.appointment_id != null) && isPositiveInt(req.body.appointment_id) == false ) {
     console.log('appointment_id is invalid: it is neither a positive integer nor an empty string');
   }
 
   // TODO: improve validation for status - there should only be a few set statuses to choose from
   // - and there should be a default status - let's say it's 0
-  if ( isInt(req.body.status) == false ) {
+  if ( (req.body.status == null) || (isInt(req.body.status) == false) ) {
     console.log('appointment status is invalid: it is not an integer - setting it to 0');
-    req.body.status = 0;
+    appointment[10] = 0;
   }
 
   // TODO: create validation for customer_id - must be blank (time off) or positive integer, matching an existing customer_id (TODO: make customers table)
@@ -596,7 +596,7 @@ router.post('/api/appointments', function (req, res) {
     }
     // if no appointment_id is given, a new appointment is created in the db
     // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
-    else if (req.body.appointment_id == '') {
+    else if (req.body.appointment_id == null) {
       createAppointment();
     }
   } // end Time Off section
@@ -642,7 +642,7 @@ router.post('/api/appointments', function (req, res) {
     }
     // if no appointment_id is given, a new appointment is created in the db
     // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
-    else if (req.body.appointment_id == '') {
+    else if (req.body.appointment_id == null) {
       createAppointment();
     }
   } // end Regular Appointment section
@@ -667,7 +667,7 @@ router.post('/api/appointments', function (req, res) {
   // }
   // // if no appointment_id is given, a new appointment is created in the db
   // // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
-  // else if (req.body.appointment_id == '') {
+  // else if (req.body.appointment_id == null) {
   //   createAppointment();
   // }
 
@@ -733,14 +733,13 @@ router.post('/api/appointments', function (req, res) {
 // **** TODO: GET THIS WORKING PROPERLY
 router.delete('/api/appointment/:id', function(req, res) {
   var con = db.connectToScheduleDB();
-  var appointment_id = req.param('appointment_id');
+  var appointment_id = req.param('id');
   var key = appointment_id;
 
   if (isPositiveInt(appointment_id) == false) {
     console.log('appointment_id is invalid: it is not a positive integer');
   }
-  var appointmentQueryString = `DELETE FROM appointments
-                            WHERE appointment_id = ?`;
+  var appointmentQueryString = `DELETE FROM appointments WHERE appointment_id = ?`;
   con.query(appointmentQueryString, [key], function(err, result){
     if(err) throw err;
     else {
@@ -766,7 +765,7 @@ function isBlank(val) {
   return val == '' ? true : false;
 }
 
-// TODO: bugfix - isInt() seems to have accepted '' as an integer
+// TODO: bugfix - isInt() seems to have accepted null as an integer
 function isInt(val) {
   // check that input is a number
   if (isNaN(val)) {
