@@ -7,9 +7,24 @@ $(document).ready(function() {
   var todayDate = new Date().toISOString().substring(0,10);
   console.log(todayDate);
 
-  // reset all bootstrap modals upon close
-  $('.modal').on('hidden.bs.modal', function(e){
-    $(this).removeData();
+  // make dropdown menus work
+  $('.dropdown-menu li > a').click(function(){
+    console.log('dropdown item was selected!');
+    $('.status').text($(this).text());
+    console.log( $('.status').text() );
+    $('.status').attr('data-current_value', $(this).attr('data-appointment_type') );
+    console.log('dropdown current value: ' + $('.status').attr('data-current_value'));
+  });
+
+  // reset bootstrap modals upon close
+  // TODO: generalize this to work for any boostrap modals, not just #fullCalModalNewEvent
+  $('#fullCalModalNewEvent').on('hidden.bs.modal', function () {
+    // clear data from text fields
+    $('.modal-body').find('text,textarea,input').val('');
+    // reset dropdowns' displayed text and value
+    // TODO: initial display text is hardcoded - make it read from the html instead
+    $('.dropdown .status').text('Appointment Type');
+    $('.dropdown .status').attr('data-current_value', '');
   });
 
   // get all technicians and send them to tech dropdown
@@ -190,24 +205,14 @@ $(document).ready(function() {
       select: function(start, end, jsEvent, view, resource) {
         var start_ISO8601 = start.format('YYYY-MM-DD[T]HH:mm:ss');
         var end_ISO8601 = end.format('YYYY-MM-DD[T]HH:mm:ss');
+
+        // populate the form with initial values from click & drag (start, end, resource)
+        $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
+        $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
+        $('#resourceInput').attr('data-resource_input', resource.id).attr('placeholder', resource.id);
+
         // summon the modal
         $('#fullCalModalNewEvent').modal();
-        // populate the form with initial values from click & drag (start, end, resource)
-        var appointmentStartDiv =  "<div class='form-group form-inline form-group-sm' id='appointmentStartDiv'>" +
-                        "<label class='control-label sr-only' for='appointment-start'></label>" +
-                        "<input type='text' class='form-control input-sm' id='startInput' " +
-                        "data-start_input='" + start_ISO8601 + "' placeholder='" + start_ISO8601 + "'></div>"
-        var appointmentEndDiv =  "<div class='form-group form-inline form-group-sm' id='appointmentEndDiv'>" +
-                      "<label class='control-label sr-only' for='appointment-end'></label>" +
-                      "<input type='text' class='form-control input-sm' id='endInput' " +
-                      "data-end_input='" + end_ISO8601 + "' placeholder='" + end_ISO8601 + "'></div>"
-        var appointmentResourceDiv =  "<div class='form-group form-inline form-group-sm' id='appointmentResourceDiv'>" +
-                            "<label class='control-label sr-only' for='resource'></label>" +
-                            "<input type='text' class='form-control input-sm' id='resourceInput' " +
-                            "data-resource_input='" + resource.id + "' placeholder='" + resource.id + "'></div>"
-        $('#appointmentTitleDiv').after(appointmentStartDiv);
-        $('#appointmentStartDiv').after(appointmentEndDiv);
-        $('#appointmentEndDiv').after(appointmentResourceDiv);
 
         calendar.fullCalendar('unselect');
       },
@@ -288,29 +293,8 @@ $(document).ready(function() {
 
     var newEvent = new Object();
 
-    // from bootstrap modal
-
-    // TODO: fix this
-    // $('#appointmentTypeDropdown li a').click(function() {
-    //   console.log('dropdown item was selected!');
-    //   newEvent.appointment_type = $(this).data('appointment_type');
-    //   console.log('appointment type = ' + newEvent.appointmentType);
-    //   // $(this).parents(".btn").find('.selection').text($(this).text() + ' <span class="caret"></span>');
-    //   // $(this).parents(".btn").find('.selection').val($(this).data('appointment_type'));
-    // });
-
-    $('.dropdown-menu li > a').click(function(){
-      console.log('dropdown item was selected!');
-      $('.status').text($(this).text());
-      console.log( $('.status').text() );
-      $('.status').attr('data-current_value', $(this).attr('data-appointment_type') );
-      console.log('dropdown current value: ' + $('.status').attr('data-current_value'));
-    });
-
-
-    // hard-coding temporarily
-    // newEvent.appointment_type = 1;
-
+    // data from bootstrap modal
+    newEvent.appointment_type = $('#appointmentTypeDiv .status').attr('data-current_value');
     newEvent.title = $('#appointmentTitleInput').val();
     newEvent.tech_id = $('#resourceInput').data('resource_input');
     newEvent.appt_start_iso_8601 = $('#startInput').data('start_input');
@@ -318,13 +302,7 @@ $(document).ready(function() {
     newEvent.customer_id = $('#customerIdInput').val();
     newEvent.ticket_id = $('#ticketIdInput').val();
     newEvent.description = $('#descriptionInput').val();
-    // $('#statusDropdown li a').click(function() {
-    //   console.log('dropdown item was selected!');
-    //   newEvent.status = $(this).data('status');
-    //   console.log('status = ' + newEvent.status);
-    //   $(this).parents(".btn-group").find('.selection').text($(this).text());
-    //   $(this).parents(".btn-group").find('.selection').val($(this).text());
-    // });
+
     console.log('JSON.stringify(new event):\n' + JSON.stringify(newEvent));
 
     var eventData = {
@@ -343,15 +321,6 @@ $(document).ready(function() {
 
     // hide modal once newEvent is created
     $('#fullCalModalNewEvent').modal('hide');
-    // clear data from modal
-    $('#fullCalModalNewEvent').on('hidden.bs.modal', function () {
-      // clear data from text fields
-      $('.modal-body').find('text,textarea,input').val('');
-      // remove procedurally generated divs
-      $('#appointmentStartDiv').remove();
-      $('#appointmentEndDiv').remove();
-      $('#appointmentResourceDiv').remove();
-    });
 
     loadCalendar();
   });
