@@ -295,12 +295,21 @@ $(document).ready(function() {
     //   console.log('dropdown item was selected!');
     //   newEvent.appointment_type = $(this).data('appointment_type');
     //   console.log('appointment type = ' + newEvent.appointmentType);
-    //   $(this).parents(".btn-group").find('.selection').text($(this).text());
-    //   $(this).parents(".btn-group").find('.selection').val($(this).text());
+    //   // $(this).parents(".btn").find('.selection').text($(this).text() + ' <span class="caret"></span>');
+    //   // $(this).parents(".btn").find('.selection').val($(this).data('appointment_type'));
     // });
 
+    $('.dropdown-menu li > a').click(function(){
+      console.log('dropdown item was selected!');
+      $('.status').text($(this).text());
+      console.log( $('.status').text() );
+      $('.status').attr('data-current_value', $(this).attr('data-appointment_type') );
+      console.log('dropdown current value: ' + $('.status').attr('data-current_value'));
+    });
+
+
     // hard-coding temporarily
-    newEvent.appointment_type = 2;
+    // newEvent.appointment_type = 1;
 
     newEvent.title = $('#appointmentTitleInput').val();
     newEvent.tech_id = $('#resourceInput').data('resource_input');
