@@ -753,16 +753,19 @@ router.delete('/api/appointment/:id', function(req, res) {
 
 // TODO: move validation helper functions into a different file
 
-function isBlank(val) {
-    if (val == '') {
-    console.log(val);
+function isBlankOrNull(val) {
+  if (val == '') {
     console.log('val is blank. val: ' + val);
+    return true;
+  }
+  else if (val == null) {
+    console.log('val is null');
+    return true;
   }
   else {
-    console.log(val);
-    console.log('val is not blank. val: ' + val);
+    console.log('val is not blank or null. val: ' + val);
+    return false;
   }
-  return val == '' ? true : false;
 }
 
 // TODO: bugfix - isInt() seems to have accepted null as an integer
@@ -770,6 +773,10 @@ function isInt(val) {
   // check that input is a number
   if (isNaN(val)) {
     console.log(val + ' is not a number');
+    return false;
+  }
+  else if (val == null) {
+    console.log(val + ' is null');
     return false;
   }
   // check that input is an integer
@@ -903,9 +910,9 @@ function isTimeOff(appointment) {
   return appointment[0] == '10' ? true : false;
 }
 
-// if appointment is not time off, and date or start time are blank, appointment is an On Deck item
+// if appointment is not time off, and date or start time are blank or null, appointment is an On Deck item
 function isOnDeck(appointment) {
-  if (  (!isTimeOff(appointment)) && ( isBlank(appointment[3]) || isBlank(appointment[4]) )  ) {
+  if (  (!isTimeOff(appointment)) && ( isBlankOrNull(appointment[3]) || isBlankOrNull(appointment[4]) )  ) {
     console.log('appointment is On Deck');
     return true;
   }
@@ -917,7 +924,7 @@ function isOnDeck(appointment) {
 
 // if appointment has no tech_id, is not Time off, has date and time -> appointment is Unassigned
 function isUnassigned(appointment) {
-  if ( isBlank(appointment[2]) && (!isTimeOff(appointment)) &&  isValidDate(appointment[3]) && isValidTime(appointment[4]) && isValidTime(appointment[5]) ) {
+  if ( isBlankOrNull(appointment[2]) && (!isTimeOff(appointment)) &&  isValidDate(appointment[3]) && isValidTime(appointment[4]) && isValidTime(appointment[5]) ) {
     console.log('appointment is Unassigned');
     return true;
   }

@@ -118,12 +118,17 @@
 
           <div id="modalBody" class="modal-body">
             <form>
-              <div class="dropdown" id="appointmentTypeDiv">
-                <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="appointmentType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              <div class="dropdown btn-group" id="appointmentTypeDiv">
+                <i class="dropdown-arrow dropdown-arrow-inverse"></i>
+                <button class="btn btn-default btn-sm status" data-current_value="">Appointment Type</button>
+                <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"> <span class="caret"></span></button>
+
+                <!-- <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="appointmentType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                   Appointment Type
                   <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
+                </button> -->
+
+                <ul class="dropdown-menu dropdown-inverse" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
                   <li><a data-appointment_type="1" href="#">Install</a></li>
                   <li><a data-appointment_type="2" href="#">Service Call</a></li>
                   <li><a data-appointment_type="3" href="#">Infrastructure</a></li>
@@ -133,6 +138,7 @@
                   <li><a data-appointment_type="10" href="#">Time Off</a></li>
                 </ul>
               </div>
+
               <div class="form-group form-inline form-group-sm" id="appointmentTitleDiv">
                 <label class="control-label sr-only" for="appointment-title"></label>
                 <input type="text" class="form-control input-sm" id="appointmentTitleInput" placeholder="Title">
