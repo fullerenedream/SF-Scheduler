@@ -83,7 +83,7 @@
           </div> <!-- /.modal-header -->
 
           <div id="modalBody" class="modal-body">
-            <form>
+            <form class="form-horizontal">
               <div class="form-group dropdown btn-group" id="appointmentTypeDiv">
                 <i class="dropdown-arrow dropdown-arrow-inverse"></i>
                 <button class="btn btn-default btn-sm status" data-current_value="">Appointment Type</button>
@@ -99,40 +99,54 @@
                 </ul>
               </div>
 
-              <div class="form-group form-inline form-group-sm" id="appointmentTitleDiv">
-                <label class="control-label sr-only" for="appointment-title"></label>
-                <input type="text" class="form-control input-sm" id="appointmentTitleInput" placeholder="Title">
+              <div class="form-group form-group-sm" id="appointmentTitleDiv">
+                <label class="control-label col-sm-3" for="appointment-title">Title</label>
+                <div class="col-sm-7">
+                  <input type="text" class="form-control input-sm" id="appointmentTitleInput">
+                </div>
               </div>
 
               <!-- TODO: change Start, End and Resource from editable to read-only -->
-              <div class='form-group form-inline form-group-sm' id='appointmentStartDiv'>
-                <label class='control-label sr-only' for='appointment-start'></label>
-                <input type='text' class='form-control input-sm' id='startInput' data-start_input='' placeholder=''>
+              <div class='form-group form-group-sm' id='appointmentStartDiv'>
+                <label class='control-label col-sm-3' for='appointment-start'>Start</label>
+                <div class="col-sm-7">
+                  <input type='text' class='form-control input-sm' id='startInput' data-start_input='' placeholder=''>
+                </div>
               </div>
 
-              <div class='form-group form-inline form-group-sm' id='appointmentEndDiv'>
-                <label class='control-label sr-only' for='appointment-end'></label>
-                <input type='text' class='form-control input-sm' id='endInput' data-end_input='' placeholder=''>
+              <div class='form-group form-group-sm' id='appointmentEndDiv'>
+                <label class='control-label col-sm-3' for='appointment-end'>End</label>
+                <div class="col-sm-7">
+                  <input type='text' class='form-control input-sm' id='endInput' data-end_input='' placeholder=''>
+                </div>
               </div>
 
-              <div class='form-group form-inline form-group-sm' id='appointmentResourceDiv'>
-                <label class='control-label sr-only' for='resource'></label>
-                <input type='text' class='form-control input-sm' id='resourceInput' data-resource_input='' placeholder=''>
+              <div class='form-group form-group-sm' id='appointmentResourceDiv'>
+                <label class='control-label col-sm-3' for='resource'>Installer ID</label>
+                <div class="col-sm-7">
+                  <input type='text' class='form-control input-sm' id='resourceInput' data-resource_input='' placeholder=''>
+                </div>
               </div>
 
-              <div class="form-group form-inline form-group-sm" id="customerIdDiv">
-                <label class="control-label sr-only" for="customer-id"></label>
-                <input type="text" class="form-control input-sm" id="customerIdInput" placeholder="Customer ID">
+              <div class="form-group form-group-sm" id="customerIdDiv">
+                <label class="control-label col-sm-3" for="customer-id">Customer ID</label>
+                <div class="col-sm-7">
+                  <input type="text" class="form-control input-sm" id="customerIdInput">
+                </div>
               </div>
 
-              <div class="form-group form-inline form-group-sm" id="ticketIdDiv">
-                <label class="control-label sr-only" for="ticket-id"></label>
-                <input type="text" class="form-control input-sm" id="ticketIdInput" placeholder="Ticket ID">
+              <div class="form-group form-group-sm" id="ticketIdDiv">
+                <label class="control-label col-sm-3" for="ticket-id">Ticket ID</label>
+                <div class="col-sm-7">
+                  <input type="text" class="form-control input-sm" id="ticketIdInput">
+                </div>
               </div>
 
-              <div class="form-group form-inline form-group-sm" id="descriptionDiv">
-                <label class="control-label sr-only" for="description"></label>
-                <textarea class="form-control input-sm" id="descriptionInput" placeholder="Description" rows="4"></textarea>
+              <div class="form-group form-group-sm" id="descriptionDiv">
+                <label class="control-label col-sm-3" for="description">Description</label>
+                <div class="col-sm-7">
+                  <textarea class="form-control input-sm" id="descriptionInput" rows="4"></textarea>
+                </div>
               </div>
 
               <div class="btn-group" data-toggle="buttons" id="appointmentStatusDiv">
