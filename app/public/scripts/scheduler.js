@@ -204,12 +204,15 @@ $(document).ready(function() {
       select: function(start, end, jsEvent, view, resource) {
         var start_ISO8601 = start.format('YYYY-MM-DD[T]HH:mm:ss');
         var end_ISO8601 = end.format('YYYY-MM-DD[T]HH:mm:ss');
-        // set the modal title
+        // set the modal title and cancel/close button
         $('#modalTitle').text('Create Appointment');
-        // populate the form with initial values from click & drag (start, end, resource)
+        $('#modalCancelOrClose').text('Cancel');
+        // populate the form with initial values
         $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
         $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
         $('#resourceInput').attr('data-resource_input', resource.id).attr('placeholder', resource.id);
+        $('#appointmentStatusDropdown').attr('data-current_value', 0).attr('text', 'Status');
+
         // summon the modal
         $('#fullCalModal').modal();
         // now that we've sent the rest of the job to the modal, de-select the selected area
@@ -224,10 +227,6 @@ $(document).ready(function() {
 
       eventRender: function(event, element) {
         // if event is Unassigned, allow overlap
-        // TODO: bugfix - right now you can't drag an On Deck event straight onto
-        // an Unassigned event - you have to drag it onto an empty calendar spot first
-        // you ought to be able to drag an On Deck event straight onto the Unassigned
-        // column, even if it's overlapping with a preexisting Unassigned event
         if (event.resourceId == 0) {
           event.overlap = true;
         }
@@ -247,18 +246,31 @@ $(document).ready(function() {
         // remove the element from the "Draggable Events" list
         $(this).remove();
       },
+
       // called when an external element, containing event data, is dropped on the calendar
+      // TODO: write eventReceive functionality
+      // TODO: bugfix - right now you can't drag an On Deck event straight onto
+      // an Unassigned event - you have to drag it onto an empty calendar spot first.
+      // you ought to be able to drag an On Deck event straight onto the Unassigned
+      // column, even if it's overlapping with a preexisting Unassigned event
       eventReceive: function(event) {
         console.log('eventReceive', event);
+        // set the modal title and cancel/close button
+        $('#modalTitle').text('Create Appointment');
+        $('#modalCancelOrClose').text('Cancel');
+        // summon the modal
+        $('#fullCalModal').modal();
       },
+
       // called when an event (already on the calendar) is moved -
       // triggered when dragging stops and the event has moved to a *different* day/time
       // *********   TODO: finish adjusting eventData to make sense in eventDrop *************************************
       eventDrop: function (event, delta, revertFunc, jsEvent, view) {
         console.log('eventDrop', event);
 
-        // set the modal title
+        // set the modal title and cancel/close button
         $('#modalTitle').text('View/Edit Appointment');
+        $('#modalCancelOrClose').text('Cancel');
 
         // populate the form with initial values from click & drag (start, end, resource)
         // $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
@@ -284,8 +296,11 @@ $(document).ready(function() {
 
       // TODO: write eventClick functionality
       eventClick: function (event, jsEvent, view) {
-        // set the modal title
+        console.log('eventClick', event);
+        // set the modal title and cancel/close button
         $('#modalTitle').text('View/Edit Appointment');
+        $('#modalCancelOrClose').text('Close');
+
         // summon the modal
         $('#fullCalModal').modal();
 
@@ -303,9 +318,9 @@ $(document).ready(function() {
   // drawFullCalendar(calendarData); // when calendarData is loaded
 
 
-  // when 'submit' button is clicked on #fullCalModal bootstrap modal
-  $('#submitNewEventFromCalendar').click(function(){
-    console.log('#submitNewEventFromCalendar was clicked!');
+  // when 'Save' button is clicked on #fullCalModal bootstrap modal
+  $('#modalSave').click(function(){
+    console.log('modal Save button was clicked!');
 
     var newEvent = new Object();
 
