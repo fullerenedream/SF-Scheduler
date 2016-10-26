@@ -16,9 +16,8 @@ $(document).ready(function() {
     console.log('dropdown current value: ' + $('.status').attr('data-current_value'));
   });
 
-  // reset bootstrap modals upon close
-  // TODO: generalize this to work for any boostrap modals, not just #fullCalModalNewEvent
-  $('#fullCalModalNewEvent').on('hidden.bs.modal', function () {
+  // reset bootstrap modal upon close
+  $('#fullCalModal').on('hidden.bs.modal', function () {
     // clear data from text fields
     $('.modal-body').find('text,textarea,input').val('');
     // reset dropdowns' displayed text and value
@@ -198,27 +197,26 @@ $(document).ready(function() {
         right: 'agendaDay,agendaWeek,month'
       },
       defaultView: 'agendaDay',
-
       selectable: true,
       selectHelper: true,
+
       // click & drag on the calendar to create an event
       select: function(start, end, jsEvent, view, resource) {
         var start_ISO8601 = start.format('YYYY-MM-DD[T]HH:mm:ss');
         var end_ISO8601 = end.format('YYYY-MM-DD[T]HH:mm:ss');
-
+        // set the modal title
+        $('#modalTitle').text('Create Appointment');
         // populate the form with initial values from click & drag (start, end, resource)
         $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
         $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
         $('#resourceInput').attr('data-resource_input', resource.id).attr('placeholder', resource.id);
-
         // summon the modal
-        $('#fullCalModalNewEvent').modal();
-
+        $('#fullCalModal').modal();
+        // now that we've sent the rest of the job to the modal, de-select the selected area
         calendar.fullCalendar('unselect');
       },
 
       resourceLabelText: 'Installers',
-
       // ************************ comment out for testing events without resources
       resources: calendarData.resources,
       // ************************ comment out for testing resources without events
@@ -255,29 +253,47 @@ $(document).ready(function() {
       },
       // called when an event (already on the calendar) is moved -
       // triggered when dragging stops and the event has moved to a *different* day/time
+      // *********   TODO: finish adjusting eventData to make sense in eventDrop *************************************
       eventDrop: function (event, delta, revertFunc, jsEvent, view) {
         console.log('eventDrop', event);
 
-        // TODO: write saveCalendarEvent function
-        // saveCalendarEvent(event);
-      },
-      eventClick: function (event, jsEvent, view) {
-        // var newTitle = prompt('Enter a new title for this event', event.title);
-        // if (newTitle) {
-        //   // update event
-        //   event.title = newTitle;
-        //   // call the updateEvent method
-        //   $('#fullcalendar').fullCalendar('updateEvent', event);
+        // set the modal title
+        $('#modalTitle').text('View/Edit Appointment');
+
+        // populate the form with initial values from click & drag (start, end, resource)
+        // $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
+        // $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
+        // $('#resourceInput').attr('data-resource_input', resource.id).attr('placeholder', resource.id);
+
+        // var eventData = {
+        //   appointment_type: event.appointment_type,
+        //   title: event.title,
+        //   tech_id: event.tech_id,
+        //   appt_start_iso_8601: event.appt_start_iso_8601,
+        //   appt_end_iso_8601: event.appt_end_iso_8601,
+        //   customer_id: event.customer_id,
+        //   ticket_id: event.ticket_id,
+        //   description: event.description,
+        //   appointment_id: event.appointment_id
         // }
 
-        // for bootstrap modal
-        $('#modalTitle').html(event.title);
-        $('#modalBody').html(event.description + '<br>Tech ID: ' + event.resourceId);
+        // summon the modal
+        $('#fullCalModal').modal();
+        // saveEvent(eventData);
+      },
+
+      // TODO: write eventClick functionality
+      eventClick: function (event, jsEvent, view) {
+        // set the modal title
+        $('#modalTitle').text('View/Edit Appointment');
+        // summon the modal
         $('#fullCalModal').modal();
 
       } // end of callback eventClick
 
-      // other options go here...
+
+      // other fullCalendar options go here...
+
 
     }); // end of var calendar
   } // end of function drawFullCalendar(calendarData)
@@ -287,7 +303,7 @@ $(document).ready(function() {
   // drawFullCalendar(calendarData); // when calendarData is loaded
 
 
-  // when 'submit' button is clicked on #fullCalModalNewEvent bootstrap modal
+  // when 'submit' button is clicked on #fullCalModal bootstrap modal
   $('#submitNewEventFromCalendar').click(function(){
     console.log('#submitNewEventFromCalendar was clicked!');
 
@@ -320,7 +336,7 @@ $(document).ready(function() {
     saveEvent(eventData);
 
     // hide modal once newEvent is created
-    $('#fullCalModalNewEvent').modal('hide');
+    $('#fullCalModal').modal('hide');
 
     loadCalendar();
   });

@@ -616,7 +616,7 @@ router.post('/api/appointments', function (req, res) {
   } // end On Deck section
 
 
-  // Regular Appointment - requires tech_id, date, start time, appointment_type
+  // Regular Appointment - requires tech_id, date, start time, appointment_type, customer_id, ticket_id
   // TODO: figure out if more validations are necessary, and if so, create them
   if ( !isTimeOff(appointment) ) {
     // require tech_id to be of an existing tech
@@ -635,6 +635,13 @@ router.post('/api/appointments', function (req, res) {
     else if (isValidAppointmentType(req.body.appointment_type) == false) {
       console.log('appointment_type is invalid - please try again');
     }
+    else if (isBlankOrNull(req.body.customer_id)) {
+      console.log('please enter a Customer ID');
+    }
+    else if (isBlankOrNull(req.body.ticket_id)) {
+      console.log('please enter a Ticket ID');
+    }
+
     // we have cleared the validations, now create or update the Time Off appointment
     // if appointment_id is valid, appointment with that id is updated in the db
     else if (isPositiveInt(req.body.appointment_id)) {
@@ -755,7 +762,7 @@ router.delete('/api/appointment/:id', function(req, res) {
 
 function isBlankOrNull(val) {
   if (val == '') {
-    console.log('val is blank. val: ' + val);
+    console.log('val is blank');
     return true;
   }
   else if (val == null) {
@@ -768,7 +775,6 @@ function isBlankOrNull(val) {
   }
 }
 
-// TODO: bugfix - isInt() seems to have accepted null as an integer
 function isInt(val) {
   // check that input is a number
   if (isNaN(val)) {
