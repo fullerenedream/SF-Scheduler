@@ -211,8 +211,6 @@ $(document).ready(function() {
         $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
         $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
         $('#resourceInput').attr('data-resource_input', resource.id).attr('placeholder', resource.id);
-        $('#appointmentStatusDropdown').attr('data-current_value', 0).attr('text', 'Status');
-
         // summon the modal
         $('#fullCalModal').modal();
         // now that we've sent the rest of the job to the modal, de-select the selected area
@@ -258,6 +256,8 @@ $(document).ready(function() {
         // set the modal title and cancel/close button
         $('#modalTitle').text('Create Appointment');
         $('#modalCancelOrClose').text('Cancel');
+        // TODO: populate the form with values from the event object
+
         // summon the modal
         $('#fullCalModal').modal();
       },
@@ -267,15 +267,17 @@ $(document).ready(function() {
       // *********   TODO: finish adjusting eventData to make sense in eventDrop *************************************
       eventDrop: function (event, delta, revertFunc, jsEvent, view) {
         console.log('eventDrop', event);
+        var start_ISO8601 = event.start.format('YYYY-MM-DD[T]HH:mm:ss');
+        var end_ISO8601 = event.end.format('YYYY-MM-DD[T]HH:mm:ss');
 
         // set the modal title and cancel/close button
         $('#modalTitle').text('View/Edit Appointment');
         $('#modalCancelOrClose').text('Cancel');
 
-        // populate the form with initial values from click & drag (start, end, resource)
-        // $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
-        // $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
-        // $('#resourceInput').attr('data-resource_input', resource.id).attr('placeholder', resource.id);
+        // TODO: populate the form with values from the event object
+        $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
+        $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
+        $('#resourceInput').attr('data-resource_input', event.resourceId).attr('placeholder', event.resourceId);
 
         // var eventData = {
         //   appointment_type: event.appointment_type,
