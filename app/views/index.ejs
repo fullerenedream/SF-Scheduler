@@ -84,55 +84,61 @@
 
           <div id="modalBody" class="modal-body">
             <form class="form-horizontal">
-              <div class="form-group dropdown btn-group" id="appointmentTypeDiv">
-                <i class="dropdown-arrow dropdown-arrow-inverse"></i>
-                <button class="btn btn-default btn-sm status" data-current_value="">Appointment Type</button>
-                <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"> <span class="caret"></span></button>
-                <ul class="dropdown-menu dropdown-inverse" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
-                  <li><a data-appointment_type="1" href="#">Install</a></li>
-                  <li><a data-appointment_type="2" href="#">Service Call</a></li>
-                  <li><a data-appointment_type="3" href="#">Infrastructure</a></li>
-                  <li><a data-appointment_type="4" href="#">Other</a></li>
-                  <li><a data-appointment_type="5" href="#">Uninstall</a></li>
-                  <li><a data-appointment_type="8" href="#">Site Audit</a></li>
-                  <li><a data-appointment_type="10" href="#">Time Off</a></li>
-                </ul>
-              </div>
-
-              <div class='form-group form-group-sm' id='appointmentIdDiv'>
-                <label class='control-label col-sm-3' for='appointment-id'>Appointment ID</label>
-                <div class="col-sm-1">
-                  <h5 id='appointmentId'></h5>
-                </div>
-              </div>
 
               <div class="form-group form-group-sm" id="appointmentTitleDiv">
-                <label class="control-label col-sm-3" for="appointment-title">Title</label>
+                <label class="control-label col-sm-3" for="appointment-title">Appointment Title</label>
                 <div class="col-sm-7">
                   <input type="text" class="form-control input-sm" id="appointmentTitleInput">
                 </div>
               </div>
 
-              <!-- TODO: change Start, End and Resource from editable to read-only -->
+              <div class='form-group form-group-sm'>
+                <label class='control-label col-sm-3' for='appointment-type'>Appointment Type</label>
+                <div class="form-group dropdown btn-group col-sm-7" id="appointmentTypeDiv">
+                  <i class="dropdown-arrow dropdown-arrow-inverse"></i>
+                  <button class="btn btn-default btn-sm status" data-current_value="">Appointment Type</button>
+                  <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"> <span class="caret"></span></button>
+                  <ul class="dropdown-menu dropdown-inverse" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
+                    <li><a data-appointment_type="1" href="#">Install</a></li>
+                    <li><a data-appointment_type="2" href="#">Service Call</a></li>
+                    <li><a data-appointment_type="3" href="#">Infrastructure</a></li>
+                    <li><a data-appointment_type="4" href="#">Other</a></li>
+                    <li><a data-appointment_type="5" href="#">Uninstall</a></li>
+                    <li><a data-appointment_type="8" href="#">Site Audit</a></li>
+                    <li><a data-appointment_type="10" href="#">Time Off</a></li>
+                  </ul>
+                </div>
+              </div>
+
               <div class='form-group form-group-sm' id='appointmentStartDiv'>
                 <label class='control-label col-sm-3' for='appointment-start'>Start</label>
-                <div class="col-sm-7">
-                  <input type='text' class='form-control input-sm' id='startInput' data-start_input='' placeholder=''>
-                </div>
+                <!-- <div class="col-sm-4"> -->
+                  <!-- <input type='text' class='form-control input-sm' id='startInput' data-start_input='' placeholder=''> -->
+                  <h6 class="col-sm-4" id='startInput'></h6>
+                <!-- </div> -->
               </div>
 
               <div class='form-group form-group-sm' id='appointmentEndDiv'>
                 <label class='control-label col-sm-3' for='appointment-end'>End</label>
-                <div class="col-sm-7">
-                  <input type='text' class='form-control input-sm' id='endInput' data-end_input='' placeholder=''>
-                </div>
+                <!-- <div class="col-sm-4"> -->
+                  <!-- <input type='text' class='form-control input-sm' id='endInput' data-end_input='' placeholder=''> -->
+                  <h6 class="col-sm-4" id='endInput'></h6>
+                <!-- </div> -->
+              </div>
+
+              <div class='form-group form-group-sm' id='appointmentIdDiv'>
+                <label class='control-label col-sm-3' for='appointment-id'>Appointment ID</label>
+                <!-- <div class="col-sm-1"> -->
+                  <h6 class="col-sm-1" id='appointmentId'></h6>
+                <!-- </div> -->
               </div>
 
               <div class='form-group form-group-sm' id='appointmentResourceDiv'>
                 <label class='control-label col-sm-3' for='resource'>Installer ID</label>
-                <div class="col-sm-7">
-                  <input type='text' class='form-control input-sm' id='resourceInput' data-resource_input='' placeholder=''>
-                </div>
+                <!-- <div class="col-sm-1"> -->
+                  <!-- <input type='text' class='form-control input-sm' id='resourceInput' data-resource_input='' placeholder=''> -->
+                  <h6 class="col-sm-1" id='resourceInput'></h6>
+                <!-- </div> -->
               </div>
 
               <div class="form-group form-group-sm" id="customerIdDiv">
@@ -156,18 +162,22 @@
                 </div>
               </div>
 
-              <div class="btn-group" data-toggle="buttons" id="appointmentStatusDiv">
-                <label class="btn btn-default btn-xs radio-btn-label active">
-                  <input class="radio-btn" type="radio" name="options" id="statusActive" data-appointment_status="0" autocomplete="off" checked> Active
-                </label>
-                <label class="btn btn-default btn-xs radio-btn-label">
-                  <input class="radio-btn" type="radio" name="options" id="statusCompleted" data-appointment_status="1" autocomplete="off"> Completed
-                </label>
-                <label class="btn btn-default btn-xs radio-btn-label">
-                  <input class="radio-btn" type="radio" name="options" id="statusCancelled" data-appointment_status="2" autocomplete="off"> Cancelled
-                </label>
+              <div class="form-group form-group-sm">
+                <label class="control-label col-sm-3" for="description">Status</label>
+                <div class="col-sm-7">
+                  <div class="btn-group" data-toggle="buttons" id="appointmentStatusDiv">
+                    <label class="btn btn-default btn-xs radio-btn-label active">
+                      <input class="radio-btn" type="radio" name="options" id="statusActive" data-appointment_status="0" autocomplete="off" checked> Active
+                    </label>
+                    <label class="btn btn-default btn-xs radio-btn-label">
+                      <input class="radio-btn" type="radio" name="options" id="statusCompleted" data-appointment_status="1" autocomplete="off"> Completed
+                    </label>
+                    <label class="btn btn-default btn-xs radio-btn-label">
+                      <input class="radio-btn" type="radio" name="options" id="statusCancelled" data-appointment_status="2" autocomplete="off"> Cancelled
+                    </label>
+                  </div>
+                </div>
               </div>
-              <!-- <input type="hidden" name="appointmentStatus" value=""/> -->
 
             </form>
           </div> <!-- /#modalBody --> <!-- /.modal-body -->

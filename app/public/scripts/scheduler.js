@@ -289,7 +289,7 @@ $(document).ready(function() {
 
         // summon the modal
         $('#fullCalModal').modal();
-      },
+      }, // end of callback eventReceive
 
       // called when an event (already on the calendar) is moved -
       // triggered when dragging stops and the event has moved to a *different* day/time
@@ -308,9 +308,10 @@ $(document).ready(function() {
 
         // summon the modal
         $('#fullCalModal').modal();
-      },
 
-      // TODO: write eventClick functionality
+      }, // end of callback eventDrop
+
+      // triggered when the user clicks an event
       eventClick: function (event, jsEvent, view) {
         console.log('eventClick', event);
         // set the modal title and cancel/close button
@@ -323,7 +324,20 @@ $(document).ready(function() {
         // summon the modal
         $('#fullCalModal').modal();
 
-      } // end of callback eventClick
+      }, // end of callback eventClick
+
+      eventResize: function (event, delta, revertFunc, jsEvent, ui, view) {
+        console.log('eventResize', event);
+        // set the modal title and cancel/close button
+        $('#modalTitle').text('View/Edit Appointment');
+        $('#modalCancelOrClose').text('Close');
+
+        // populate the form with values from the event object
+        populateModal(event);
+
+        // summon the modal
+        $('#fullCalModal').modal();
+      }
 
 
       // other fullCalendar options go here...
@@ -345,13 +359,22 @@ $(document).ready(function() {
     eventData = {
       appointment_type: $('#appointmentTypeDiv .status').attr('data-current_value'),
       title: $('#appointmentTitleInput').val(),
-      tech_id: $('#resourceInput').data('resource_input'),
-      appt_start_iso_8601: $('#startInput').data('start_input'),
-      appt_end_iso_8601: $('#endInput').data('end_input'),
+      // tech_id: $('#resourceInput').data('resource_input'),
+      // appt_start_iso_8601: $('#startInput').data('start_input'),
+      // appt_end_iso_8601: $('#endInput').data('end_input'),
       customer_id: $('#customerIdInput').val(),
       ticket_id: $('#ticketIdInput').val(),
       description: $('#descriptionInput').val(),
       status: $('#appointmentStatusDiv .active .radio-btn').attr('data-appointment_status')
+    }
+    if ($('#resourceInput').text() != null) {
+      eventData.tech_id = $('#resourceInput').text();
+    }
+    if ($('#startInput').text() != null) {
+      eventData.appt_start_iso_8601 = $('#startInput').text();
+    }
+    if ($('#endInput').text() != null) {
+      eventData.appt_end_iso_8601 = $('#endInput').text();
     }
     if ($('#appointmentId').text() != null) {
       eventData.appointment_id = $('#appointmentId').text();
@@ -377,9 +400,12 @@ $(document).ready(function() {
     $('#appointmentTypeDiv .status').text(appointmentTypeArray[event.appointmentType]);
     $('#appointmentId').text(event.id);
     $('#appointmentTitleInput').val(event.title);
-    $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
-    $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
-    $('#resourceInput').attr('data-resource_input', event.resourceId).attr('placeholder', event.resourceId);
+    // $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
+    // $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
+    // $('#resourceInput').attr('data-resource_input', event.resourceId).attr('placeholder', event.resourceId);
+    $('#startInput').text(start_ISO8601);
+    $('#endInput').text(end_ISO8601);
+    $('#resourceInput').text(event.resourceId);
     $('#customerIdInput').val(event.customerId);
     $('#ticketIdInput').val(event.ticketId);
     $('#descriptionInput').val(event.description);
