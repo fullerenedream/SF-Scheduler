@@ -18,6 +18,21 @@ $(document).ready(function() {
   appointmentTypes[8] = 'Site Audit';
   appointmentTypes[10] = 'Time Off';
 
+
+  /***************************/
+  // TODO: continue building this from info on scratchpad
+  // function getAppointmentTypes() {
+  //   $.getJSON('/api/calendar_itemtypes', function(data) {
+  //     loadedAppointmentTypes(data);
+  //   })
+  // }
+
+  // function loadedAppointmentTypes(response) {
+
+  // }
+  /***************************/
+
+
   // make dropdown menus work
   $('.dropdown-menu li > a').click(function(){
     console.log('dropdown item was selected!');
@@ -259,7 +274,6 @@ $(document).ready(function() {
       },
 
       // called when an external element, containing event data, is dropped on the calendar
-      // TODO: write eventReceive functionality
       // TODO: bugfix - right now you can't drag an On Deck event straight onto
       // an Unassigned event - you have to drag it onto an empty calendar spot first.
       // you ought to be able to drag an On Deck event straight onto the Unassigned
