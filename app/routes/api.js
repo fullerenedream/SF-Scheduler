@@ -548,6 +548,9 @@ router.post('/api/appointments', function (req, res) {
   if ( (req.body.appointment_id != null) && isPositiveInt(req.body.appointment_id) == false ) {
     console.log('appointment_id is invalid: it is neither a positive integer nor an empty string');
   }
+  else {
+    console.log('appointment_id is valid: ' + req.body.appointment_id);
+  }
 
   // TODO: improve validation for status - there should only be a few set statuses to choose from
   // - and there should be a default status - let's say it's 0

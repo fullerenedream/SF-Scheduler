@@ -7,6 +7,17 @@ $(document).ready(function() {
   var todayDate = new Date().toISOString().substring(0,10);
   console.log(todayDate);
 
+  // WARNING: these values are also hard-coded in #appointmentTypeDiv
+  // if they ever change, they must be changed in both places
+  var appointmentTypes = new Object();
+  appointmentTypes[1] = 'Install';
+  appointmentTypes[2] = 'Service Call';
+  appointmentTypes[3] = 'Infrastructure';
+  appointmentTypes[4] = 'Other';
+  appointmentTypes[5] = 'Uninstall';
+  appointmentTypes[8] = 'Site Audit';
+  appointmentTypes[10] = 'Time Off';
+
   // make dropdown menus work
   $('.dropdown-menu li > a').click(function(){
     console.log('dropdown item was selected!');
@@ -190,6 +201,8 @@ $(document).ready(function() {
       allDaySlot: false,
       navLinks: true,
       eventOverlap: false,
+      forceEventDuration: true, // force calculation of an event's end if it is unspecified
+      defaultTimedEventDuration: '02:00:00', // 2 hours is fc's default duration, but we may wish to change this
       // TODO: change buttons so 'today' shows today's date, get rid of title
       header: {
         left: 'prev,today,next',
@@ -256,7 +269,9 @@ $(document).ready(function() {
         // set the modal title and cancel/close button
         $('#modalTitle').text('Create Appointment');
         $('#modalCancelOrClose').text('Cancel');
-        // TODO: populate the form with values from the event object
+
+        // populate the form with values from the event object
+        populateModal(event);
 
         // summon the modal
         $('#fullCalModal').modal();
@@ -264,36 +279,34 @@ $(document).ready(function() {
 
       // called when an event (already on the calendar) is moved -
       // triggered when dragging stops and the event has moved to a *different* day/time
-      // *********   TODO: finish adjusting eventData to make sense in eventDrop *************************************
+      // TODO: bugfix: eventDrop saves to db when page is fresh
+      // but after you do an eventDrop once, the next time you do it,
+      // it doesn't save to the db. values must need to be reset somewhere...
       eventDrop: function (event, delta, revertFunc, jsEvent, view) {
         console.log('eventDrop', event);
-        var start_ISO8601 = event.start.format('YYYY-MM-DD[T]HH:mm:ss');
-        var end_ISO8601 = event.end.format('YYYY-MM-DD[T]HH:mm:ss');
 
         // set the modal title and cancel/close button
         $('#modalTitle').text('View/Edit Appointment');
         $('#modalCancelOrClose').text('Cancel');
 
-        // TODO: populate the form with values from the event object
-        $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
-        $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
-        $('#resourceInput').attr('data-resource_input', event.resourceId).attr('placeholder', event.resourceId);
+        // populate the form with values from the event object
+        populateModal(event);
 
         // var eventData = {
-        //   appointment_type: event.appointment_type,
+        //   appointment_type: event.appointmentType,
         //   title: event.title,
-        //   tech_id: event.tech_id,
-        //   appt_start_iso_8601: event.appt_start_iso_8601,
-        //   appt_end_iso_8601: event.appt_end_iso_8601,
-        //   customer_id: event.customer_id,
-        //   ticket_id: event.ticket_id,
+        //   tech_id: event.resourceId,
+        //   appt_start_iso_8601: start_ISO8601,
+        //   appt_end_iso_8601: end_ISO8601,
+        //   customer_id: event.customerId,
+        //   ticket_id: event.ticketId,
+        //   status: event.status,
         //   description: event.description,
-        //   appointment_id: event.appointment_id
+        //   appointment_id: event.id
         // }
 
         // summon the modal
         $('#fullCalModal').modal();
-        // saveEvent(eventData);
       },
 
       // TODO: write eventClick functionality
@@ -302,6 +315,9 @@ $(document).ready(function() {
         // set the modal title and cancel/close button
         $('#modalTitle').text('View/Edit Appointment');
         $('#modalCancelOrClose').text('Close');
+
+        // populate the form with values from the event object
+        populateModal(event);
 
         // summon the modal
         $('#fullCalModal').modal();
@@ -323,32 +339,39 @@ $(document).ready(function() {
   // when 'Save' button is clicked on #fullCalModal bootstrap modal
   $('#modalSave').click(function(){
     console.log('modal Save button was clicked!');
+    var eventData = {};
 
     var newEvent = new Object();
 
     // data from bootstrap modal
-    newEvent.appointment_type = $('#appointmentTypeDiv .status').attr('data-current_value');
-    newEvent.title = $('#appointmentTitleInput').val();
-    newEvent.tech_id = $('#resourceInput').data('resource_input');
-    newEvent.appt_start_iso_8601 = $('#startInput').data('start_input');
-    newEvent.appt_end_iso_8601 = $('#endInput').data('end_input');
-    newEvent.customer_id = $('#customerIdInput').val();
-    newEvent.ticket_id = $('#ticketIdInput').val();
-    newEvent.description = $('#descriptionInput').val();
+    // newEvent.appointment_type = $('#appointmentTypeDiv .status').attr('data-current_value');
+    // newEvent.title = $('#appointmentTitleInput').val();
+    // newEvent.tech_id = $('#resourceInput').data('resource_input');
+    // newEvent.appt_start_iso_8601 = $('#startInput').data('start_input');
+    // newEvent.appt_end_iso_8601 = $('#endInput').data('end_input');
+    // newEvent.customer_id = $('#customerIdInput').val();
+    // newEvent.ticket_id = $('#ticketIdInput').val();
+    // newEvent.description = $('#descriptionInput').val();
+    // newEvent.status = $('#appointmentStatusDiv .active .radio-btn').attr('data-appointment_status');
+    // newEvent.appointment_id = $('#appointmentId').text();
 
-    console.log('JSON.stringify(new event):\n' + JSON.stringify(newEvent));
+    // console.log('JSON.stringify(new event):\n' + JSON.stringify(newEvent));
 
     var eventData = {
-      appointment_type: newEvent.appointment_type,
-      title: newEvent.title,
-      tech_id: newEvent.tech_id,
-      appt_start_iso_8601: newEvent.appt_start_iso_8601,
-      appt_end_iso_8601: newEvent.appt_end_iso_8601,
-      customer_id: newEvent.customer_id,
-      ticket_id: newEvent.ticket_id,
-      description: newEvent.description
+      appointment_type: $('#appointmentTypeDiv .status').attr('data-current_value'),
+      title: $('#appointmentTitleInput').val(),
+      tech_id: $('#resourceInput').data('resource_input'),
+      appt_start_iso_8601: $('#startInput').data('start_input'),
+      appt_end_iso_8601: $('#endInput').data('end_input'),
+      customer_id: $('#customerIdInput').val(),
+      ticket_id: $('#ticketIdInput').val(),
+      description: $('#descriptionInput').val(),
+      status: $('#appointmentStatusDiv .active .radio-btn').attr('data-appointment_status')
     }
-    console.log('JSON.stringify(eventData): ' + JSON.stringify(eventData));
+    if ($('#appointmentId').text() != null) {
+      eventData.appointment_id = $('#appointmentId').text();
+    }
+    console.log('#modalSave clicked! JSON.stringify(eventData): ' + JSON.stringify(eventData));
 
     saveEvent(eventData);
 
@@ -357,6 +380,35 @@ $(document).ready(function() {
 
     loadCalendar();
   });
+
+
+  // populate the form with values from the event object
+  function populateModal(event) {
+    console.log('populating modal');
+    var start_ISO8601 = event.start.format('YYYY-MM-DD[T]HH:mm:ss');
+    var end_ISO8601 = event.end.format('YYYY-MM-DD[T]HH:mm:ss');
+
+    $('#appointmentTypeDiv .status').attr('data-current_value', event.appointmentType);
+    $('#appointmentTypeDiv .status').text(appointmentTypes[event.appointmentType]);
+    $('#appointmentId').text(event.id);
+    $('#appointmentTitleInput').val(event.title);
+    $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
+    $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
+    $('#resourceInput').attr('data-resource_input', event.resourceId).attr('placeholder', event.resourceId);
+    $('#customerIdInput').val(event.customerId);
+    $('#ticketIdInput').val(event.ticketId);
+    $('#descriptionInput').val(event.description);
+    $('#appointmentStatusDiv .btn').removeClass('active');
+
+    var eventStatus = event.status;
+    $('#appointmentStatusDiv .radio-btn').each(function() {
+      // console.log($(this));
+      if ( $(this).attr('data-appointment_status') == eventStatus ) {
+        // console.log(eventStatus);
+        $(this).parent().addClass('active');
+      }
+    })
+  }
 
 
   // send POST request to /api/appointments to save event to db
