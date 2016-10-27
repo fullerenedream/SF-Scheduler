@@ -5,6 +5,10 @@ body {
   font-family: "Lucida Grande", Helvetica, Arial, Verdana, sans-serif;
 }
 
+.modal-body {
+  text-align: left;
+}
+
 .nav {
   margin-bottom: 15px;
 }
