@@ -99,6 +99,13 @@
                 </ul>
               </div>
 
+              <div class='form-group form-group-sm' id='appointmentIdDiv'>
+                <label class='control-label col-sm-3' for='appointment-id'>Appointment ID</label>
+                <div class="col-sm-1">
+                  <h5 id='appointmentId'></h5>
+                </div>
+              </div>
+
               <div class="form-group form-group-sm" id="appointmentTitleDiv">
                 <label class="control-label col-sm-3" for="appointment-title">Title</label>
                 <div class="col-sm-7">
@@ -150,16 +157,17 @@
               </div>
 
               <div class="btn-group" data-toggle="buttons" id="appointmentStatusDiv">
-                <label class="btn btn-default btn-xs active">
-                  <input type="radio" name="options" id="statusActive" data-appointment_status="0" autocomplete="off" checked> Active
+                <label class="btn btn-default btn-xs radio-btn-label active">
+                  <input class="radio-btn" type="radio" name="options" id="statusActive" data-appointment_status="0" autocomplete="off" checked> Active
                 </label>
-                <label class="btn btn-default btn-xs">
-                  <input type="radio" name="options" id="statusCompleted" data-appointment_status="1" autocomplete="off"> Completed
+                <label class="btn btn-default btn-xs radio-btn-label">
+                  <input class="radio-btn" type="radio" name="options" id="statusCompleted" data-appointment_status="1" autocomplete="off"> Completed
                 </label>
-                <label class="btn btn-default btn-xs">
-                  <input type="radio" name="options" id="statusCancelled" data-appointment_status="2" autocomplete="off"> Cancelled
+                <label class="btn btn-default btn-xs radio-btn-label">
+                  <input class="radio-btn" type="radio" name="options" id="statusCancelled" data-appointment_status="2" autocomplete="off"> Cancelled
                 </label>
               </div>
+              <!-- <input type="hidden" name="appointmentStatus" value=""/> -->
 
             </form>
           </div> <!-- /#modalBody --> <!-- /.modal-body -->
