@@ -228,6 +228,42 @@ router.get('/api/appointments/:appointment_id', function(req,res){
 });
 
 
+// GET all calendar_itemtypes
+router.get('/api/calendar_itemtypes', function(req,res){
+  var con = db.connectToScheduleDB();
+  var ciTypesQueryString = `SELECT ci_type_id,
+                              ci_type_name,
+                              ci_type_description,
+                              ci_type_durationminutes,
+                              ci_type_color,
+                              ci_type_enabled,
+                              ci_type_order,
+                              ci_type_visible
+                            FROM calendar_itemtypes`;
+  con.query(ciTypesQueryString,function(err,ciTypes_rows){
+    if(err) throw err;
+    var response = new Object();
+    var ciTypes = [];
+
+    // iterate over ciTypes_rows into a valid JSON string
+    for (var i = 0; i < ciTypes_rows.length; i++) {
+      console.log('ciTypes_rows ' + i + ':\n' + ciTypes_rows[i]);
+      var ciType = new Object();
+      ciType.id = ciTypes_rows[i].ci_type_id;
+      ciType.name = ciTypes_rows[i].ci_type_name;
+      ciType.description = ciTypes_rows[i].ci_type_description;
+      ciType.durationminutes = ciTypes_rows[i].ci_type_durationminutes;
+      ciType.color = ciTypes_rows[i].ci_type_color;
+      ciType.enabled = ciTypes_rows[i].ci_type_enabled;
+      ciType.order = ciTypes_rows[i].ci_type_order;
+      ciType.visible = ciTypes_rows[i].ci_type_visible;
+      ciTypes.push(ciType);
+    }
+    response.ciTypes = ciTypes;
+    res.json(response);
+  });
+});
+
 
 // GET all users from users table
 router.get('/api/users', function(req,res){
