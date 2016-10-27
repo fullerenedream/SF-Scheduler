@@ -9,14 +9,14 @@ $(document).ready(function() {
 
   // WARNING: these values are also hard-coded in #appointmentTypeDiv
   // if they ever change, they must be changed in both places
-  var appointmentTypes = new Object();
-  appointmentTypes[1] = 'Install';
-  appointmentTypes[2] = 'Service Call';
-  appointmentTypes[3] = 'Infrastructure';
-  appointmentTypes[4] = 'Other';
-  appointmentTypes[5] = 'Uninstall';
-  appointmentTypes[8] = 'Site Audit';
-  appointmentTypes[10] = 'Time Off';
+  var appointmentTypeArray = new Object();
+  appointmentTypeArray[1] = 'Install';
+  appointmentTypeArray[2] = 'Service Call';
+  appointmentTypeArray[3] = 'Infrastructure';
+  appointmentTypeArray[4] = 'Other';
+  appointmentTypeArray[5] = 'Uninstall';
+  appointmentTypeArray[8] = 'Site Audit';
+  appointmentTypeArray[10] = 'Time Off';
 
 
   /***************************/
@@ -306,19 +306,6 @@ $(document).ready(function() {
         // populate the form with values from the event object
         populateModal(event);
 
-        // var eventData = {
-        //   appointment_type: event.appointmentType,
-        //   title: event.title,
-        //   tech_id: event.resourceId,
-        //   appt_start_iso_8601: start_ISO8601,
-        //   appt_end_iso_8601: end_ISO8601,
-        //   customer_id: event.customerId,
-        //   ticket_id: event.ticketId,
-        //   status: event.status,
-        //   description: event.description,
-        //   appointment_id: event.id
-        // }
-
         // summon the modal
         $('#fullCalModal').modal();
       },
@@ -355,23 +342,7 @@ $(document).ready(function() {
     console.log('modal Save button was clicked!');
     var eventData = {};
 
-    var newEvent = new Object();
-
-    // data from bootstrap modal
-    // newEvent.appointment_type = $('#appointmentTypeDiv .status').attr('data-current_value');
-    // newEvent.title = $('#appointmentTitleInput').val();
-    // newEvent.tech_id = $('#resourceInput').data('resource_input');
-    // newEvent.appt_start_iso_8601 = $('#startInput').data('start_input');
-    // newEvent.appt_end_iso_8601 = $('#endInput').data('end_input');
-    // newEvent.customer_id = $('#customerIdInput').val();
-    // newEvent.ticket_id = $('#ticketIdInput').val();
-    // newEvent.description = $('#descriptionInput').val();
-    // newEvent.status = $('#appointmentStatusDiv .active .radio-btn').attr('data-appointment_status');
-    // newEvent.appointment_id = $('#appointmentId').text();
-
-    // console.log('JSON.stringify(new event):\n' + JSON.stringify(newEvent));
-
-    var eventData = {
+    eventData = {
       appointment_type: $('#appointmentTypeDiv .status').attr('data-current_value'),
       title: $('#appointmentTitleInput').val(),
       tech_id: $('#resourceInput').data('resource_input'),
@@ -398,12 +369,12 @@ $(document).ready(function() {
 
   // populate the form with values from the event object
   function populateModal(event) {
-    console.log('populating modal');
+    console.log('populateModal', event);
     var start_ISO8601 = event.start.format('YYYY-MM-DD[T]HH:mm:ss');
     var end_ISO8601 = event.end.format('YYYY-MM-DD[T]HH:mm:ss');
 
     $('#appointmentTypeDiv .status').attr('data-current_value', event.appointmentType);
-    $('#appointmentTypeDiv .status').text(appointmentTypes[event.appointmentType]);
+    $('#appointmentTypeDiv .status').text(appointmentTypeArray[event.appointmentType]);
     $('#appointmentId').text(event.id);
     $('#appointmentTitleInput').val(event.title);
     $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
@@ -421,7 +392,8 @@ $(document).ready(function() {
         // console.log(eventStatus);
         $(this).parent().addClass('active');
       }
-    })
+    });
+
   }
 
 
