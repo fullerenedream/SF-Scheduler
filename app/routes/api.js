@@ -252,7 +252,7 @@ router.get('/api/calendar_itemtypes', function(req,res){
       ciType.id = ciTypes_rows[i].ci_type_id;
       ciType.name = ciTypes_rows[i].ci_type_name;
       ciType.description = ciTypes_rows[i].ci_type_description;
-      ciType.durationminutes = ciTypes_rows[i].ci_type_durationminutes;
+      ciType.duration = ciTypes_rows[i].ci_type_durationminutes;
       ciType.color = ciTypes_rows[i].ci_type_color;
       ciType.enabled = ciTypes_rows[i].ci_type_enabled;
       ciType.order = ciTypes_rows[i].ci_type_order;
@@ -581,8 +581,8 @@ router.post('/api/appointments', function (req, res) {
   if (req.body.description == null || req.body.description == '') {appointment[11] = 'No Description';}
 
   // appointment_id must be either blank (=new appointment) or a positive integer
-  if ( (req.body.appointment_id != null) && isPositiveInt(req.body.appointment_id) == false ) {
-    console.log('appointment_id is invalid: it is neither a positive integer nor an empty string');
+  if ( isBlankOrNull(req.body.appointment_id) || !isPositiveInt(req.body.appointment_id) ) {
+    console.log('appointment_id is invalid: it is neither blank nor a positive integer. appointment_id: ' + req.body.appointment_id);
   }
   else {
     console.log('appointment_id is valid: ' + req.body.appointment_id);
@@ -635,7 +635,7 @@ router.post('/api/appointments', function (req, res) {
     }
     // if no appointment_id is given, a new appointment is created in the db
     // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
-    else if (req.body.appointment_id == null) {
+    else if (isBlankOrNull(req.body.appointment_id)) {
       createAppointment();
     }
   } // end Time Off section
@@ -688,7 +688,7 @@ router.post('/api/appointments', function (req, res) {
     }
     // if no appointment_id is given, a new appointment is created in the db
     // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
-    else if (req.body.appointment_id == null) {
+    else if (isBlankOrNull(req.body.appointment_id)) {
       createAppointment();
     }
   } // end Regular Appointment section

@@ -36,20 +36,37 @@ body {
 }
 
 #external-events h4 {
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 500;
   margin-top: 0;
-  padding-top: 1em;
+  padding-top: .7em;
 }
 
 #external-events .fc-event {
-  margin: 10px 0;
+  margin: 5px 0;
+  font-size: 1em;
+  color: #fff;
   cursor: pointer;
+  line-height: 1.6;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#external-events .new-appointment {
+  margin: 5px 0;
+  font-size: 1.03em;
+  color: #fff;
+  line-height: 1.7;
+  border-radius: 3px;
+  cursor: pointer;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 #external-events p {
-  margin: 1.5em 0;
-  font-size: 11px;
-  color: #666;
+  margin: 5px 0;
+  color: #fff;
+
 }
 
 #external-events p input {
