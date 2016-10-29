@@ -132,49 +132,18 @@ $(document).ready(function() {
     $("#appointment-templates").empty();
     for (var type in appointmentTypes) {
       console.log(type);
-      // var divString = "<div id='" + type +
-      //                 "' class='new-appointment' style='background-color:" + appointmentTypes[type].color + "' data-event='{" +
-      //                   "\"title\":\"New " + appointmentTypes[type].name + "\"," +
-      //                   "\"color\":\"" + appointmentTypes[type].color + "\"," +
-      //                   "\"duration\":\"00:" + appointmentTypes[type].duration + ":00\"," +
-      //                   "\"ci_account\":\"\"," +
-      //                   "\"status\":\"0\"," +
-      //                   "\"notes\":\"\"," +
-      //                   "\"id\":\"0\"," +
-      //                   "\"ci_type_id\":\"" + appointmentTypes[type].ci_type_id + "\"" +
-      //                 "}'>" + appointmentTypes[type].name +
-      //                 "</div>"
-
-
-/*************************  YOU ARE FIXING THIS BIT RIGHT HERE  ********************************/
       var divString = "<div class='new-appointment' id='" + type +
-                      "' style='background-color:" + appointmentTypes[type].color +
-                      "' data-title='" + appointmentTypes[type].name +
-                      "' data-color='" + appointmentTypes[type].color +
-                      // can Duration really work with values like '00:456:00' ???
-                      "' data-duration='00:" + appointmentTypes[type].duration + ":00" +
-                      "' data-status='0" +
-                      "' data-appointment_type='" + appointmentTypes[type].ci_type_id +
-                      "'>" + appointmentTypes[type].name +
-                      "</div>"
-
-                      // "' data-event='{" +
-                      //   "\"title\":\"New " + appointmentTypes[type].name + "\"," +
-                      //   "\"color\":\"" + appointmentTypes[type].color + "\"," +
-                      //   "\"duration\":\"00:" + appointmentTypes[type].duration + ":00\"," +
-                      //   "\"ci_account\":\"\"," +
-                      //   "\"status\":\"0\"," +
-                      //   "\"notes\":\"\"," +
-                      //   "\"id\":\"0\"," +
-                      //   "\"ci_type_id\":\"" + appointmentTypes[type].ci_type_id + "\"" +
-                      // "}'>" + appointmentTypes[type].name +
-                      // "</div>"
-
+        "' style='background-color:" + appointmentTypes[type].color +
+        "' data-title='" + appointmentTypes[type].name +
+        "' data-color='" + appointmentTypes[type].color +
+        "' data-duration='00:" + appointmentTypes[type].duration + ":00" +
+        "' data-status='0" +
+        "' data-appointment_type='" + appointmentTypes[type].ci_type_id +
+        "'>" + appointmentTypes[type].name +
+        "</div>"
       $("#appointment-templates").append($(divString));
     }
-
     $("#appointment-templates").prepend("<h4>New Event:</h4>");
-
     $("#appointment-templates div.new-appointment").each(function(){
       // store data so the calendar knows to render an event upon drop
       $(this).data('event', {
@@ -184,7 +153,7 @@ $(document).ready(function() {
         appointment_type: $(this).data('appointment_type'),
         status: $(this).data('status'),
         description: $(this).data('description'),
-        stick: true // maintain when user navigates (see docs on the renderEvent method)
+        // stick: true // maintain when user navigates (see docs on the renderEvent method)
       });
       // make the event draggable using jQuery UI
       $(this).draggable({
@@ -253,7 +222,7 @@ $(document).ready(function() {
         appointment_type: $(this).data('appointment_type'),
         status: $(this).data('status'),
         description: $(this).data('description'),
-        stick: true // maintain when user navigates (see docs on the renderEvent method)
+        // stick: true // maintain when user navigates (see docs on the renderEvent method)
       });
 
       // make the event draggable using jQuery UI
@@ -287,6 +256,7 @@ $(document).ready(function() {
       aspectRatio: 1.8,
       scrollTime: '06:00', // 6am is default scrollTime, but we may wish to change this
       allDaySlot: false,
+      snapDuration: '00:15:00',
       navLinks: true,
       eventOverlap: false,
       forceEventDuration: true, // force calculation of an event's end if it is unspecified
@@ -325,7 +295,7 @@ $(document).ready(function() {
       eventSources: calendarData.eventSources,
 
       // triggered while an event is being rendered
-      eventRender: function(event, element) {
+      eventRender: function(event, element, view) {
         // if event is Unassigned, allow overlap
         if (event.resourceId == 0) {
           event.overlap = true;

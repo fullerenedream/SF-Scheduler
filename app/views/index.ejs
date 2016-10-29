@@ -94,10 +94,10 @@
               <div class='form-group form-group-sm'>
                 <label class='control-label col-sm-3' for='appointment-type'>Appointment Type</label>
                 <div class="form-group dropdown btn-group col-sm-7" id="appointmentTypeDiv">
-                  <i class="dropdown-arrow dropdown-arrow-inverse"></i>
-                  <button class="btn btn-default btn-sm status" data-current_value="">Appointment Type</button>
-                  <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"> <span class="caret"></span></button>
-                  <ul class="dropdown-menu dropdown-inverse" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
+                  <!-- <i class="dropdown-arrow dropdown-arrow-inverse"></i> -->
+                  <!-- <button class="btn btn-default btn-sm status" data-current_value="">Appointment Type</button> -->
+                  <button type="button" class="btn btn-default btn-sm dropdown-toggle status" data-toggle="dropdown"  aria-haspopup="true" aria-expanded="false" data-current_value="">Select <span class="caret"></span></button>
+                  <ul class="dropdown-menu" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
                     <li><a data-appointment_type="1" href="#">Install</a></li>
                     <li><a data-appointment_type="2" href="#">Service Call</a></li>
                     <li><a data-appointment_type="3" href="#">Infrastructure</a></li>
@@ -108,6 +108,24 @@
                   </ul>
                 </div>
               </div>
+
+<!--               <div class='form-group form-group-sm'>
+                <label class='control-label col-sm-3' for='appointment-type'>Appointment Type</label>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-default btn-sm dropdown-toggle status" data-current_value="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Select <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" id="appointmentTypeDropdown">
+                    <li><a data-appointment_type="1" href="#">Install</a></li>
+                    <li><a data-appointment_type="2" href="#">Service Call</a></li>
+                    <li><a data-appointment_type="3" href="#">Infrastructure</a></li>
+                    <li><a data-appointment_type="4" href="#">Other</a></li>
+                    <li><a data-appointment_type="5" href="#">Uninstall</a></li>
+                    <li><a data-appointment_type="8" href="#">Site Audit</a></li>
+                    <li><a data-appointment_type="10" href="#">Time Off</a></li>
+                  </ul>
+                </div>
+              </div> -->
 
               <div class='form-group form-group-sm' id='appointmentStartDiv'>
                 <label class='control-label col-sm-3' for='appointment-start'>Start</label>
