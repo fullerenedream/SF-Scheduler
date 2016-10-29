@@ -19,20 +19,6 @@ $(document).ready(function() {
   appointmentTypeArray[10] = 'Time Off';
 
 
-  /***************************/
-  // TODO: continue building this from info on scratchpad
-  // function getAppointmentTypes() {
-  //   $.getJSON('/api/calendar_itemtypes', function(data) {
-  //     loadedAppointmentTypes(data);
-  //   })
-  // }
-
-  // function loadedAppointmentTypes(response) {
-
-  // }
-  /***************************/
-
-
   // make dropdown menus work
   $('.dropdown-menu li > a').click(function(){
     console.log('dropdown item was selected!');
@@ -126,32 +112,118 @@ $(document).ready(function() {
   // });
 
 
+  /*** generate draggable appointment-type divs ***/
+  // TODO: continue building this from info on scratchpad
+  var appointmentTypes;
 
-  /* initialize the external events
-  -----------------------------------------------------------------*/
+  function getAppointmentTypes() {
+    $.getJSON('/api/calendar_itemtypes', function(data) {
+      loadedAppointmentTypes(data);
+    })
+  }
+
+  function loadedAppointmentTypes(response) {
+    appointmentTypes = response.ciTypes;
+    console.log(JSON.stringify(appointmentTypes));
+    drawAppointmentTypes();
+  }
+
+  function drawAppointmentTypes() {
+    $("#appointment-templates").empty();
+    for (var type in appointmentTypes) {
+      console.log(type);
+      // var divString = "<div id='" + type +
+      //                 "' class='new-appointment' style='background-color:" + appointmentTypes[type].color + "' data-event='{" +
+      //                   "\"title\":\"New " + appointmentTypes[type].name + "\"," +
+      //                   "\"color\":\"" + appointmentTypes[type].color + "\"," +
+      //                   "\"duration\":\"00:" + appointmentTypes[type].duration + ":00\"," +
+      //                   "\"ci_account\":\"\"," +
+      //                   "\"status\":\"0\"," +
+      //                   "\"notes\":\"\"," +
+      //                   "\"id\":\"0\"," +
+      //                   "\"ci_type_id\":\"" + appointmentTypes[type].ci_type_id + "\"" +
+      //                 "}'>" + appointmentTypes[type].name +
+      //                 "</div>"
+
+
+/*************************  YOU ARE FIXING THIS BIT RIGHT HERE  ********************************/
+      var divString = "<div class='new-appointment' id='" + type +
+                      "' style='background-color:" + appointmentTypes[type].color +
+                      "' data-title='" + appointmentTypes[type].name +
+                      "' data-color='" + appointmentTypes[type].color +
+                      // can Duration really work with values like '00:456:00' ???
+                      "' data-duration='00:" + appointmentTypes[type].duration + ":00" +
+                      "' data-status='0" +
+                      "' data-appointment_type='" + appointmentTypes[type].ci_type_id +
+                      "'>" + appointmentTypes[type].name +
+                      "</div>"
+
+                      // "' data-event='{" +
+                      //   "\"title\":\"New " + appointmentTypes[type].name + "\"," +
+                      //   "\"color\":\"" + appointmentTypes[type].color + "\"," +
+                      //   "\"duration\":\"00:" + appointmentTypes[type].duration + ":00\"," +
+                      //   "\"ci_account\":\"\"," +
+                      //   "\"status\":\"0\"," +
+                      //   "\"notes\":\"\"," +
+                      //   "\"id\":\"0\"," +
+                      //   "\"ci_type_id\":\"" + appointmentTypes[type].ci_type_id + "\"" +
+                      // "}'>" + appointmentTypes[type].name +
+                      // "</div>"
+
+      $("#appointment-templates").append($(divString));
+    }
+
+    $("#appointment-templates").prepend("<h4>New Event:</h4>");
+
+    $("#appointment-templates div.new-appointment").each(function(){
+      // store data so the calendar knows to render an event upon drop
+      $(this).data('event', {
+        title: $(this).data('title'),
+        customer_id: $(this).data('customer_id'),
+        ticket_id: $(this).data('ticket_id'),
+        appointment_type: $(this).data('appointment_type'),
+        status: $(this).data('status'),
+        description: $(this).data('description'),
+        stick: true // maintain when user navigates (see docs on the renderEvent method)
+      });
+      // make the event draggable using jQuery UI
+      $(this).draggable({
+        zIndex: 999,
+        revert: true,
+        revertDuration: 0
+      });
+    });
+  }
+
+  getAppointmentTypes();
+  /***************************/
+
+
+
+  // initialize the external events
 
   // dummy external events
   var externalEvent1 = new Object();
-  externalEvent1.appointmentType = 1;
+  externalEvent1.appointment_type = 1;
   externalEvent1.title = 'Install at the Boathouse';
-  externalEvent1.customerId = 20;
-  externalEvent1.ticketId = 120;
+  externalEvent1.customer_id = 20;
+  externalEvent1.ticket_id = 120;
   externalEvent1.status = 0;
   externalEvent1.description = 'Say hi to Henry Fuller';
 
   var externalEvent2 = new Object();
-  externalEvent2.appointmentType = 2;
+  externalEvent2.appointment_type = 2;
   externalEvent2.title = 'Fix router for Grandma Jenkins';
-  externalEvent2.customerId = 21;
-  externalEvent2.ticketId = 121;
+  externalEvent2.customer_id = 21;
+  externalEvent2.ticket_id = 121;
   externalEvent2.status = 0;
   externalEvent2.description = 'Good cookies, avoid lemonade';
 
   var externalEvent3 = new Object();
-  externalEvent3.appointmentType = 1;
+  externalEvent3.appointment_type = 1;
   externalEvent3.title = 'Install at Harris farm';
-  externalEvent3.customerId = 22;
-  externalEvent3.ticketId = 122;
+  externalEvent3.customer_id = 22;
+  externalEvent3.ticket_id = 122;
   externalEvent3.status = 0;
   externalEvent3.description = 'on the green barn';
 
@@ -163,9 +235,9 @@ $(document).ready(function() {
     // generate html for external events for makeOnDeckSection to operate on
     for (var i = 0; i < externalEventArray.length; i++) {
       var onDeckEvent = "<div class='fc-event' data-title='" + externalEventArray[i].title +
-                        "' data-customer_id='" + externalEventArray[i].customerId +
-                        "' data-ticket_id='" + externalEventArray[i].ticketId +
-                        "' data-appointment_type='" + externalEventArray[i].appointmentType +
+                        "' data-customer_id='" + externalEventArray[i].customer_id +
+                        "' data-ticket_id='" + externalEventArray[i].ticket_id +
+                        "' data-appointment_type='" + externalEventArray[i].appointment_type +
                         "' data-status='" + externalEventArray[i].status +
                         "' data-description='" + externalEventArray[i].description +
                         "'>" + externalEventArray[i].title +"</div>";
@@ -194,8 +266,9 @@ $(document).ready(function() {
     });
   }
 
-  /* initialize the calendar
-  -----------------------------------------------------------------*/
+
+  // initialize the calendar
+
   // draw the calendar with all resources and events
   loadCalendar();
 
@@ -251,6 +324,7 @@ $(document).ready(function() {
       // ************************ comment out for testing resources without events
       eventSources: calendarData.eventSources,
 
+      // triggered while an event is being rendered
       eventRender: function(event, element) {
         // if event is Unassigned, allow overlap
         if (event.resourceId == 0) {
@@ -267,14 +341,20 @@ $(document).ready(function() {
           $('div.fc-title', element).append(notesDiv);
         };
       },
+
       drop: function(date, jsEvent, ui, resourceId) {
         console.log('drop', date.format(), resourceId);
+
         // remove the element from the "Draggable Events" list
-        $(this).remove();
+        // if it's an On Deck event
+        console.log($(this));
+        if ( $(this).hasClass('fc-event') ) {
+          $(this).remove();
+        }
       },
 
       // called when an external element, containing event data, is dropped on the calendar
-      // TODO: bugfix - right now you can't drag an On Deck event straight onto
+      // TODO: right now you can't drag an On Deck event straight onto
       // an Unassigned event - you have to drag it onto an empty calendar spot first.
       // you ought to be able to drag an On Deck event straight onto the Unassigned
       // column, even if it's overlapping with a preexisting Unassigned event
@@ -283,33 +363,24 @@ $(document).ready(function() {
         // set the modal title and cancel/close button
         $('#modalTitle').text('Create Appointment');
         $('#modalCancelOrClose').text('Cancel');
-
         // populate the form with values from the event object
         populateModal(event);
-
         // summon the modal
         $('#fullCalModal').modal();
-      }, // end of callback eventReceive
+      },
 
       // called when an event (already on the calendar) is moved -
       // triggered when dragging stops and the event has moved to a *different* day/time
-      // TODO: bugfix: eventDrop saves to db when page is fresh
-      // but after you do an eventDrop once, the next time you do it,
-      // it doesn't save to the db. values must need to be reset somewhere...
       eventDrop: function (event, delta, revertFunc, jsEvent, view) {
         console.log('eventDrop', event);
-
         // set the modal title and cancel/close button
         $('#modalTitle').text('View/Edit Appointment');
         $('#modalCancelOrClose').text('Cancel');
-
         // populate the form with values from the event object
         populateModal(event);
-
         // summon the modal
         $('#fullCalModal').modal();
-
-      }, // end of callback eventDrop
+      },
 
       // triggered when the user clicks an event
       eventClick: function (event, jsEvent, view) {
@@ -317,24 +388,19 @@ $(document).ready(function() {
         // set the modal title and cancel/close button
         $('#modalTitle').text('View/Edit Appointment');
         $('#modalCancelOrClose').text('Close');
-
         // populate the form with values from the event object
         populateModal(event);
-
         // summon the modal
         $('#fullCalModal').modal();
-
-      }, // end of callback eventClick
+      },
 
       eventResize: function (event, delta, revertFunc, jsEvent, ui, view) {
         console.log('eventResize', event);
         // set the modal title and cancel/close button
         $('#modalTitle').text('View/Edit Appointment');
         $('#modalCancelOrClose').text('Close');
-
         // populate the form with values from the event object
         populateModal(event);
-
         // summon the modal
         $('#fullCalModal').modal();
       }
@@ -382,24 +448,30 @@ $(document).ready(function() {
     console.log('#modalSave clicked! JSON.stringify(eventData): ' + JSON.stringify(eventData));
 
     saveEvent(eventData);
-
-    // hide modal once newEvent is created
     $('#fullCalModal').modal('hide');
+    loadCalendar();
+  });
 
+
+  // TODO: find where updated events are being told to 'stick'
+  // set that to false, and then get rid of this function
+  // - we don't want events to 'stick' if the update is cancelled
+  $('#modalCancelOrClose').click(function() {
     loadCalendar();
   });
 
 
   // populate the form with values from the event object
   function populateModal(event) {
+    clearModal();
     console.log('populateModal', event);
     var start_ISO8601 = event.start.format('YYYY-MM-DD[T]HH:mm:ss');
     var end_ISO8601 = event.end.format('YYYY-MM-DD[T]HH:mm:ss');
 
     $('#appointmentTypeDiv .status').attr('data-current_value', event.appointmentType);
     $('#appointmentTypeDiv .status').text(appointmentTypeArray[event.appointmentType]);
-    $('#appointmentId').text(event.id);
     $('#appointmentTitleInput').val(event.title);
+    $('#appointmentId').text(event.id);
     // $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
     // $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
     // $('#resourceInput').attr('data-resource_input', event.resourceId).attr('placeholder', event.resourceId);
@@ -419,7 +491,21 @@ $(document).ready(function() {
         $(this).parent().addClass('active');
       }
     });
+  }
 
+  // clear all data from the modal
+  function clearModal() {
+    $('#appointmentTypeDiv .status').attr('data-current_value', '');
+    $('#appointmentTypeDiv .status').text('Appointment Type');
+    $('#appointmentId').text('');
+    $('#appointmentTitleInput').val('');
+    $('#startInput').text('');
+    $('#endInput').text('');
+    $('#resourceInput').text('');
+    $('#customerIdInput').val('');
+    $('#ticketIdInput').val('');
+    $('#descriptionInput').val('');
+    $('#appointmentStatusDiv .btn').removeClass('active');
   }
 
 
