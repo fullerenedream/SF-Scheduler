@@ -119,12 +119,13 @@ $(document).ready(function() {
   function getAppointmentTypes() {
     $.getJSON('/api/calendar_itemtypes', function(data) {
       loadedAppointmentTypes(data);
+      console.log('data from inside getAppointmentTypes: ', data);
     })
   }
 
   function loadedAppointmentTypes(response) {
     appointmentTypes = response.ciTypes;
-    console.log(JSON.stringify(appointmentTypes));
+    console.log('appointmentTypes from inside loadedAppointmentTypes(): ' + JSON.stringify(appointmentTypes));
     drawAppointmentTypes();
   }
 
@@ -138,9 +139,23 @@ $(document).ready(function() {
         "' data-color='" + appointmentTypes[type].color +
         "' data-duration='00:" + appointmentTypes[type].duration + ":00" +
         "' data-status='0" +
-        "' data-appointment_type='" + appointmentTypes[type].ci_type_id +
+        "' data-appointment_type='" + appointmentTypes[type].id +
         "'>" + appointmentTypes[type].name +
         "</div>"
+
+      // var divString = "<div id='"+type+"' class='new-appointment' style='background-color:"+appointmentTypes[type].color+"' data-event='{";
+      // divString +=       "\"title\":\"New "+appointmentTypes[type].name+"\",";
+      // divString +=       "\"color\":\""+appointmentTypes[type].color+"\",";
+      // divString +=       "\"duration\":\"00:"+appointmentTypes[type].duration+":00\",";
+      // // divString +=       "\"ci_account\":\"\",";
+      // divString +=       "\"status\":\"0\",";
+      // // divString +=       "\"notes\":\"\",";
+      // // divString +=       "\"id\":\"0\",";
+      // divString +=       "\"ci_type_id\":\""+appointmentTypes[type].ci_type_id+"\"";
+      // divString +=       "}'>";
+      // divString += appointmentTypes[type].name;
+      // divString += "</div>";
+
       $("#appointment-templates").append($(divString));
     }
     $("#appointment-templates").prepend("<h4>New Event:</h4>");
@@ -148,11 +163,11 @@ $(document).ready(function() {
       // store data so the calendar knows to render an event upon drop
       $(this).data('event', {
         title: $(this).data('title'),
-        customer_id: $(this).data('customer_id'),
-        ticket_id: $(this).data('ticket_id'),
-        appointment_type: $(this).data('appointment_type'),
+        customerId: $(this).data('customer_id'),
+        ticketId: $(this).data('ticket_id'),
+        appointmentType: $(this).data('appointment_type'),
         status: $(this).data('status'),
-        description: $(this).data('description'),
+        description: $(this).data('description')//, // uncomment the comma if you uncomment stick!
         // stick: true // maintain when user navigates (see docs on the renderEvent method)
       });
       // make the event draggable using jQuery UI
@@ -217,9 +232,9 @@ $(document).ready(function() {
       // store data so the calendar knows to render an event upon drop
       $(this).data('event', {
         title: $(this).data('title'),
-        customer_id: $(this).data('customer_id'),
-        ticket_id: $(this).data('ticket_id'),
-        appointment_type: $(this).data('appointment_type'),
+        customerId: $(this).data('customer_id'),
+        ticketId: $(this).data('ticket_id'),
+        appointmentType: $(this).data('appointment_type'),
         status: $(this).data('status'),
         description: $(this).data('description'),
         // stick: true // maintain when user navigates (see docs on the renderEvent method)
