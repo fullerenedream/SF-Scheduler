@@ -2,6 +2,9 @@
 // http://code.runnable.com/UfNTSnKMU1ZgAACt/how-to-add-calendar-using-jquery-and-fullcalendar
 // some of the code and comments are still in here
 
+var appointmentTypes;
+var onDeckEvents;
+
 $(document).ready(function() {
 
   var todayDate = new Date().toISOString().substring(0,10);
@@ -17,7 +20,6 @@ $(document).ready(function() {
   appointmentTypeArray[5] = 'Uninstall';
   appointmentTypeArray[8] = 'Site Audit';
   appointmentTypeArray[10] = 'Time Off';
-
 
   // make dropdown menus work
   $('.dropdown-menu li > a').click(function(){
@@ -67,6 +69,11 @@ $(document).ready(function() {
   // draw the calendar with all resources and events
   function loadCalendar() {
     $.getJSON('/api/resources_and_events', function(data) {
+      console.log('loadCalendar: ', data);
+      onDeckEvents = data.eventSources.splice(1,1);
+      onDeckEvents = onDeckEvents[0];
+      console.log('onDeckEvents: ', onDeckEvents);
+      console.log('data after splice: ', data);
       $('#fullcalendar').replaceWith('<div id="fullcalendar"></div>');
       drawFullCalendar(data);
     });
@@ -113,8 +120,6 @@ $(document).ready(function() {
 
 
   /*** generate draggable appointment-type divs ***/
-  // TODO: continue building this from info on scratchpad
-  var appointmentTypes;
 
   function getAppointmentTypes() {
     $.getJSON('/api/calendar_itemtypes', function(data) {
@@ -133,6 +138,7 @@ $(document).ready(function() {
     $("#appointment-templates").empty();
     for (var type in appointmentTypes) {
       console.log(type);
+
       var divString = "<div class='new-appointment' id='" + type +
         "' style='background-color:" + appointmentTypes[type].color +
         "' data-title='" + appointmentTypes[type].name +
@@ -142,20 +148,6 @@ $(document).ready(function() {
         "' data-appointment_type='" + appointmentTypes[type].id +
         "'>" + appointmentTypes[type].name +
         "</div>"
-
-      // var divString = "<div id='"+type+"' class='new-appointment' style='background-color:"+appointmentTypes[type].color+"' data-event='{";
-      // divString +=       "\"title\":\"New "+appointmentTypes[type].name+"\",";
-      // divString +=       "\"color\":\""+appointmentTypes[type].color+"\",";
-      // divString +=       "\"duration\":\"00:"+appointmentTypes[type].duration+":00\",";
-      // // divString +=       "\"ci_account\":\"\",";
-      // divString +=       "\"status\":\"0\",";
-      // // divString +=       "\"notes\":\"\",";
-      // // divString +=       "\"id\":\"0\",";
-      // divString +=       "\"ci_type_id\":\""+appointmentTypes[type].ci_type_id+"\"";
-      // divString +=       "}'>";
-      // divString += appointmentTypes[type].name;
-      // divString += "</div>";
-
       $("#appointment-templates").append($(divString));
     }
     $("#appointment-templates").prepend("<h4>New Event:</h4>");
@@ -217,14 +209,27 @@ $(document).ready(function() {
   function makeOnDeckSection() {
 
     // generate html for external events for makeOnDeckSection to operate on
-    for (var i = 0; i < externalEventArray.length; i++) {
-      var onDeckEvent = "<div class='fc-event' data-title='" + externalEventArray[i].title +
-                        "' data-customer_id='" + externalEventArray[i].customer_id +
-                        "' data-ticket_id='" + externalEventArray[i].ticket_id +
-                        "' data-appointment_type='" + externalEventArray[i].appointment_type +
-                        "' data-status='" + externalEventArray[i].status +
-                        "' data-description='" + externalEventArray[i].description +
-                        "'>" + externalEventArray[i].title +"</div>";
+    // for (var i = 0; i < externalEventArray.length; i++) {
+    //   var onDeckEvent = "<div class='fc-event' data-title='" + externalEventArray[i].title +
+    //     "' data-customer_id='" + externalEventArray[i].customer_id +
+    //     "' data-ticket_id='" + externalEventArray[i].ticket_id +
+    //     "' data-appointment_type='" + externalEventArray[i].appointment_type +
+    //     "' data-status='" + externalEventArray[i].status +
+    //     "' data-description='" + externalEventArray[i].description +
+    //     "'>" + externalEventArray[i].title +"</div>";
+    //   $('#external-events').append(onDeckEvent);
+    // }
+
+    for (var i = 0; i < onDeckEvents.length; i++) {
+      var onDeckEvent = "<div class='fc-event " + onDeckEvents[i].className +
+        "' data-title='" + onDeckEvents[i].title +
+        "' data-customer_id='" + onDeckEvents[i].customerId +
+        "' data-ticket_id='" + onDeckEvents[i].ticketId +
+        "' data-appointment_type='" + onDeckEvents[i].appointmentType +
+        "' data-status='" + onDeckEvents[i].status +
+        "' data-description='" + onDeckEvents[i].description +
+        "' data-color='" + onDeckEvents[i].color +
+        "'>" + onDeckEvents[i].title +"</div>";
       $('#external-events').append(onDeckEvent);
     }
 
@@ -236,7 +241,7 @@ $(document).ready(function() {
         ticketId: $(this).data('ticket_id'),
         appointmentType: $(this).data('appointment_type'),
         status: $(this).data('status'),
-        description: $(this).data('description'),
+        description: $(this).data('description')//, // uncomment the comma if you uncomment stick!
         // stick: true // maintain when user navigates (see docs on the renderEvent method)
       });
 

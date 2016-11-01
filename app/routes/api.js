@@ -388,11 +388,15 @@ router.get('/api/resources_and_events', function(req,res){
                                   customer_id,
                                   ticket_id,
                                   status,
-                                  description
-                                FROM appointments`;
+                                  description,
+                                  ci_type_color
+                                FROM appointments
+                                LEFT JOIN calendar_itemtypes
+                                ON appointments.appointment_type = calendar_itemtypes.ci_type_id`;
     con.query(appointmentQueryString, function(err, appt_rows) {
       if(err) throw err;
       var appointments = [];
+      var onDeckEvents = [];
       for (var i = 0; i < appt_rows.length; i++) {
         // console.log('appt_rows ' + i + ':\n' + appt_rows[i]);
         // console.log('appt_rows ' + i + ' ticket_id:\n' + appt_rows[i].ticket_id);
@@ -408,11 +412,20 @@ router.get('/api/resources_and_events', function(req,res){
         appointment.ticketId = appt_rows[i].ticket_id;
         appointment.status = appt_rows[i].status;  // (0, 1 or 2)
         appointment.description = appt_rows[i].description;
-        appointments.push(appointment);
+        appointment.color = appt_rows[i].ci_type_color;
+
+        if (appointment.start == '' || appointment.start == null) {
+          appointment.className = 'onDeck';
+          onDeckEvents.push(appointment);
+        }
+        else {
+          appointments.push(appointment);
+        }
       }
       eventSources.push(appointments);
+      eventSources.push(onDeckEvents);
       response.eventSources = eventSources;
-      // console.log('response: ' + JSON.stringify(response));
+      console.log('response: ' + JSON.stringify(response));
       console.log('sending response');
       res.json(response);
     }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
@@ -652,6 +665,27 @@ router.post('/api/appointments', function (req, res) {
   // TODO: feed On Deck appointments to makeOnDeckSection() in scheduler.js
   if (isOnDeck(appointment)) {
     console.log('On Deck appointment - needs to be fed to makeOnDeckSection() in scheduler.js');
+    // WARNING: appointment_type values are temporarily hard-coded in this function
+    if (isValidAppointmentType(req.body.appointment_type) == false) {
+      console.log('appointment_type is invalid - please try again');
+    }
+    else if (isBlankOrNull(req.body.customer_id)) {
+      console.log('please enter a Customer ID');
+    }
+    else if (isBlankOrNull(req.body.ticket_id)) {
+      console.log('please enter a Ticket ID');
+    }
+
+    // we have cleared the validations, now create or update the On Deck appointment
+    // if appointment_id is valid, appointment with that id is updated in the db
+    else if (isPositiveInt(req.body.appointment_id)) {
+      updateAppointment();
+    }
+    // if no appointment_id is given, a new appointment is created in the db
+    // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
+    else if (isBlankOrNull(req.body.appointment_id)) {
+      createAppointment();
+    }
   } // end On Deck section
 
 
