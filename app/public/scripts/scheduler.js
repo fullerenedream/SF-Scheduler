@@ -3,7 +3,7 @@
 // some of the code and comments are still in here
 
 var appointmentTypes;
-var onDeckEvents;
+var onDeckEvents = [];
 
 $(document).ready(function() {
 
@@ -71,13 +71,20 @@ $(document).ready(function() {
     $.getJSON('/api/resources_and_events', function(data) {
       console.log('loadCalendar: ', data);
       onDeckEvents = data.eventSources.splice(1,1);
-      onDeckEvents = onDeckEvents[0];
       console.log('onDeckEvents: ', onDeckEvents);
+      onDeckEvents = onDeckEvents[0];
+      console.log('onDeckEvents[0]: ', onDeckEvents);
       console.log('data after splice: ', data);
       $('#fullcalendar').replaceWith('<div id="fullcalendar"></div>');
       drawFullCalendar(data);
+      makeOnDeckSection(onDeckEvents);
     });
   }
+  // console.log('onDeckEvents just before makeOnDeckSection is called: ', onDeckEvents);
+  // makeOnDeckSection(onDeckEvents); // when On Deck events are loaded
+  // drawFullCalendar(calendarData); // when calendarData is loaded
+
+
 
   // re-draw fullcalendar based on what was selected in dropdown
   function loadTechCalendar(techId) {
@@ -204,11 +211,13 @@ $(document).ready(function() {
   externalEvent3.description = 'on the green barn';
 
   var externalEventArray = [externalEvent1, externalEvent2, externalEvent3];
+  console.log('externalEventArray: ', externalEventArray);
 
 
-  function makeOnDeckSection() {
+  function makeOnDeckSection(onDeckEvents) {
 
     // generate html for external events for makeOnDeckSection to operate on
+
     // for (var i = 0; i < externalEventArray.length; i++) {
     //   var onDeckEvent = "<div class='fc-event' data-title='" + externalEventArray[i].title +
     //     "' data-customer_id='" + externalEventArray[i].customer_id +
@@ -217,11 +226,16 @@ $(document).ready(function() {
     //     "' data-status='" + externalEventArray[i].status +
     //     "' data-description='" + externalEventArray[i].description +
     //     "'>" + externalEventArray[i].title +"</div>";
+    //   console.log('fake onDeckEvent: ' + onDeckEvent);
     //   $('#external-events').append(onDeckEvent);
     // }
 
+    // // getting closer to the problem - the line below yields an empty array -> scope or async/timing problem
+    // console.log('onDeckEvents within makeOnDeckSection', onDeckEvents);
+
     for (var i = 0; i < onDeckEvents.length; i++) {
       var onDeckEvent = "<div class='fc-event " + onDeckEvents[i].className +
+        "' style='background-color:" + onDeckEvents[i].color +
         "' data-title='" + onDeckEvents[i].title +
         "' data-customer_id='" + onDeckEvents[i].customerId +
         "' data-ticket_id='" + onDeckEvents[i].ticketId +
@@ -230,6 +244,7 @@ $(document).ready(function() {
         "' data-description='" + onDeckEvents[i].description +
         "' data-color='" + onDeckEvents[i].color +
         "'>" + onDeckEvents[i].title +"</div>";
+      console.log('onDeckEvent from db' + onDeckEvent);
       $('#external-events').append(onDeckEvent);
     }
 
@@ -241,7 +256,8 @@ $(document).ready(function() {
         ticketId: $(this).data('ticket_id'),
         appointmentType: $(this).data('appointment_type'),
         status: $(this).data('status'),
-        description: $(this).data('description')//, // uncomment the comma if you uncomment stick!
+        description: $(this).data('description'),
+        color: $(this).data('color')//, // uncomment the comma if you uncomment stick!
         // stick: true // maintain when user navigates (see docs on the renderEvent method)
       });
 
@@ -402,9 +418,6 @@ $(document).ready(function() {
     }); // end of var calendar
   } // end of function drawFullCalendar(calendarData)
 
-
-  makeOnDeckSection(); // when On Deck events are loaded
-  // drawFullCalendar(calendarData); // when calendarData is loaded
 
 
   // when 'Save' button is clicked on #fullCalModal bootstrap modal
