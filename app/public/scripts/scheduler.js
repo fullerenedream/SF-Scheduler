@@ -80,9 +80,6 @@ $(document).ready(function() {
       makeOnDeckSection(onDeckEvents);
     });
   }
-  // console.log('onDeckEvents just before makeOnDeckSection is called: ', onDeckEvents);
-  // makeOnDeckSection(onDeckEvents); // when On Deck events are loaded
-  // drawFullCalendar(calendarData); // when calendarData is loaded
 
 
 
@@ -120,13 +117,8 @@ $(document).ready(function() {
   }
 
 
-  // // draw the calendar with all appointments but no resources (for testing)
-  // $.getJSON('/api/appointments', function(data) {
-  //   drawFullCalendar(data);
-  // });
 
-
-  /*** generate draggable appointment-type divs ***/
+  // generate draggable appointment-type divs
 
   function getAppointmentTypes() {
     $.getJSON('/api/calendar_itemtypes', function(data) {
@@ -158,6 +150,7 @@ $(document).ready(function() {
       $("#appointment-templates").append($(divString));
     }
     $("#appointment-templates").prepend("<h4>New Event:</h4>");
+
     $("#appointment-templates div.new-appointment").each(function(){
       // store data so the calendar knows to render an event upon drop
       $(this).data('event', {
@@ -166,7 +159,8 @@ $(document).ready(function() {
         ticketId: $(this).data('ticket_id'),
         appointmentType: $(this).data('appointment_type'),
         status: $(this).data('status'),
-        description: $(this).data('description')//, // uncomment the comma if you uncomment stick!
+        description: $(this).data('description'),
+        color: $(this).data('color')//, // uncomment the comma if you uncomment stick!
         // stick: true // maintain when user navigates (see docs on the renderEvent method)
       });
       // make the event draggable using jQuery UI
@@ -179,78 +173,49 @@ $(document).ready(function() {
   }
 
   getAppointmentTypes();
-  /***************************/
 
 
 
   // initialize the external events
 
-  // dummy external events
-  var externalEvent1 = new Object();
-  externalEvent1.appointment_type = 1;
-  externalEvent1.title = 'Install at the Boathouse';
-  externalEvent1.customer_id = 20;
-  externalEvent1.ticket_id = 120;
-  externalEvent1.status = 0;
-  externalEvent1.description = 'Say hi to Henry Fuller';
-
-  var externalEvent2 = new Object();
-  externalEvent2.appointment_type = 2;
-  externalEvent2.title = 'Fix router for Grandma Jenkins';
-  externalEvent2.customer_id = 21;
-  externalEvent2.ticket_id = 121;
-  externalEvent2.status = 0;
-  externalEvent2.description = 'Good cookies, avoid lemonade';
-
-  var externalEvent3 = new Object();
-  externalEvent3.appointment_type = 1;
-  externalEvent3.title = 'Install at Harris farm';
-  externalEvent3.customer_id = 22;
-  externalEvent3.ticket_id = 122;
-  externalEvent3.status = 0;
-  externalEvent3.description = 'on the green barn';
-
-  var externalEventArray = [externalEvent1, externalEvent2, externalEvent3];
-  console.log('externalEventArray: ', externalEventArray);
-
-
   function makeOnDeckSection(onDeckEvents) {
-
-    // generate html for external events for makeOnDeckSection to operate on
-
-    // for (var i = 0; i < externalEventArray.length; i++) {
-    //   var onDeckEvent = "<div class='fc-event' data-title='" + externalEventArray[i].title +
-    //     "' data-customer_id='" + externalEventArray[i].customer_id +
-    //     "' data-ticket_id='" + externalEventArray[i].ticket_id +
-    //     "' data-appointment_type='" + externalEventArray[i].appointment_type +
-    //     "' data-status='" + externalEventArray[i].status +
-    //     "' data-description='" + externalEventArray[i].description +
-    //     "'>" + externalEventArray[i].title +"</div>";
-    //   console.log('fake onDeckEvent: ' + onDeckEvent);
-    //   $('#external-events').append(onDeckEvent);
-    // }
-
-    // // getting closer to the problem - the line below yields an empty array -> scope or async/timing problem
-    // console.log('onDeckEvents within makeOnDeckSection', onDeckEvents);
-
-    for (var i = 0; i < onDeckEvents.length; i++) {
-      var onDeckEvent = "<div class='fc-event " + onDeckEvents[i].className +
-        "' style='background-color:" + onDeckEvents[i].color +
-        "' data-title='" + onDeckEvents[i].title +
-        "' data-customer_id='" + onDeckEvents[i].customerId +
-        "' data-ticket_id='" + onDeckEvents[i].ticketId +
-        "' data-appointment_type='" + onDeckEvents[i].appointmentType +
-        "' data-status='" + onDeckEvents[i].status +
-        "' data-description='" + onDeckEvents[i].description +
-        "' data-color='" + onDeckEvents[i].color +
-        "'>" + onDeckEvents[i].title +"</div>";
-      console.log('onDeckEvent from db' + onDeckEvent);
-      $('#external-events').append(onDeckEvent);
+    $("#on-deck").empty();
+    if (onDeckEvents.length == 0) {
+      $('#on-deck').append('<h6>No On Deck Events</h6>');
     }
+    // generate html for On Deck events for makeOnDeckSection to operate on
+    for (var i = 0; i < onDeckEvents.length; i++) {
+      console.log('getting duration by appointment type:');
+      var thisAppointmentTypeId = onDeckEvents[i].appointmentType;
+      console.log('thisAppointmentTypeId: ', thisAppointmentTypeId);
+      var index = appointmentTypes.map(function(el) {
+        return el.id;
+      }).indexOf(thisAppointmentTypeId);
+      console.log('index: ', index);
+      var thisEventDuration = appointmentTypes[index].duration;
+      console.log('thisEventDuration: ', thisEventDuration);
 
-    $('#external-events .fc-event').each(function() {
+      var onDeckEvent = "<div class=\"fc-event " + onDeckEvents[i].className +
+        "\" style=\"background-color:" + onDeckEvents[i].color +
+        "\" data-appointment_id=\"" + onDeckEvents[i].id +
+        "\" data-title=\"" + onDeckEvents[i].title +
+        "\" data-customer_id=\"" + onDeckEvents[i].customerId +
+        "\" data-ticket_id=\"" + onDeckEvents[i].ticketId +
+        "\" data-appointment_type=\"" + onDeckEvents[i].appointmentType +
+        "\" data-status=\"" + onDeckEvents[i].status +
+        "\" data-description=\"" + onDeckEvents[i].description +
+        "\" data-color=\"" + onDeckEvents[i].color +
+        "\" data-duration=\"00:" + thisEventDuration + ":00" +
+        "\">" + onDeckEvents[i].title + "</div>";
+      console.log('onDeckEvent from db' + onDeckEvent);
+      $('#on-deck').append(onDeckEvent);
+    }
+    $('#on-deck').prepend("<h4>On Deck:</h4>");
+
+    $('#on-deck .fc-event').each(function() {
       // store data so the calendar knows to render an event upon drop
       $(this).data('event', {
+        id: $(this).data('appointment_id'),
         title: $(this).data('title'),
         customerId: $(this).data('customer_id'),
         ticketId: $(this).data('ticket_id'),
@@ -366,6 +331,9 @@ $(document).ready(function() {
       // column, even if it's overlapping with a preexisting Unassigned event
       eventReceive: function(event) {
         console.log('eventReceive', event);
+        if (event.className == 'onDeck') {
+          event.className = '';
+        }
         // set the modal title and cancel/close button
         $('#modalTitle').text('Create Appointment');
         $('#modalCancelOrClose').text('Cancel');
