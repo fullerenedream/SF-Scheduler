@@ -414,6 +414,10 @@ router.get('/api/resources_and_events', function(req,res){
         appointment.description = appt_rows[i].description;
         appointment.color = appt_rows[i].ci_type_color;
 
+        if (appointment.status == 2) {
+          appointment.borderColor = appointment.color;
+          appointment.color = '#666666';
+        }
         if (appointment.start == '' || appointment.start == null) {
           appointment.className = 'onDeck';
           onDeckEvents.push(appointment);

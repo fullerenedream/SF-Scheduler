@@ -301,16 +301,20 @@ $(document).ready(function() {
         if (event.resourceId == 0) {
           event.overlap = true;
         }
+        // // if event status is Completed, set border color to black
+        // if (event.status == 2) {
+        //   event.borderColor = '#000000';
+        // }
         // add event description after event title
         if (event.description) {
           var descriptionDiv = '<div>' + event.description + '</div>';
           $('div.fc-title', element).append(descriptionDiv);
-        };
+        }
         // add event notes after event title
         if (event.notes) {
           var notesDiv = '<div>' + event.notes + '</div>';
           $('div.fc-title', element).append(notesDiv);
-        };
+        }
       },
 
       drop: function(date, jsEvent, ui, resourceId) {
