@@ -419,7 +419,7 @@ router.get('/api/resources_and_events', function(req,res){
           appointment.color = '#666666';
         }
         if (appointment.start == '' || appointment.start == null) {
-          appointment.className = 'onDeck';
+          // appointment.className = 'onDeck';
           onDeckEvents.push(appointment);
         }
         else {

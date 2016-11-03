@@ -67,7 +67,8 @@ $(document).ready(function() {
 
 
   // draw the calendar with all resources and events
-  function loadCalendar() {
+  function loadCalendar(view = 'agendaDay') {
+    console.log('currentView: ', view);
     $.getJSON('/api/resources_and_events', function(data) {
       console.log('loadCalendar: ', data);
       onDeckEvents = data.eventSources.splice(1,1);
@@ -76,7 +77,7 @@ $(document).ready(function() {
       console.log('onDeckEvents[0]: ', onDeckEvents);
       console.log('data after splice: ', data);
       $('#fullcalendar').replaceWith('<div id="fullcalendar"></div>');
-      drawFullCalendar(data);
+      drawFullCalendar(data, view);
       makeOnDeckSection(onDeckEvents);
     });
   }
@@ -210,7 +211,7 @@ $(document).ready(function() {
       console.log('onDeckEvent from db' + onDeckEvent);
       $('#on-deck').append(onDeckEvent);
     }
-    $('#on-deck').prepend("<h4>On Deck:</h4>");
+    $('#on-deck').prepend("<h4>Backlog:</h4>");
 
     $('#on-deck .fc-event').each(function() {
       // store data so the calendar knows to render an event upon drop
@@ -242,7 +243,7 @@ $(document).ready(function() {
   // draw the calendar with all resources and events
   loadCalendar();
 
-  function drawFullCalendar(calendarData) {
+  function drawFullCalendar(calendarData, view = 'agendaDay') {
     console.log('calendarData.resources:')
     console.log(calendarData.resources);
     console.log('inside drawFullCalendar - calendarData: ')
@@ -268,7 +269,7 @@ $(document).ready(function() {
         center: 'title',
         right: 'agendaDay,agendaWeek,month'
       },
-      defaultView: 'agendaDay',
+      defaultView: view,
       selectable: true,
       selectHelper: true,
 
@@ -279,10 +280,12 @@ $(document).ready(function() {
         // set the modal title and cancel/close button
         $('#modalTitle').text('Create Appointment');
         $('#modalCancelOrClose').text('Cancel');
+        // hide appointment ID (event won't have one until it's saved)
+        $('#appointmentIdDiv').hide();
         // populate the form with initial values
-        $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
-        $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
-        $('#resourceInput').attr('data-resource_input', resource.id).attr('placeholder', resource.id);
+        $('#startInput').text(start_ISO8601);
+        $('#endInput').text(end_ISO8601);
+        $('#resourceInput').text(resource.id);
         // summon the modal
         $('#fullCalModal').modal();
         // now that we've sent the rest of the job to the modal, de-select the selected area
@@ -301,10 +304,6 @@ $(document).ready(function() {
         if (event.resourceId == 0) {
           event.overlap = true;
         }
-        // // if event status is Completed, set border color to black
-        // if (event.status == 2) {
-        //   event.borderColor = '#000000';
-        // }
         // add event description after event title
         if (event.description) {
           var descriptionDiv = '<div>' + event.description + '</div>';
@@ -319,7 +318,6 @@ $(document).ready(function() {
 
       drop: function(date, jsEvent, ui, resourceId) {
         console.log('drop', date.format(), resourceId);
-
         // remove the element from the "Draggable Events" list
         // if it's an On Deck event
         console.log($(this));
@@ -329,18 +327,23 @@ $(document).ready(function() {
       },
 
       // called when an external element, containing event data, is dropped on the calendar
-      // TODO: right now you can't drag an On Deck event straight onto
-      // an Unassigned event - you have to drag it onto an empty calendar spot first.
-      // you ought to be able to drag an On Deck event straight onto the Unassigned
-      // column, even if it's overlapping with a preexisting Unassigned event
       eventReceive: function(event) {
         console.log('eventReceive', event);
-        if (event.className == 'onDeck') {
-          event.className = '';
-        }
+        // console.log('event.className: ', event.className);
+        // // TODO: this is not the right spot to remove onDeck from event.className - what if user clicks 'cancel' instead of 'save' on modal?
+        // // also it's just not working, though fc docs say an event can have a className property...
+        // if (event.className == 'onDeck') {
+        //   console.log('event.className == onDeck... resetting event.className to empty string');
+        //   event.className = '';
+        // }
         // set the modal title and cancel/close button
         $('#modalTitle').text('Create Appointment');
         $('#modalCancelOrClose').text('Cancel');
+        // if new appointment, hide appointment ID (event won't have one until it's saved)
+        if (event.id == null || event.id == '') {
+          console.log('no event.id... hiding #appointmentIdDiv');
+          $('#appointmentIdDiv').hide();
+        }
         // populate the form with values from the event object
         populateModal(event);
         // summon the modal
@@ -384,25 +387,38 @@ $(document).ready(function() {
       }
 
 
-      // other fullCalendar options go here...
+      // other fullCalendar options can be added here...
 
 
     }); // end of var calendar
   } // end of function drawFullCalendar(calendarData)
 
 
+  // // launch modal set up for creating new On Deck event
+  $('#new-on-deck-btn').click(function(){
+    // set the modal title and cancel/close button
+    $('#modalTitle').text('Create Backlog Item');
+    $('#modalCancelOrClose').text('Cancel');
+    // hide start time, end time, appointment ID, & installer options
+    $('#appointmentStartDiv').hide();
+    $('#appointmentEndDiv').hide();
+    $('#appointmentIdDiv').hide();
+    $('#appointmentResourceDiv').hide();
+    // summon the modal
+    $('#fullCalModal').modal();
+  });
+
+
 
   // when 'Save' button is clicked on #fullCalModal bootstrap modal
   $('#modalSave').click(function(){
     console.log('modal Save button was clicked!');
+    currentView = $('#fullcalendar').fullCalendar('getView').name;
     var eventData = {};
 
     eventData = {
       appointment_type: $('#appointmentTypeDiv .status').attr('data-current_value'),
       title: $('#appointmentTitleInput').val(),
-      // tech_id: $('#resourceInput').data('resource_input'),
-      // appt_start_iso_8601: $('#startInput').data('start_input'),
-      // appt_end_iso_8601: $('#endInput').data('end_input'),
       customer_id: $('#customerIdInput').val(),
       ticket_id: $('#ticketIdInput').val(),
       description: $('#descriptionInput').val(),
@@ -423,8 +439,10 @@ $(document).ready(function() {
     console.log('#modalSave clicked! JSON.stringify(eventData): ' + JSON.stringify(eventData));
 
     saveEvent(eventData);
+    console.log('saving event: ', eventData);
     $('#fullCalModal').modal('hide');
-    loadCalendar();
+    showHiddenModalDivs();
+    loadCalendar(currentView);
   });
 
 
@@ -432,7 +450,9 @@ $(document).ready(function() {
   // set that to false, and then get rid of this function
   // - we don't want events to 'stick' if the update is cancelled
   $('#modalCancelOrClose').click(function() {
-    loadCalendar();
+    currentView = $('#fullcalendar').fullCalendar('getView').name;
+    showHiddenModalDivs();
+    loadCalendar(currentView);
   });
 
 
@@ -447,9 +467,6 @@ $(document).ready(function() {
     $('#appointmentTypeDiv .status').text(appointmentTypeArray[event.appointmentType]);
     $('#appointmentTitleInput').val(event.title);
     $('#appointmentId').text(event.id);
-    // $('#startInput').attr('data-start_input', start_ISO8601).attr('placeholder', start_ISO8601);
-    // $('#endInput').attr('data-end_input', end_ISO8601).attr('placeholder', end_ISO8601);
-    // $('#resourceInput').attr('data-resource_input', event.resourceId).attr('placeholder', event.resourceId);
     $('#startInput').text(start_ISO8601);
     $('#endInput').text(end_ISO8601);
     $('#resourceInput').text(event.resourceId);
@@ -481,6 +498,13 @@ $(document).ready(function() {
     $('#ticketIdInput').val('');
     $('#descriptionInput').val('');
     $('#appointmentStatusDiv .btn').removeClass('active');
+  }
+
+  function showHiddenModalDivs() {
+    $('#appointmentStartDiv').show();
+    $('#appointmentEndDiv').show();
+    $('#appointmentIdDiv').show();
+    $('#appointmentResourceDiv').show();
   }
 
 
