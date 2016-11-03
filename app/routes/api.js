@@ -438,6 +438,9 @@ router.get('/api/resources_and_events', function(req,res){
 
 
 
+// TODO: GET all the resources and events has been heavily edited -
+// now this section for a single resource and its events is way behind -
+// needs to be updated, and eventually refactored to be DRY
 // GET one resource and all its events - technician working hours + appointments
 router.get('/api/resources_and_events/:user_id', function(req,res){
   var con = db.connectToScheduleDB();
@@ -445,7 +448,7 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
   var key = user_id;
   console.log('inside GET request for one resource and all its events - /api/resources_and_events/' + user_id);
   var response = new Object();
-  // using eventSources array to combine appointments and time_off events - TODO: undo this
+  // using eventSources array to combine appointments and time_off events
   var eventSources = [];
   // get this technician's working hours
   var tsQueryString =  `SELECT schedule_id,

@@ -196,7 +196,7 @@ $(document).ready(function() {
       var thisEventDuration = appointmentTypes[index].duration;
       console.log('thisEventDuration: ', thisEventDuration);
 
-      var onDeckEvent = "<div class=\"fc-event " + onDeckEvents[i].className +
+      var onDeckEvent = "<div class=\"fc-event on-deck-event " + //onDeckEvents[i].className +
         "\" style=\"background-color:" + onDeckEvents[i].color +
         "\" data-appointment_id=\"" + onDeckEvents[i].id +
         "\" data-title=\"" + onDeckEvents[i].title +
@@ -394,7 +394,7 @@ $(document).ready(function() {
   } // end of function drawFullCalendar(calendarData)
 
 
-  // // launch modal set up for creating new On Deck event
+  // launch modal set up for creating new On Deck event
   $('#new-on-deck-btn').click(function(){
     // set the modal title and cancel/close button
     $('#modalTitle').text('Create Backlog Item');
@@ -407,6 +407,25 @@ $(document).ready(function() {
     // summon the modal
     $('#fullCalModal').modal();
   });
+
+
+  // TODO: make this actually work
+  // launch modal to View/Edit when On Deck event is clicked
+  // $('.on-deck-event').click(function(){ // PROBLEM: this is not defining the clicked element clearly enough
+  //   console.log('On Deck event clicked!');
+  //   // set the modal title and cancel/close button
+  //   $('#modalTitle').text('View/Edit Backlog Item');
+  //   $('#modalCancelOrClose').text('Close');
+  //   // hide start time, end time, appointment ID, & installer options
+  //   $('#appointmentStartDiv').hide();
+  //   $('#appointmentEndDiv').hide();
+  //   $('#appointmentIdDiv').hide();
+  //   $('#appointmentResourceDiv').hide();
+  //   // populate the form with values from the On Deck event
+  //   // but how????
+  //   // summon the modal
+  //   $('#fullCalModal').modal();
+  // });
 
 
 
