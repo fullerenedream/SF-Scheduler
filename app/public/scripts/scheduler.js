@@ -10,16 +10,8 @@ $(document).ready(function() {
   var todayDate = new Date().toISOString().substring(0,10);
   console.log(todayDate);
 
-  // WARNING: these values are also hard-coded in #appointmentTypeDiv
-  // if they ever change, they must be changed in both places
-  var appointmentTypeArray = new Object();
-  appointmentTypeArray[1] = 'Install';
-  appointmentTypeArray[2] = 'Service Call';
-  appointmentTypeArray[3] = 'Infrastructure';
-  appointmentTypeArray[4] = 'Other';
-  appointmentTypeArray[5] = 'Uninstall';
-  appointmentTypeArray[8] = 'Site Audit';
-  appointmentTypeArray[10] = 'Time Off';
+  getAppointmentTypes();
+  getOnDeckEvents();
 
   // make dropdown menus work
   $('.dropdown-menu li > a').click(function(){
@@ -71,14 +63,10 @@ $(document).ready(function() {
     console.log('currentView: ', view);
     $.getJSON('/api/resources_and_events', function(data) {
       console.log('loadCalendar: ', data);
-      // onDeckEvents = data.eventSources.splice(1,1);
-      // console.log('onDeckEvents: ', onDeckEvents);
-      // onDeckEvents = onDeckEvents[0];
-      // console.log('onDeckEvents[0]: ', onDeckEvents);
-      // console.log('data after splice: ', data);
+      // clear calendar of old data
       $('#fullcalendar').replaceWith('<div id="fullcalendar"></div>');
+      // draw calendar with new data
       drawFullCalendar(data, view);
-      // makeOnDeckSection(onDeckEvents);
     });
   }
 
@@ -119,21 +107,18 @@ $(document).ready(function() {
 
 
 
-  // generate draggable appointment-type divs
-
+  // generate draggable appointment-type divs and populate the New Event section
   function getAppointmentTypes() {
     $.getJSON('/api/calendar_itemtypes', function(data) {
       loadedAppointmentTypes(data);
       console.log('data from inside getAppointmentTypes: ', data);
     })
   }
-
   function loadedAppointmentTypes(response) {
     appointmentTypes = response.ciTypes;
     console.log('appointmentTypes from inside loadedAppointmentTypes(): ' + JSON.stringify(appointmentTypes));
     drawAppointmentTypes();
   }
-
   function drawAppointmentTypes() {
     $("#appointment-templates").empty();
     for (var type in appointmentTypes) {
@@ -173,26 +158,32 @@ $(document).ready(function() {
     });
   }
 
-  getAppointmentTypes();
+  // search appointmentTypes: find an appointmentType's index using its appointmentType ID
+  function getAppointmentTypeIndexById(appointmentTypeID) {
+    console.log('getting appointmentType index by appointmentType ID');
+    console.log('appointmentTypeID: ', appointmentTypeID);
+    var index = appointmentTypes.map(function(el) {
+      return el.id;
+    }).indexOf(appointmentTypeID);
+    console.log('appointmentType ' + appointmentTypeID + ' has this index: ' + index);
+    return index;
+  }
 
 
 
-  // initialize the external events
-
+  // generate draggable divs of On Deck events and populate the On Deck section
   function getOnDeckEvents() {
     $.getJSON('/api/on_deck_events', function(data) {
       loadedOnDeckEvents(data);
       console.log('data from inside getOnDeckEvents: ', data);
     })
   }
-
   function loadedOnDeckEvents(response) {
     onDeckEvents = response.onDeckEvents;
     console.log('onDeckEvents from inside loadedOnDeckEvents(): ' + JSON.stringify(onDeckEvents));
     // wait for appointmentTypes to load before calling makeOnDeckSection()
     waitForAppointmentTypes();
   }
-
   function waitForAppointmentTypes() {
     if (typeof appointmentTypes !== "undefined") {
       console.log('appointmentTypes is now defined - calling makeOnDeckSection()');
@@ -205,7 +196,6 @@ $(document).ready(function() {
       }, 250);
     }
   }
-
   function makeOnDeckSection() {
     $("#on-deck").empty();
     if (onDeckEvents.length == 0) {
@@ -213,12 +203,7 @@ $(document).ready(function() {
     }
     // generate html for On Deck events for makeOnDeckSection to operate on
     for (var i = 0; i < onDeckEvents.length; i++) {
-      console.log('getting duration by appointment type:');
-      var thisAppointmentTypeId = onDeckEvents[i].appointmentType;
-      console.log('thisAppointmentTypeId: ', thisAppointmentTypeId);
-      var index = appointmentTypes.map(function(el) {
-        return el.id;
-      }).indexOf(thisAppointmentTypeId);
+      var index = getAppointmentTypeIndexById(onDeckEvents[i].appointmentType);
       console.log('index: ', index);
       var thisEventDuration = appointmentTypes[index].duration;
       console.log('thisEventDuration: ', thisEventDuration);
@@ -263,8 +248,6 @@ $(document).ready(function() {
 
     });
   }
-
-  getOnDeckEvents();
 
 
 
@@ -426,6 +409,9 @@ $(document).ready(function() {
 
   // launch modal set up for creating new On Deck event
   $('#new-on-deck-btn').click(function(){
+    console.log('***********New Backlog Item button was clicked!***********');
+    // clear the modal
+    clearModal();
     // set the modal title and cancel/close button
     $('#modalTitle').text('Create Backlog Item');
     $('#modalCancelOrClose').text('Cancel');
@@ -485,7 +471,7 @@ $(document).ready(function() {
     if ($('#appointmentId').text() != null) {
       eventData.appointment_id = $('#appointmentId').text();
     }
-    console.log('#modalSave clicked! JSON.stringify(eventData): ' + JSON.stringify(eventData));
+    console.log('#modalSave clicked! JSON.stringified eventData: ' + JSON.stringify(eventData));
 
     saveEvent(eventData);
     console.log('saving event: ', eventData);
@@ -509,13 +495,19 @@ $(document).ready(function() {
 
   // populate the form with values from the event object
   function populateModal(event) {
+    console.log('populateModal');
     clearModal();
-    console.log('populateModal', event);
+    console.log('populating modal with event: ', event);
     var start_ISO8601 = event.start.format('YYYY-MM-DD[T]HH:mm:ss');
     var end_ISO8601 = event.end.format('YYYY-MM-DD[T]HH:mm:ss');
 
+    var index = getAppointmentTypeIndexById(event.appointmentType);
+    console.log('index: ', index);
+    var appointmentTypeName = appointmentTypes[index].name;
+    console.log('appointmentTypeName: ', appointmentTypeName);
+
     $('#appointmentTypeDiv .status').attr('data-current_value', event.appointmentType);
-    $('#appointmentTypeDiv .status').text(appointmentTypeArray[event.appointmentType]);
+    $('#appointmentTypeDiv .status').text(appointmentTypeName);
     $('#appointmentTitleInput').val(event.title);
     $('#appointmentId').text(event.id);
     $('#startInput').text(start_ISO8601);
@@ -538,6 +530,7 @@ $(document).ready(function() {
 
   // clear all data from the modal
   function clearModal() {
+    console.log('clearing modal');
     $('#appointmentTypeDiv .status').attr('data-current_value', '');
     $('#appointmentTypeDiv .status').text('Appointment Type');
     $('#appointmentId').text('');
