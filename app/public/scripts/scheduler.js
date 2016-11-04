@@ -3,7 +3,7 @@
 // some of the code and comments are still in here
 
 var appointmentTypes;
-var onDeckEvents = [];
+var onDeckEvents;
 
 $(document).ready(function() {
 
@@ -71,14 +71,14 @@ $(document).ready(function() {
     console.log('currentView: ', view);
     $.getJSON('/api/resources_and_events', function(data) {
       console.log('loadCalendar: ', data);
-      onDeckEvents = data.eventSources.splice(1,1);
-      console.log('onDeckEvents: ', onDeckEvents);
-      onDeckEvents = onDeckEvents[0];
-      console.log('onDeckEvents[0]: ', onDeckEvents);
-      console.log('data after splice: ', data);
+      // onDeckEvents = data.eventSources.splice(1,1);
+      // console.log('onDeckEvents: ', onDeckEvents);
+      // onDeckEvents = onDeckEvents[0];
+      // console.log('onDeckEvents[0]: ', onDeckEvents);
+      // console.log('data after splice: ', data);
       $('#fullcalendar').replaceWith('<div id="fullcalendar"></div>');
       drawFullCalendar(data, view);
-      makeOnDeckSection(onDeckEvents);
+      // makeOnDeckSection(onDeckEvents);
     });
   }
 
@@ -179,7 +179,20 @@ $(document).ready(function() {
 
   // initialize the external events
 
-  function makeOnDeckSection(onDeckEvents) {
+  function getOnDeckEvents() {
+    $.getJSON('/api/on_deck_events', function(data) {
+      loadedOnDeckEvents(data);
+      console.log('data from inside getOnDeckEvents: ', data);
+    })
+  }
+
+  function loadedOnDeckEvents(response) {
+    onDeckEvents = response.onDeckEvents;
+    console.log('onDeckEvents from inside loadedOnDeckEvents(): ' + JSON.stringify(onDeckEvents));
+    makeOnDeckSection();
+  }
+
+  function makeOnDeckSection() {
     $("#on-deck").empty();
     if (onDeckEvents.length == 0) {
       $('#on-deck').append('<h6>No On Deck Events</h6>');
@@ -236,6 +249,9 @@ $(document).ready(function() {
 
     });
   }
+
+  getOnDeckEvents();
+
 
 
   // initialize the calendar
