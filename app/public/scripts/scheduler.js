@@ -189,7 +189,21 @@ $(document).ready(function() {
   function loadedOnDeckEvents(response) {
     onDeckEvents = response.onDeckEvents;
     console.log('onDeckEvents from inside loadedOnDeckEvents(): ' + JSON.stringify(onDeckEvents));
-    makeOnDeckSection();
+    // wait for appointmentTypes to load before calling makeOnDeckSection()
+    waitForAppointmentTypes();
+  }
+
+  function waitForAppointmentTypes() {
+    if (typeof appointmentTypes !== "undefined") {
+      console.log('appointmentTypes is now defined - calling makeOnDeckSection()');
+      makeOnDeckSection();
+    }
+    else {
+      console.log('appointmentTypes is not yet defined - waiting 1/4 second and checking again');
+      setTimeout(function() {
+        waitForAppointmentTypes();
+      }, 250);
+    }
   }
 
   function makeOnDeckSection() {
@@ -477,6 +491,7 @@ $(document).ready(function() {
     console.log('saving event: ', eventData);
     $('#fullCalModal').modal('hide');
     showHiddenModalDivs();
+    getOnDeckEvents();
     loadCalendar(currentView);
   });
 
@@ -487,6 +502,7 @@ $(document).ready(function() {
   $('#modalCancelOrClose').click(function() {
     currentView = $('#fullcalendar').fullCalendar('getView').name;
     showHiddenModalDivs();
+    getOnDeckEvents();
     loadCalendar(currentView);
   });
 
