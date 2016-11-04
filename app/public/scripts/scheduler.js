@@ -223,8 +223,7 @@ $(document).ready(function() {
       console.log('onDeckEvent from db' + onDeckEvent);
       $('#on-deck').append(onDeckEvent);
     }
-    $('#on-deck').prepend("<h4>Backlog:</h4>");
-
+    $('#on-deck').prepend("<h4>Backlog:</h4>")
     $('#on-deck .fc-event').each(function() {
       // store data so the calendar knows to render an event upon drop
       $(this).data('event', {
@@ -238,14 +237,50 @@ $(document).ready(function() {
         color: $(this).data('color')//, // uncomment the comma if you uncomment stick!
         // stick: true // maintain when user navigates (see docs on the renderEvent method)
       });
-
       // make the event draggable using jQuery UI
       $(this).draggable({
         zIndex: 999,
         revert: true,      // will cause the event to go back to its
         revertDuration: 0  //  original position after the drag
       });
+    });
+    // launch modal to View/Edit when On Deck event is clicked
+    $('.on-deck-event').click(function(){
+      console.log('On Deck event clicked!');
+      console.log('$(this): ', $(this));
+      // console.log("$(this).data('title'): ", $(this).data('title'));
+      // console.log("$(this).data('appointment_id'): ", $(this).data('appointment_id'));
+      var onDeckEventDiv = $(this);
+      // console.log("onDeckEventDiv.data('title'): ", onDeckEventDiv.data('title'));
+      // console.log("onDeckEventDiv.data('appointment_id'): ", onDeckEventDiv.data('appointment_id'));
 
+
+      // var onDeckEventData = {
+      //   appointment_id: onDeckEventDiv.data('appointment_id'),
+      //   title: onDeckEventDiv.data('title'),
+      //   customer_id: onDeckEventDiv.data('customer_id'),
+      //   ticket_id: onDeckEventDiv.data('ticket_id'),
+      //   appointment_type: onDeckEventDiv.data('appointment_type'),
+      //   status: onDeckEventDiv.data('status'),
+      //   description: onDeckEventDiv.data('description'),
+      //   color: onDeckEventDiv.data('color'),
+      //   duration: onDeckEventDiv.data('duration'),
+      // }
+      // console.log('onDeckEventData: ', onDeckEventData);
+
+
+      // set the modal title and cancel/close button
+      $('#modalTitle').text('View/Edit Backlog Item');
+      $('#modalCancelOrClose').text('Close');
+      // hide start time, end time, appointment ID, & installer options
+      $('#appointmentStartDiv').hide();
+      $('#appointmentEndDiv').hide();
+      $('#appointmentIdDiv').hide();
+      $('#appointmentResourceDiv').hide();
+      // populate the form with values from the On Deck event
+      populateOnDeckModal(onDeckEventDiv);
+      // summon the modal
+      $('#fullCalModal').modal();
     });
   }
 
@@ -299,6 +334,12 @@ $(document).ready(function() {
         $('#startInput').text(start_ISO8601);
         $('#endInput').text(end_ISO8601);
         $('#resourceInput').text(resource.id);
+        // set radio buttons so 'Active' is selected (status == 0)
+        $('#appointmentStatusDiv .radio-btn').each(function() {
+          if ( $(this).attr('data-appointment_status') == 0 ) {
+            $(this).parent().addClass('active');
+          }
+        });
         // summon the modal
         $('#fullCalModal').modal();
         // now that we've sent the rest of the job to the modal, de-select the selected area
@@ -409,12 +450,18 @@ $(document).ready(function() {
 
   // launch modal set up for creating new On Deck event
   $('#new-on-deck-btn').click(function(){
-    console.log('***********New Backlog Item button was clicked!***********');
+    console.log('New Backlog Item button was clicked!');
     // clear the modal
     clearModal();
     // set the modal title and cancel/close button
     $('#modalTitle').text('Create Backlog Item');
     $('#modalCancelOrClose').text('Cancel');
+    // set radio buttons so 'Active' is selected (status == 0)
+    $('#appointmentStatusDiv .radio-btn').each(function() {
+      if ( $(this).attr('data-appointment_status') == 0 ) {
+        $(this).parent().addClass('active');
+      }
+    });
     // hide start time, end time, appointment ID, & installer options
     $('#appointmentStartDiv').hide();
     $('#appointmentEndDiv').hide();
@@ -423,25 +470,6 @@ $(document).ready(function() {
     // summon the modal
     $('#fullCalModal').modal();
   });
-
-
-  // TODO: make this actually work
-  // launch modal to View/Edit when On Deck event is clicked
-  // $('.on-deck-event').click(function(){ // PROBLEM: this is not defining the clicked element clearly enough
-  //   console.log('On Deck event clicked!');
-  //   // set the modal title and cancel/close button
-  //   $('#modalTitle').text('View/Edit Backlog Item');
-  //   $('#modalCancelOrClose').text('Close');
-  //   // hide start time, end time, appointment ID, & installer options
-  //   $('#appointmentStartDiv').hide();
-  //   $('#appointmentEndDiv').hide();
-  //   $('#appointmentIdDiv').hide();
-  //   $('#appointmentResourceDiv').hide();
-  //   // populate the form with values from the On Deck event
-  //   // but how????
-  //   // summon the modal
-  //   $('#fullCalModal').modal();
-  // });
 
 
 
@@ -513,6 +541,49 @@ $(document).ready(function() {
     $('#startInput').text(start_ISO8601);
     $('#endInput').text(end_ISO8601);
     $('#resourceInput').text(event.resourceId);
+    $('#customerIdInput').val(event.customerId);
+    $('#ticketIdInput').val(event.ticketId);
+    $('#descriptionInput').val(event.description);
+    $('#appointmentStatusDiv .btn').removeClass('active');
+
+    var eventStatus = event.status;
+    $('#appointmentStatusDiv .radio-btn').each(function() {
+      // console.log($(this));
+      if ( $(this).attr('data-appointment_status') == eventStatus ) {
+        // console.log(eventStatus);
+        $(this).parent().addClass('active');
+      }
+    });
+  }
+
+  // populate the form with values from the On Deck event div
+  function populateOnDeckModal(onDeckEventDiv) {
+    console.log('populateOnDeckModal');
+    clearModal();
+    console.log('populating modal with info from On Deck event div');
+
+    var event = {
+      id: onDeckEventDiv.data('appointment_id'),
+      title: onDeckEventDiv.data('title'),
+      customerId: onDeckEventDiv.data('customer_id'),
+      ticketId: onDeckEventDiv.data('ticket_id'),
+      appointmentType: onDeckEventDiv.data('appointment_type'),
+      status: onDeckEventDiv.data('status'),
+      description: onDeckEventDiv.data('description'),
+      color: onDeckEventDiv.data('color'),
+      duration: onDeckEventDiv.data('duration'),
+    }
+    console.log('On Deck event: ', event);
+
+    var index = getAppointmentTypeIndexById(event.appointmentType);
+    console.log('index: ', index);
+    var appointmentTypeName = appointmentTypes[index].name;
+    console.log('appointmentTypeName: ', appointmentTypeName);
+
+    $('#appointmentTypeDiv .status').attr('data-current_value', event.appointmentType);
+    $('#appointmentTypeDiv .status').text(appointmentTypeName);
+    $('#appointmentTitleInput').val(event.title);
+    $('#appointmentId').text(event.id);
     $('#customerIdInput').val(event.customerId);
     $('#ticketIdInput').val(event.ticketId);
     $('#descriptionInput').val(event.description);
