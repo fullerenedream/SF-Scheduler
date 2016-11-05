@@ -9,6 +9,21 @@ body {
   text-align: left;
 }
 
+.modal-body #appointmentTypeButton {
+  margin-left: 16px;
+  margin-right: 0px;
+}
+
+.modal-footer #saveAndCloseButtons {
+  margin-left: -14px;
+  margin-right: 0px;
+}
+
+.modal-footer #deleteButton {
+  margin-left: 74px;
+  margin-right: -15px;
+}
+
 .nav {
   margin-bottom: 15px;
 }

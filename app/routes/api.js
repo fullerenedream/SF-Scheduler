@@ -326,68 +326,7 @@ router.get('/api/users/:user_id', function(req,res){
 
 
 
-// GET all onDeckEvents
-router.get('/api/on_deck_events', function(req,res){
-  var con = db.connectToScheduleDB();
-  var response = new Object();
-  var onDeckEvents = [];
-
-  // get all appointments
-  var appointmentQueryString = `SELECT appointment_id,
-                                appointment_type,
-                                title,
-                                tech_id,
-                                appt_date,
-                                appt_start_time,
-                                appt_end_time,
-                                appt_start_iso_8601,
-                                appt_end_iso_8601,
-                                customer_id,
-                                ticket_id,
-                                status,
-                                description,
-                                ci_type_color
-                              FROM appointments
-                              LEFT JOIN calendar_itemtypes
-                              ON appointments.appointment_type = calendar_itemtypes.ci_type_id`;
-  con.query(appointmentQueryString, function(err, appt_rows) {
-    if(err) throw err;
-
-    for (var i = 0; i < appt_rows.length; i++) {
-      var appointment = new Object();
-      appointment.id = appt_rows[i].appointment_id;
-      appointment.appointmentType = appt_rows[i].appointment_type;
-      appointment.title = appt_rows[i].title;
-      appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
-      appointment.start = appt_rows[i].appt_start_iso_8601;
-      appointment.end = appt_rows[i].appt_end_iso_8601;
-      appointment.customerId = appt_rows[i].customer_id;
-      appointment.ticketId = appt_rows[i].ticket_id;
-      appointment.status = appt_rows[i].status;  // (0, 1 or 2)
-      appointment.description = appt_rows[i].description;
-      appointment.color = appt_rows[i].ci_type_color;
-
-      if (appointment.status == 2) {
-        appointment.borderColor = appointment.color;
-        appointment.color = '#666666';
-      }
-      // only add On Deck events to the response
-      if (appointment.start == '' || appointment.start == null) {
-        // appointment.className = 'onDeck';
-        onDeckEvents.push(appointment);
-      }
-    }
-    response.onDeckEvents = onDeckEvents;
-    console.log('response: ' + JSON.stringify(response));
-    console.log('sending response');
-    res.json(response);
-  }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
-}); // closes 'router.get('/api/on_deck_events', function(req,res)'
-
-
-
-
-// GET resources and events - all technicians' working hours + appointments (NOT onDeckEvents)
+// GET all the resources and events - technician working hours + appointments
 router.get('/api/resources_and_events', function(req,res){
   var con = db.connectToScheduleDB();
   var response = new Object();
@@ -500,10 +439,79 @@ router.get('/api/resources_and_events', function(req,res){
 
 
 
+
+
+
+// GET all onDeckEvents
+router.get('/api/on_deck_events', function(req,res){
+  var con = db.connectToScheduleDB();
+  var response = new Object();
+  var onDeckEvents = [];
+
+  // get all appointments
+  var appointmentQueryString = `SELECT appointment_id,
+                                appointment_type,
+                                title,
+                                tech_id,
+                                appt_date,
+                                appt_start_time,
+                                appt_end_time,
+                                appt_start_iso_8601,
+                                appt_end_iso_8601,
+                                customer_id,
+                                ticket_id,
+                                status,
+                                description,
+                                ci_type_color
+                              FROM appointments
+                              LEFT JOIN calendar_itemtypes
+                              ON appointments.appointment_type = calendar_itemtypes.ci_type_id`;
+  con.query(appointmentQueryString, function(err, appt_rows) {
+    if(err) throw err;
+
+    for (var i = 0; i < appt_rows.length; i++) {
+      var appointment = new Object();
+      appointment.id = appt_rows[i].appointment_id;
+      appointment.appointmentType = appt_rows[i].appointment_type;
+      appointment.title = appt_rows[i].title;
+      appointment.resourceId = appt_rows[i].tech_id;  // (user_id in technician_schedules)
+      appointment.start = appt_rows[i].appt_start_iso_8601;
+      appointment.end = appt_rows[i].appt_end_iso_8601;
+      appointment.customerId = appt_rows[i].customer_id;
+      appointment.ticketId = appt_rows[i].ticket_id;
+      appointment.status = appt_rows[i].status;  // (0, 1 or 2)
+      appointment.description = appt_rows[i].description;
+      appointment.color = appt_rows[i].ci_type_color;
+
+      if (appointment.status == 2) {
+        appointment.borderColor = appointment.color;
+        appointment.color = '#666666';
+      }
+      // only add On Deck events to the response
+      if (appointment.start == '' || appointment.start == null) {
+        // appointment.className = 'onDeck';
+        onDeckEvents.push(appointment);
+      }
+    }
+    response.onDeckEvents = onDeckEvents;
+    console.log('response: ' + JSON.stringify(response));
+    console.log('sending response');
+    res.json(response);
+  }); // closes 'con.query(appointmentQueryString,function(err,appt_rows)'
+}); // closes 'router.get('/api/on_deck_events', function(req,res)'
+
+
+
+
+
+
+
+
+
 // TODO: GET all the resources and events has been heavily edited -
 // now this section for a single resource and its events is way behind -
 // needs to be updated, and eventually refactored to be DRY
-// GET one resource and all its events - a technician's working hours + appointments (NOT onDeckEvents)
+// GET one resource and all its events - technician working hours + appointments
 router.get('/api/resources_and_events/:user_id', function(req,res){
   var con = db.connectToScheduleDB();
   var user_id = req.param('user_id');
@@ -533,6 +541,7 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
                         FROM technician_schedules
                         WHERE user_id = ?
                         ORDER BY created_at DESC LIMIT 1`;
+
   con.query(tsQueryString, [key], function(err,ts_rows){
     if(err) throw err;
     var resources = [];
@@ -567,11 +576,8 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
                                     customer_id,
                                     ticket_id,
                                     status,
-                                    description,
-                                    ci_type_color
+                                    description
                                   FROM appointments
-                                  LEFT JOIN calendar_itemtypes
-                                  ON appointments.appointment_type = calendar_itemtypes.ci_type_id
                                   WHERE tech_id = ?`;
     con.query(appointmentQueryString, [key], function(err,appt_rows){
       if(err) throw err;
@@ -591,19 +597,7 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
         appointment.ticketId = appt_rows[i].ticket_id;
         appointment.status = appt_rows[i].status;  // (0, 1 or 2)
         appointment.description = appt_rows[i].description;
-        appointment.color = appt_rows[i].ci_type_color;
-        if (appointment.status == 2) {
-          appointment.borderColor = appointment.color;
-          appointment.color = '#666666';
-        }
-        if (appointment.start == '' || appointment.start == null) {
-          // appointment.className = 'onDeck';
-          onDeckEvents.push(appointment);
-        }
-        else {
-          appointments.push(appointment);
-        }
-        // appointments.push(appointment);
+        appointments.push(appointment);
         // console.log(appointment);
       }
       eventSources.push(appointments);
@@ -811,6 +805,29 @@ router.post('/api/appointments', function (req, res) {
   } // end Regular Appointment section
 
 
+
+
+  // if (isValidDate(req.body.appt_date) == false) {
+  //   console.log('appt_date is invalid');
+  // }
+  // else if (isValidTime(req.body.appt_start_time) == false) {
+  //   console.log('appt_start_time is invalid');
+  // }
+  // else if (isValidTime(req.body.appt_end_time) == false) {
+  //   console.log('appt_end_time is invalid');
+  // }
+
+
+  // // if appointment_id is valid, appointment with that id is updated in the db
+  // else if (isPositiveInt(req.body.appointment_id)) {
+  //   updateAppointment();
+  // }
+  // // if no appointment_id is given, a new appointment is created in the db
+  // // *** TODO: check if new appointment is in the past, and write a warning that requires an OK to continue creating it
+  // else if (req.body.appointment_id == null) {
+  //   createAppointment();
+  // }
+
   function updateAppointment() {
     var con = db.connectToScheduleDB();
     var appointmentQueryString = `UPDATE appointments
@@ -871,7 +888,7 @@ router.post('/api/appointments', function (req, res) {
 
 // DELETE an appointment, specified by appointment_id
 // **** TODO: GET THIS WORKING PROPERLY
-router.delete('/api/appointment/:id', function(req, res) {
+router.delete('/api/appointments/:id', function(req, res) {
   var con = db.connectToScheduleDB();
   var appointment_id = req.param('id');
   var key = appointment_id;
