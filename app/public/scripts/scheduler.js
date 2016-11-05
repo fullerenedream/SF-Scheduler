@@ -521,6 +521,25 @@ $(document).ready(function() {
   });
 
 
+  $('#modalDelete').click(function() {
+    console.log('modal Delete button was clicked!');
+    currentView = $('#fullcalendar').fullCalendar('getView').name;
+    var eventToDelete;
+    if ($('#appointmentId').text() != null) {
+      eventToDelete = $('#appointmentId').text();
+      console.log('deleting event with ID = ' + eventToDelete);
+      deleteEvent(eventToDelete);
+    }
+    else {
+      console.log('there is no Appointment ID - event cannot be deleted');
+    }
+    $('#fullCalModal').modal('hide');
+    showHiddenModalDivs();
+    getOnDeckEvents();
+    loadCalendar(currentView);
+  });
+
+
   // populate the form with values from the event object
   function populateModal(event) {
     console.log('populateModal');
@@ -629,6 +648,17 @@ $(document).ready(function() {
       type: 'POST',
       url: '/api/appointments',
       data: event,
+      success: function(data) {console.log(data)},
+      dataType: 'json'
+    });
+  }
+
+  // send DELETE request to /api/appointments to delete event from db
+  function deleteEvent(eventID) {
+    $.ajax({
+      type: 'DELETE',
+      url: '/api/appointments',
+      data: eventID,
       success: function(data) {console.log(data)},
       dataType: 'json'
     });

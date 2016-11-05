@@ -81,7 +81,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <!-- <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button> -->
-            <h5 id="modalTitle" class="modal-title"></h5>
+            <h4 id="modalTitle" class="modal-title"></h4>
           </div> <!-- /.modal-header -->
 
           <div id="modalBody" class="modal-body">
@@ -99,7 +99,7 @@
                 <div class="form-group dropdown btn-group col-sm-7" id="appointmentTypeDiv">
                   <!-- <i class="dropdown-arrow dropdown-arrow-inverse"></i> -->
                   <!-- <button class="btn btn-default btn-sm status" data-current_value="">Appointment Type</button> -->
-                  <button type="button" class="btn btn-default btn-sm dropdown-toggle status" data-toggle="dropdown"  aria-haspopup="true" aria-expanded="false" data-current_value="">Select <span class="caret"></span></button>
+                  <button type="button" class="btn btn-default btn-sm dropdown-toggle status" id="appointmentTypeButton" data-toggle="dropdown"  aria-haspopup="true" aria-expanded="false" data-current_value="">Select <span class="caret"></span></button>
                   <ul class="dropdown-menu" id="appointmentTypeDropdown" aria-labelledby="appointmentType">
                     <li><a data-appointment_type="1" href="#">Install</a></li>
                     <li><a data-appointment_type="2" href="#">Service Call</a></li>
@@ -203,8 +203,13 @@
           </div> <!-- /#modalBody --> <!-- /.modal-body -->
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-default btn-sm" id="modalCancelOrClose" data-dismiss="modal"></button>
-            <button type="button" class="btn btn-primary btn-sm" id="modalSave">Save</button>
+            <div class="col-sm-3" id="saveAndCloseButtons">
+              <button type="button" class="btn btn-primary btn-sm" id="modalSave">Save</button>
+              <button type="button" class="btn btn-default btn-sm" id="modalCancelOrClose" data-dismiss="modal"></button>
+            </div>
+            <div class="col-sm-8" id="deleteButton">
+              <button type="button" class="btn btn-danger btn-sm" id="modalDelete">Delete</button>
+            </div>
           </div> <!-- /.modal-footer -->
 
         </div> <!-- /.modal-content -->
