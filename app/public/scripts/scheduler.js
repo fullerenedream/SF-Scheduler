@@ -328,6 +328,8 @@ $(document).ready(function() {
         // set the modal title and cancel/close button
         $('#modalTitle').text('Create Appointment');
         $('#modalCancelOrClose').text('Cancel');
+        // clear appointment ID
+        $('#appointmentId').text('');
         // hide appointment ID (event won't have one until it's saved)
         $('#appointmentIdDiv').hide();
         // populate the form with initial values
@@ -655,9 +657,10 @@ $(document).ready(function() {
 
   // send DELETE request to /api/appointments to delete event from db
   function deleteEvent(eventID) {
+    console.log('ATTEMPTING TO DELETE EVENT ' + eventID);
     $.ajax({
       type: 'DELETE',
-      url: '/api/appointments',
+      url: '/api/appointments/' + eventID,
       data: eventID,
       success: function(data) {console.log(data)},
       dataType: 'json'
