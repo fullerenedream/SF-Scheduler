@@ -25,11 +25,15 @@ $(document).ready(function() {
         "'>Name: " + data.users[i].username +
         "&emsp;Installer ID: " + data.users[i].id +
         "&emsp;Email Address: " + data.users[i].email +
-        "&emsp;<button type='button' class='btn btn-info btn-xs'>Working Hours</button>" +
+        // "&emsp;<button type='button' class='btn btn-info btn-xs'>Working Hours</button>" +
         "</div>";
       $("#installers-list").append($(userDivString));
     }
   }
+
+  $('#new-installer-btn .btn').click(function(){
+    console.log('New Installer button was clicked!');
+  });
 
 
 

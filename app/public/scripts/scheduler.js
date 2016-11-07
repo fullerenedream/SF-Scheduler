@@ -13,15 +13,6 @@ $(document).ready(function() {
   getAppointmentTypes();
   getOnDeckEvents();
 
-  // make dropdown menus work
-  $('.dropdown-menu li > a').click(function(){
-    console.log('dropdown item was selected!');
-    $('.status').text($(this).text());
-    console.log( $('.status').text() );
-    $('.status').attr('data-current_value', $(this).attr('data-appointment_type') );
-    console.log('dropdown current value: ' + $('.status').attr('data-current_value'));
-  });
-
   // reset bootstrap modal upon close
   $('#fullCalModal').on('hidden.bs.modal', function () {
     // clear data from text fields
@@ -118,6 +109,7 @@ $(document).ready(function() {
     appointmentTypes = response.ciTypes;
     console.log('appointmentTypes from inside loadedAppointmentTypes(): ' + JSON.stringify(appointmentTypes));
     drawAppointmentTypes();
+    populateAppointmentTypeDropdown();
   }
   function drawAppointmentTypes() {
     $("#appointment-templates").empty();
@@ -157,6 +149,24 @@ $(document).ready(function() {
       });
     });
   }
+
+  function populateAppointmentTypeDropdown() {
+    for (var i in appointmentTypes) {
+      var liString = "<li><a data-appointment_type=\"" + appointmentTypes[i].id + "\" href=\"#\">" + appointmentTypes[i].name + "</a></li>"
+      $("#appointmentTypeDropdown").append($(liString));
+    }
+    initiateDropdown();
+  }
+  function initiateDropdown() {
+    $('.dropdown-menu li > a').click(function(){
+      console.log('dropdown item was selected!');
+      $('.status').text($(this).text());
+      console.log( $('.status').text() );
+      $('.status').attr('data-current_value', $(this).attr('data-appointment_type') );
+      console.log('dropdown current value: ' + $('.status').attr('data-current_value'));
+    });
+  }
+
 
   // search appointmentTypes: find an appointmentType's index using its appointmentType ID
   function getAppointmentTypeIndexById(appointmentTypeID) {
@@ -311,7 +321,6 @@ $(document).ready(function() {
       eventOverlap: false,
       forceEventDuration: true, // force calculation of an event's end if it is unspecified
       defaultTimedEventDuration: '02:00:00', // 2 hours is fc's default duration, but we may wish to change this
-      // TODO: change buttons so 'today' shows today's date, get rid of title
       header: {
         left: 'prev,today,next',
         center: 'title',
@@ -385,13 +394,6 @@ $(document).ready(function() {
       // called when an external element, containing event data, is dropped on the calendar
       eventReceive: function(event) {
         console.log('eventReceive', event);
-        // console.log('event.className: ', event.className);
-        // // TODO: this is not the right spot to remove onDeck from event.className - what if user clicks 'cancel' instead of 'save' on modal?
-        // // also it's just not working, though fc docs say an event can have a className property...
-        // if (event.className == 'onDeck') {
-        //   console.log('event.className == onDeck... resetting event.className to empty string');
-        //   event.className = '';
-        // }
         // set the modal title and cancel/close button
         $('#modalTitle').text('Create Appointment');
         $('#modalCancelOrClose').text('Cancel');
@@ -464,7 +466,8 @@ $(document).ready(function() {
         $(this).parent().addClass('active');
       }
     });
-    // hide start time, end time, appointment ID, & installer options
+    // hide Time Off from dropdown, & start time, end time, appointment ID, installer options
+    $("a[data-appointment_type='10']").hide();
     $('#appointmentStartDiv').hide();
     $('#appointmentEndDiv').hide();
     $('#appointmentIdDiv').hide();
@@ -512,9 +515,6 @@ $(document).ready(function() {
   });
 
 
-  // TODO: find where updated events are being told to 'stick'
-  // set that to false, and then get rid of this function
-  // - we don't want events to 'stick' if the update is cancelled
   $('#modalCancelOrClose').click(function() {
     currentView = $('#fullcalendar').fullCalendar('getView').name;
     showHiddenModalDivs();
@@ -641,6 +641,7 @@ $(document).ready(function() {
     $('#appointmentEndDiv').show();
     $('#appointmentIdDiv').show();
     $('#appointmentResourceDiv').show();
+    $("a[data-appointment_type='10']").show();
   }
 
 
