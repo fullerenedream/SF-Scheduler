@@ -65,7 +65,22 @@
       </div> <!-- /.tab-pane active /#scheduletab -->
 
       <div class="tab-pane" id="installerstab">
-        <div id="installers-list"><h3>Installers</h3></div>
+        <!-- <div id="installers-list"><h3>Installers</h3></div> -->
+        <div id="installers-table-div">
+          <table class="table" id="installers-table">
+            <caption>Installers</caption>
+            <thead>
+              <tr>
+                <!-- <th>ID</th> -->
+                <th>Name</th>
+                <th>Email</th>
+                <th>Working Hours</th>
+              </tr>
+            </thead>
+            <tbody id="installers-table-body">
+            </tbody>
+          </table>
+        </div>
         <div id="new-installer-btn"><button type="button" class="btn btn-default">New Installer</button></div>
         <!-- <div id="installers-fullcalendar"></div> -->
       </div> <!-- /#installerstab -->
@@ -177,11 +192,11 @@
           </div> <!-- /#modalBody --> <!-- /.modal-body -->
 
           <div class="modal-footer">
-            <div class="col-sm-3" id="saveAndCloseButtons">
+            <div class="col-sm-4" id="saveAndCloseButtons">
               <button type="button" class="btn btn-primary btn-sm" id="modalSave">Save</button>
               <button type="button" class="btn btn-default btn-sm" id="modalCancelOrClose" data-dismiss="modal"></button>
             </div>
-            <div class="col-sm-8" id="deleteButton">
+            <div class="col-sm-7" id="deleteButton">
               <button type="button" class="btn btn-danger btn-sm" id="modalDelete">Delete</button>
             </div>
           </div> <!-- /.modal-footer -->
@@ -189,6 +204,51 @@
         </div> <!-- /.modal-content -->
       </div> <!-- /.modal-dialog -->
     </div> <!-- /#fullCalModal /.modal fade -->
+
+
+
+    <!-- bootstrap modal for Create/Edit Installer -->
+    <div id="installersModal" class="modal fade" data-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+
+            <h4 id="installersModalTitle" class="modal-title"></h4>
+          </div> <!-- /.modal-header -->
+
+          <div id="modalBody" class="modal-body">
+            <form class="form-horizontal">
+
+              <div class="form-group form-group-sm" id="installerNameDiv">
+                <label class="control-label col-sm-3" for="installer-name">Name</label>
+                <div class="col-sm-7">
+                  <input type="text" class="form-control input-sm" id="installerNameInput">
+                </div>
+              </div>
+
+              <div class="form-group form-group-sm" id="installerEmailDiv">
+                <label class="control-label col-sm-3" for="installer-email">Email Address</label>
+                <div class="col-sm-7">
+                  <input type="text" class="form-control input-sm" id="installerEmailInput">
+                </div>
+              </div>
+
+            </form>
+          </div> <!-- /#modalBody --> <!-- /.modal-body -->
+
+          <div class="modal-footer">
+            <div class="col-sm-4" id="saveAndCloseButtons">
+              <button type="button" class="btn btn-primary btn-sm" id="installersModalSave">Save</button>
+              <button type="button" class="btn btn-default btn-sm" id="installersModalCancelOrClose" data-dismiss="modal"></button>
+            </div>
+            <div class="col-sm-7" id="deleteButton">
+              <button type="button" class="btn btn-danger btn-sm" id="installersModalDelete">Delete</button>
+            </div>
+          </div> <!-- /.modal-footer -->
+
+        </div> <!-- /.modal-content -->
+      </div> <!-- /.modal-dialog -->
+    </div> <!-- /#installersModal /.modal fade -->
 
 
   </div> <!-- /.container-fluid -->

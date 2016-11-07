@@ -10,7 +10,8 @@ $(document).ready(function() {
 
   // get all users
   var allUsers = $.getJSON('/api/users', function(data) {
-    makeUserDivs(data);
+    // makeUserDivs(data);
+    populateUserTable(data);
   });
 
   function makeUserDivs(data) {
@@ -31,8 +32,28 @@ $(document).ready(function() {
     }
   }
 
+  function populateUserTable(data) {
+    console.log('all technicians:', data);
+    for (i = 0; i < data.users.length; i++) {
+      var tableRowString = "<tr>" +
+        // "<th scope=\"row\"" + data.users[i].id + "</th>" +
+        "<td>" + data.users[i].username + "</td>" +
+        "<td>" + data.users[i].email + "</td>" +
+        "<td><button type='button' class='btn btn-default btn-xs' data-id=\"" + data.users[i].id + "\">show working hours</button></td>" +
+        "</tr>";
+      $("#installers-table-body").append($(tableRowString));
+    }
+  }
+
   $('#new-installer-btn .btn').click(function(){
     console.log('New Installer button was clicked!');
+    // clear the modal
+    // clearInstallersModal();
+    // set the modal title and cancel/close button
+    $('#installersModalTitle').text('Add New Installer');
+    $('#installersModalCancelOrClose').text('Cancel');
+    // summon the modal
+    $('#installersModal').modal();
   });
 
 
