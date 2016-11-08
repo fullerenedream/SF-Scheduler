@@ -12,6 +12,14 @@ var technician_schedules = require("../technician_schedules.js");
 var eventSources = [];
 var todayDate = new Date().toISOString().substring(0,10);
 
+router.use(bodyParser.json());
+// parses data from form into JSON, so then you access e.g. 'name' field from form
+// as req.body.name ... if you want all the data from the form, you access it as
+// req.body
+router.use(bodyParser.urlencoded({ extended: false }));
+// parses urlencoded bodies
+
+
 // GET each tech's most recent working hours from technician_schedules table
 router.get('/api/technician_schedules', function(req,res){
   var con = db.connectToScheduleDB();
@@ -614,12 +622,68 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
 
 
 
-router.use(bodyParser.json());
-// parses data from form into JSON, so then you access e.g. 'name' field from form
-// as req.body.name ... if you want all the data from the form, you access it as
-// req.body
-router.use(bodyParser.urlencoded({ extended: false }));
-// parses urlencoded bodies
+
+// TODO: finish writing this! *************************
+
+// CREATE or UPDATE Installer (installer/technician/user :P )
+// receive a form post for an installer and save it to the database
+
+// *** If a new user is created, then a new schedule for that user
+// must also be created in the technician_schedules table.
+// That means you have to write a
+// router.post('/api/technician_schedules', function (req, res) {...});
+// and send a request to it.
+// It's ok to set the user's hours to a default (e.g. M-F, 9-5) ***
+router.post('/api/users', function (req, res) {
+  var user = [
+    req.body.user_id,
+    req.body.user_type,
+    req.body.username,
+    req.body.email
+  ];
+  console.log('POST request received at /api/users for user: ');
+  for (i = 0; i < user.length; i++) {
+    console.log(user[i]);
+  }
+
+  // validations - should I write them client-side or follow the existing pattern?
+
+  // if there was a user_id provided with the request
+  // *** copypasta from updateAppointment() - this needs further editing!!!
+  // function updateUser() {
+  //   var con = db.connectToScheduleDB();
+  //   var userQueryString = `.........`;
+
+  //   con.query(userQueryString, user, function(err, result){
+  //     if(err) throw err;
+  //     else {
+  //       console.log('userQueryString sent to db as update to existing item');
+  //       console.log('affected rows: ' + result.affectedRows);
+  //       res.json("success");
+  //     }
+  //   });
+  // }
+
+  // if no user_id was provided with the request
+  // *** copypasta from createAppointment() - this needs further editing!!!
+  // function createUser() {
+  //   var con = db.connectToScheduleDB();
+  //   var userQueryString = `.........`;
+
+  //   con.query(userQueryString, user, function(err, result){
+  //     if(err) throw err;
+  //     else {
+  //       console.log('userQueryString sent to db as new item. user_id = ' + result.insertId);
+  //       console.log('affected rows: ' + result.affectedRows);
+  //       res.json("success");
+  //     }
+  //   });
+  // }
+});
+
+// ******************************************************
+
+
 
 
 // CREATE or UPDATE event
