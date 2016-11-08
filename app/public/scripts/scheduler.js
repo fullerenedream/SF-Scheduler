@@ -523,6 +523,7 @@ $(document).ready(function() {
   });
 
 
+  // TODO: add an "Are you sure?" to confirm deletion
   $('#modalDelete').click(function() {
     console.log('modal Delete button was clicked!');
     currentView = $('#fullcalendar').fullCalendar('getView').name;
