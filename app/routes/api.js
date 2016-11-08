@@ -636,10 +636,10 @@ router.get('/api/resources_and_events/:user_id', function(req,res){
 // It's ok to set the user's hours to a default (e.g. M-F, 9-5) ***
 router.post('/api/users', function (req, res) {
   var user = [
-    req.body.user_id,
-    req.body.user_type,
-    req.body.username,
-    req.body.email
+    req.body.user_type, // 0
+    req.body.username,  // 1
+    req.body.email,     // 2
+    req.body.user_id    // 3
   ];
   console.log('POST request received at /api/users for user: ');
   for (i = 0; i < user.length; i++) {
@@ -649,36 +649,49 @@ router.post('/api/users', function (req, res) {
   // validations - should I write them client-side or follow the existing pattern?
 
   // if there was a user_id provided with the request
-  // *** copypasta from updateAppointment() - this needs further editing!!!
-  // function updateUser() {
-  //   var con = db.connectToScheduleDB();
-  //   var userQueryString = `.........`;
-
-  //   con.query(userQueryString, user, function(err, result){
-  //     if(err) throw err;
-  //     else {
-  //       console.log('userQueryString sent to db as update to existing item');
-  //       console.log('affected rows: ' + result.affectedRows);
-  //       res.json("success");
-  //     }
-  //   });
-  // }
-
+  if ( (user[3] != '') && (user[3] != null) ) {
+    updateUser();
+  }
   // if no user_id was provided with the request
-  // *** copypasta from createAppointment() - this needs further editing!!!
-  // function createUser() {
-  //   var con = db.connectToScheduleDB();
-  //   var userQueryString = `.........`;
+  else if ( (user[3] == '') || (user[3] == null) ) {
+    createUser();
+  }
+  else ('ERROR: user was neither created nor updated');
 
-  //   con.query(userQueryString, user, function(err, result){
-  //     if(err) throw err;
-  //     else {
-  //       console.log('userQueryString sent to db as new item. user_id = ' + result.insertId);
-  //       console.log('affected rows: ' + result.affectedRows);
-  //       res.json("success");
-  //     }
-  //   });
-  // }
+  function updateUser() {
+    var con = db.connectToScheduleDB();
+    var userQueryString =  `UPDATE users
+                            SET user_type = ?,
+                              username = ?,
+                              email = ?
+                            WHERE user_id = ?;`;
+    con.query(userQueryString, user, function(err, result){
+      if(err) throw err;
+      else {
+        console.log('userQueryString sent to db as update to existing item');
+        console.log('affected rows: ' + result.affectedRows);
+        res.json("success");
+      }
+    });
+  }
+
+  function createUser() {
+    var con = db.connectToScheduleDB();
+    var userQueryString =  `INSERT INTO users
+                             (user_type,
+                              username,
+                              email)
+                            VALUES
+                              (?, ?, ?);`;
+    con.query(userQueryString, user, function(err, result){
+      if(err) throw err;
+      else {
+        console.log('userQueryString sent to db as new item. user_id = ' + result.insertId);
+        console.log('affected rows: ' + result.affectedRows);
+        res.json("success");
+      }
+    });
+  }
 });
 
 // ******************************************************
