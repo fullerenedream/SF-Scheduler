@@ -35,11 +35,14 @@
               </fieldset>
             </form>
           </div> <!-- /#installer-picker -->
-          <script>
-            $(document).ready(function(){
-              // $('select#installer-selector').selectmenu();
-            });
-          </script>
+
+<!--           <div class="dropdown" id="installer-dropdown-div">
+            <button class="btn btn-default dropdown-toggle" type="button" id="installer-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-current_value="">Title<span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" id="installer-dropdown-ul" aria-labelledby="installer">
+              <li><a href="#">Option 1</a></li>
+            </ul>
+          </div> --><!-- /#installer-dropdown-div -->
 
           <div id="external-events">
             <div id="appointment-templates"></div>
@@ -67,14 +70,14 @@
       <div class="tab-pane" id="installerstab">
         <!-- <div id="installers-list"><h3>Installers</h3></div> -->
         <div id="installers-table-div">
-          <table class="table" id="installers-table">
-            <caption>Installers</caption>
+          <table class="table center table-condensed" id="installers-table">
+            <!-- <caption>Installers</caption> -->
             <thead>
               <tr>
-                <!-- <th>ID</th> -->
+                <th></th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Working Hours</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="installers-table-body">
@@ -86,6 +89,7 @@
       </div> <!-- /#installerstab -->
 
       <!-- <div class="tab-pane" id="reportstab"><p>Run reports from here</p></div> --> <!-- /#reportstab -->
+
       <div class="tab-pane" id="settingstab"><p>Edit settings here</p></div> <!-- /#settingstab -->
 
     </div> <!-- /.tab-content -->

@@ -12,6 +12,7 @@ $(document).ready(function() {
 
   getAppointmentTypes();
   getOnDeckEvents();
+  loadCalendar();
 
   // reset bootstrap modal upon close
   $('#fullCalModal').on('hidden.bs.modal', function () {
@@ -47,6 +48,30 @@ $(document).ready(function() {
       loadTechCalendar(selectedTechId);
     });
   }
+
+    // // WARNING!!! THIS IS NOT FINISHED!!!!!!
+
+    // function populateTechDropdown() {
+    //   for (var i in data.users) {
+    //     var userString = "<li><a data-user_id=\"" + data.users[i].id + "\" href=\"#\">" + data.users[i].username + "</a></li>";
+    //     $("#installer-dropdown-ul").append($(userString));
+    //   }
+    //   initiateTechDropdown();
+    // }
+    // function initiateTechDropdown() {
+    //   $('#installer-dropdown-ul li > a').click(function(){
+    //     console.log('dropdown item was selected!');
+    //     $('.status').text($(this).text());
+    //     console.log( $('.status').text() );
+    //     $('.status').attr('data-current_value', $(this).attr('data-username') );
+    //     console.log('dropdown current value: ' + $('.status').attr('data-current_value'));
+    //   });
+    // }
+
+
+
+
+
 
 
   // draw the calendar with all resources and events
@@ -297,9 +322,6 @@ $(document).ready(function() {
 
 
   // initialize the calendar
-
-  // draw the calendar with all resources and events
-  loadCalendar();
 
   function drawFullCalendar(calendarData, view = 'agendaDay') {
     console.log('calendarData.resources:')
