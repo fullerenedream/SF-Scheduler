@@ -24,9 +24,12 @@ $(document).ready(function() {
     // add a table row for each user's data
     for (i = 0; i < data.users.length; i++) {
       var tableRowString = "<tr>" +
+        "<td><button type='button' class='btn btn-default btn-xs' id='edit-installer-btn' data-id=\"" + data.users[i].id +
+        "\">Edit Installer</button></td>" +
         "<td>" + data.users[i].username + "</td>" +
         "<td>" + data.users[i].email + "</td>" +
-        "<td><button type='button' class='btn btn-default btn-xs' data-id=\"" + data.users[i].id + "\">show working hours</button></td>" +
+        "<td><button type='button' class='btn btn-default btn-xs' id='show-working-hours-btn' data-id=\"" + data.users[i].id +
+        "\">Show Working Hours</button></td>" +
         "</tr>";
       $("#installers-table-body").append($(tableRowString));
     }
@@ -45,6 +48,20 @@ $(document).ready(function() {
     // summon the modal
     $('#installersModal').modal();
   });
+
+  // // when 'Edit Installer' button is clicked on #installersModal
+  // $('#edit-installer-btn .btn').click(function(){
+  //   console.log('Edit Installer button was clicked!');
+  //   // clear the modal
+  //   clearInstallersModal();
+  //   // set the modal title and cancel/close button
+  //   $('#installersModalTitle').text('Edit Installer');
+  //   $('#installersModalCancelOrClose').text('Cancel');
+  //   // populate the form with values from the user object
+  //   populateInstallersModal(user);
+  //   // summon the modal
+  //   $('#installersModal').modal();
+  // });
 
   // when 'Save' button is clicked on #installersModal
   $('#installersModalSave').click(function(){
